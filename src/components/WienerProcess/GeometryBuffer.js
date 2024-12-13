@@ -22,7 +22,7 @@ export default class GeometryBuffer {
     const lastIndex = (this.currentIndex - 1 + this.parameters.maxPoints) % this.parameters.maxPoints
     const lastPoint = new Point(this.points[lastIndex * 3], this.points[lastIndex * 3 + 1], this.points[lastIndex * 3 + 2])
 
-    let nextPoint = lastPoint.takeRandomStep(this.parameters.stepSize)
+    let nextPoint = lastPoint.takeRandomStep(this.parameters.stepSize, this.parameters.constraint)
     const { r, g, b } = nextPoint.toColor
 
     this.points.set(nextPoint.coords, this.currentIndex * 3)
