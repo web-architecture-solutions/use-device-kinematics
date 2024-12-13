@@ -15,6 +15,10 @@ export default class GeometryBuffer {
   initialize() {
     this.points.set([0, 0, 0], 0)
     this.colors.set([0.5, 0.5, 0.5], 0)
+
+    Point.constraint = this.parameters.constraint
+    Point.stepSize = this.parameters.stepSize
+
     return this
   }
 
@@ -22,11 +26,10 @@ export default class GeometryBuffer {
     const lastIndex = (this.currentIndex - 1 + this.parameters.maxPoints) % this.parameters.maxPoints
     const lastPoint = new Point(this.points[lastIndex * 3], this.points[lastIndex * 3 + 1], this.points[lastIndex * 3 + 2])
 
-    let nextPoint = lastPoint.takeRandomStep(this.parameters.stepSize, this.parameters.constraint)
-    const { r, g, b } = nextPoint.toColor
+    let nextPoint = lastPoint.nextPoint
 
     this.points.set(nextPoint.coords, this.currentIndex * 3)
-    this.colors.set([r, g, b], this.currentIndex * 3)
+    this.colors.set(nextPoint.color, this.currentIndex * 3)
 
     this.currentIndex = (this.currentIndex + 1) % this.parameters.maxPoints
     if (this.currentIndex === 0) this.isFull = true

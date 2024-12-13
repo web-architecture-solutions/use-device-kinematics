@@ -1,6 +1,9 @@
 import * as THREE from 'three'
 
 export default class Point {
+  static constraint = 'cubical'
+  static stepSize = 0.1
+
   constructor(x, y, z) {
     this.x = x
     this.y = y
@@ -15,15 +18,16 @@ export default class Point {
     return new Point(...this.coords.map((value) => (value + 1) / 2))
   }
 
-  get toColor() {
-    return new THREE.Color(this.normalize.x, this.normalize.y, this.normalize.z)
+  get color() {
+    const { r, g, b } = new THREE.Color(this.normalize.x, this.normalize.y, this.normalize.z)
+    return [r, g, b]
   }
 
-  takeRandomStep(stepSize, constraint = 'cubical') {
+  get nextPoint() {
     return {
       cubical: () => {
         const newCoords = this.coords.map((coord) => {
-          const randomStep = (Math.random() - 0.5) * stepSize
+          const randomStep = (Math.random() - 0.5) * this.constructor.stepSize
           const newCoord = coord + randomStep
           if (newCoord > 1) return 2 - newCoord
           if (newCoord < -1) return -2 - newCoord
@@ -33,7 +37,7 @@ export default class Point {
       },
       spherical: () => {
         const newCoords = this.coords.map((coord) => {
-          const randomStep = (Math.random() - 0.5) * stepSize
+          const randomStep = (Math.random() - 0.5) * this.constructor.stepSize
           return coord + randomStep
         })
 
@@ -47,12 +51,6 @@ export default class Point {
 
         return new Point(...newCoords)
       }
-    }[constraint]()
+    }[this.constructor.constraint]()
   }
-
-  /*
-  takeRandomStep(stepSize) {
-    
-  }
-  */
 }
