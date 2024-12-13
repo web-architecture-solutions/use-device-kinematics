@@ -14,12 +14,12 @@ export default class Point {
     return [this.x, this.y, this.z]
   }
 
-  get normalize() {
+  get normalized() {
     return new Point(...this.coords.map((value) => (value + 1) / 2))
   }
 
   get color() {
-    const { r, g, b } = new THREE.Color(this.normalize.x, this.normalize.y, this.normalize.z)
+    const { r, g, b } = new THREE.Color(this.normalized.x, this.normalized.y, this.normalized.z)
     return [r, g, b]
   }
 
