@@ -1,22 +1,14 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef } from 'react'
 
 import { useFrame } from '@react-three/fiber'
 
-import GeometryBuffer from './GeometryBuffer'
+import { useGeometryBuffer } from './hooks'
 
 import UnitCube from '../UnitCube'
 
 export default function WienerProcess({ parameters }) {
   const lineRef = useRef()
-
-  const initialGeometryBuffer = new GeometryBuffer(lineRef, parameters).initialize()
-
-  const [geometryBuffer, setGeometryBuffer] = useState(initialGeometryBuffer)
-
-  useEffect(() => {
-    const geometryBuffer = new GeometryBuffer(lineRef, parameters).initialize()
-    setGeometryBuffer(geometryBuffer)
-  }, [parameters])
+  const geometryBuffer = useGeometryBuffer(lineRef, parameters)
 
   useFrame(() => geometryBuffer.update())
 

@@ -6,13 +6,13 @@ import { OrbitControls } from '@react-three/drei'
 
 import { GUI } from 'dat.gui'
 
-import WienerProcess from './components/WienerProcess'
+import WienerProcess from '../WienerProcess'
 
 import { parameterReducer } from './reducers'
 
 import { useGUI } from './hooks'
 
-import { initialConstraint, initialMaxPoints, initialStepSize } from './constants'
+import { initialConstraint, initialMaxPoints, initialStepSize } from '../../constants'
 
 const initialParameters = {
   constraint: initialConstraint,
