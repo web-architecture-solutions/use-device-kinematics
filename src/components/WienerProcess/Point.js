@@ -1,8 +1,10 @@
 import * as THREE from 'three'
 
+import { initialConstraint, initialStepSize } from '../../constants'
+
 export default class Point {
-  static constraint = 'cubical'
-  static stepSize = 0.1
+  static constraint = initialConstraint
+  static stepSize = initialStepSize
 
   constructor(x, y, z) {
     this.x = x
@@ -23,12 +25,15 @@ export default class Point {
     return [r, g, b]
   }
 
+  get magnitude() {
+    return Math.sqrt(this.coords.reduce((sum, coord) => sum + coord * coord, 0))
+  }
+
   get nextPoint() {
     return {
       cubical: () => {
         const newCoords = this.coords.map((coord) => {
-          const randomStep = (Math.random() - 0.5) * this.constructor.stepSize
-          const newCoord = coord + randomStep
+          const newCoord = this.randomStep(coord)
           if (newCoord > 1) return 2 - newCoord
           if (newCoord < -1) return -2 - newCoord
           return newCoord
@@ -36,21 +41,15 @@ export default class Point {
         return new Point(...newCoords)
       },
       spherical: () => {
-        const newCoords = this.coords.map((coord) => {
-          const randomStep = (Math.random() - 0.5) * this.constructor.stepSize
-          return coord + randomStep
-        })
+        const newPoint = new Point(...this.coords.map((coord) => this.randomStep(coord)))
 
-        const magnitude = Math.sqrt(newCoords.reduce((sum, coord) => sum + coord * coord, 0))
-
-        if (magnitude > 1) {
-          newCoords.forEach((coord, index) => {
-            newCoords[index] = coord / magnitude
-          })
-        }
-
-        return new Point(...newCoords)
+        return newPoint.magnitude > 1 ? new Point(...newPoint.coords.map((coord) => coord / newPoint.magnitude)) : newPoint
       }
     }[this.constructor.constraint]()
+  }
+
+  randomStep(coord) {
+    const randomStep = (Math.random() - 0.5) * this.constructor.stepSize
+    return coord + randomStep
   }
 }
