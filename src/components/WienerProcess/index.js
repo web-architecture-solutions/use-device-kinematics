@@ -5,6 +5,7 @@ import { useFrame } from '@react-three/fiber'
 import { useGeometryBuffer } from './hooks'
 
 import UnitCube from '../UnitCube'
+import UnitSphere from '../UnitSphere'
 
 export default function WienerProcess({ parameters }) {
   const lineRef = useRef()
@@ -14,7 +15,7 @@ export default function WienerProcess({ parameters }) {
 
   return (
     <>
-      <UnitCube />
+      {parameters.constraint === 'cubical' ? <UnitCube /> : <UnitSphere />}
 
       <line ref={lineRef}>
         <bufferGeometry />

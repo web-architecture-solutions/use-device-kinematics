@@ -6,7 +6,7 @@ export default class GeometryBuffer {
   constructor(lineRef, parameters) {
     this.lineRef = lineRef
     this.parameters = parameters
-    this.points = new Float32Array(parameters.maxPoints * 3)
+    this.coords = new Float32Array(parameters.maxPoints * 3)
     this.colors = new Float32Array(parameters.maxPoints * 3)
     this.bufferIndex = 1
     this.isFull = false
@@ -22,53 +22,45 @@ export default class GeometryBuffer {
 
   get currentPoint() {
     return new Point(
-      this.points[this.currentPointIndex * 3],
-      this.points[this.currentPointIndex * 3 + 1],
-      this.points[this.currentPointIndex * 3 + 2]
+      this.coords[this.currentPointIndex * 3],
+      this.coords[this.currentPointIndex * 3 + 1],
+      this.coords[this.currentPointIndex * 3 + 2]
     )
   }
 
   initialize() {
-    this.points.set([0, 0, 0], 0)
+    this.coords.set([0, 0, 0], 0)
     this.colors.set([0.5, 0.5, 0.5], 0)
-
     Point.constraint = this.parameters.constraint
     Point.stepSize = this.parameters.stepSize
-
     return this
   }
 
   reorderArray(array) {
     const reorderedArray = new Float32Array(this.parameters.maxPoints * 3)
     const splitIndex = this.bufferIndex * 3
-
     reorderedArray.set(array.subarray(splitIndex), 0)
     reorderedArray.set(array.subarray(0, splitIndex), array.length - splitIndex)
-
     return reorderedArray
   }
 
   addNextPoint() {
     const nextPoint = this.currentPoint.nextPoint
-
-    this.points.set(nextPoint.coords, this.bufferIndex * 3)
+    this.coords.set(nextPoint.coords, this.bufferIndex * 3)
     this.colors.set(nextPoint.color, this.bufferIndex * 3)
-
     this.bufferIndex = (this.bufferIndex + 1) % this.parameters.maxPoints
-
     if (this.bufferIndex === 0) this.isFull = true
   }
 
   updatePartialBuffer() {
-    this.geometry.setAttribute('position', new THREE.BufferAttribute(this.points, 3))
+    this.geometry.setAttribute('position', new THREE.BufferAttribute(this.coords, 3))
     this.geometry.setAttribute('color', new THREE.BufferAttribute(this.colors, 3))
     this.geometry.setDrawRange(0, this.bufferIndex)
   }
 
   updateFullBuffer() {
-    const reorderedPoints = this.reorderArray(this.points)
+    const reorderedPoints = this.reorderArray(this.coords)
     const reorderedColors = this.reorderArray(this.colors)
-
     this.geometry.setAttribute('position', new THREE.BufferAttribute(reorderedPoints, 3))
     this.geometry.setAttribute('color', new THREE.BufferAttribute(reorderedColors, 3))
     this.geometry.setDrawRange(0, this.parameters.maxPoints - 1)
@@ -76,9 +68,7 @@ export default class GeometryBuffer {
 
   update() {
     this.addNextPoint()
-
     this.isFull ? this.updateFullBuffer() : this.updatePartialBuffer()
-
     this.geometry.attributes.position.needsUpdate = true
     this.geometry.attributes.color.needsUpdate = true
   }
