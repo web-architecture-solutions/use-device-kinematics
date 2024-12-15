@@ -6,6 +6,8 @@ import { OrbitControls } from '@react-three/drei'
 
 import { GUI } from 'dat.gui'
 
+import UnitCube from '../UnitCube'
+import UnitSphere from '../UnitSphere'
 import WienerProcess from '../WienerProcess'
 
 import { parameterReducer } from './reducers'
@@ -30,6 +32,8 @@ export default function App() {
   return (
     <Canvas camera={{ position: [3, 3, 3], fov: 75 }} style={{ background: 'black' }}>
       <ambientLight intensity={0.5} />
+
+      {parameters.constraint === 'cubical' ? <UnitCube /> : <UnitSphere />}
 
       <WienerProcess parameters={parameters} />
 
