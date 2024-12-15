@@ -1,6 +1,10 @@
 import { useEffect } from 'react'
 
-export function useGUI({ gui, parameters, dispatch }) {
+import { GUI } from 'dat.gui'
+
+export function useGUI({ parameters, dispatch }) {
+  const gui = new GUI()
+
   const stepSizeController = gui.add(parameters, 'stepSize', 0.01, 1).name('Step Size')
   const maxPointsController = gui.add(parameters, 'maxPoints', 3, 50000, 1).name('Max Points')
   const constraintController = gui.add(parameters, 'constraint', ['spherical', 'cubical']).name('Constraint Type')
