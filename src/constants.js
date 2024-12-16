@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 
-export const initialMaxPoints = 20000
-export const initialStepSize = 0.1
+export const initialMaxPoints = 500
+export const initialStepSize = 0.2
 
 export const edges = [
   [0, 1],

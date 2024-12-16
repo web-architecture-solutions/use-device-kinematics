@@ -44,7 +44,7 @@ export default function App() {
 
         {/*<Glitch delay={[1, 10]} duration={[0.1, 1.0]} strength={[0.01, 0.2]} mode={GlitchMode.SPORADIC} active ratio={0.8} />
          */}
-        <PixelationGlitch maxGranularity={100} intensity={1} duration={30} delay={120} />
+        <PixelationGlitch maxGranularity={100} intensity={1} duration={30} delay={240} />
         <SSAO />
       </EffectComposer>
     </Canvas>
