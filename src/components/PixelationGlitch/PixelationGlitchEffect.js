@@ -14,7 +14,7 @@ const fragmentShader = `
 `
 
 export default class PixelationGlitchEffect extends Effect {
-  constructor(maxGranularity = 30.0, intensity = 1, duration = 30, delay = 30) {
+  constructor(maxGranularity = 30.0, intensity = 1, duration = 30, delay = 30, camera) {
     super('PixelationGlitchEffect', fragmentShader, {
       uniforms: new Map([
         ['active', new Uniform(false)],
@@ -35,6 +35,11 @@ export default class PixelationGlitchEffect extends Effect {
 
     this._delay = delay
     this.delay = delay
+
+    this.initialPosition = camera.position.clone()
+    this.camera = camera
+
+    this.foo = 0
   }
 
   get granularity() {
@@ -62,13 +67,30 @@ export default class PixelationGlitchEffect extends Effect {
   }
 
   update() {
-    if (this.delay >= 0) {
+    if (this.delay > 0) {
       this.delay -= 1
-    } else if (this.duration >= 0 && Math.random() >= 1 - this.intensity) {
-      this.setGranularity(Math.random() * this.maxGranularity)
+    } else if (this.duration > 0) {
+      if (Math.random() >= 1 - this.intensity) {
+        this.foo = 1
+
+        this.setGranularity(Math.random() * this.maxGranularity)
+
+        const newPosition = this.camera.position.clone()
+        newPosition.x += (Math.random() - 0.5) * 10
+        newPosition.y += (Math.random() - 0.5) * 10
+        newPosition.z += (Math.random() - 0.5) * 10
+
+        this.camera.position.copy(newPosition)
+
+        this.camera.lookAt(0, 0, 0)
+      }
+
       this.duration -= 1
     } else {
+      this.camera.position.copy(this.initialPosition)
+      this.camera.lookAt(0, 0, 0)
       this.setGranularity(0)
+
       this.duration = this._duration * Math.random()
       this.delay = this._delay * Math.random()
     }
