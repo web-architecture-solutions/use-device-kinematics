@@ -39,7 +39,7 @@ export default class PixelationGlitchEffect extends Effect {
     this.initialPosition = camera.position.clone()
     this.camera = camera
 
-    this.foo = 0
+    this.cameraState = 0
   }
 
   get granularity() {
@@ -71,24 +71,29 @@ export default class PixelationGlitchEffect extends Effect {
       this.delay -= 1
     } else if (this.duration > 0) {
       if (Math.random() >= 1 - this.intensity) {
-        this.foo = 1
+        if (this.cameraState === 0) {
+          this.cameraState = 1
 
-        this.setGranularity(Math.random() * this.maxGranularity)
+          this.setGranularity(Math.random() * this.maxGranularity)
 
-        const newPosition = this.camera.position.clone()
-        newPosition.x += (Math.random() - 0.5) * 10
-        newPosition.y += (Math.random() - 0.5) * 10
-        newPosition.z += (Math.random() - 0.5) * 10
+          const newPosition = this.camera.position.clone()
+          newPosition.x += (Math.random() - 0.5) * 10
+          newPosition.y += (Math.random() - 0.5) * 10
+          newPosition.z += (Math.random() - 0.5) * 10
 
-        this.camera.position.copy(newPosition)
+          this.camera.position.copy(newPosition)
 
-        this.camera.lookAt(0, 0, 0)
+          this.camera.lookAt(0, 0, 0)
+        } else {
+          this.cameraState = 0
+
+          this.camera.position.copy(this.initialPosition)
+          this.camera.lookAt(0, 0, 0)
+        }
       }
 
       this.duration -= 1
     } else {
-      this.camera.position.copy(this.initialPosition)
-      this.camera.lookAt(0, 0, 0)
       this.setGranularity(0)
 
       this.duration = this._duration * Math.random()
