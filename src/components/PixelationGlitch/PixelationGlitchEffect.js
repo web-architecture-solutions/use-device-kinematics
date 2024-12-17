@@ -14,7 +14,7 @@ const fragmentShader = `
 `
 
 export default class PixelationGlitchEffect extends Effect {
-  constructor(maxGranularity = 30.0, intensity = 1, duration = 30, delay = 30, camera) {
+  constructor(maxGranularity = 30.0, intensity = 1, isGlitched, camera) {
     super('PixelationGlitchEffect', fragmentShader, {
       uniforms: new Map([
         ['active', new Uniform(false)],
@@ -30,11 +30,7 @@ export default class PixelationGlitchEffect extends Effect {
 
     this.intensity = intensity
 
-    this._duration = duration
-    this.duration = duration
-
-    this._delay = delay
-    this.delay = delay
+    this.isGlitched = isGlitched
 
     this.initialPosition = camera.position.clone()
     this.camera = camera
@@ -67,37 +63,23 @@ export default class PixelationGlitchEffect extends Effect {
   }
 
   update() {
-    if (this.delay > 0) {
-      this.delay -= 1
-    } else if (this.duration > 0) {
-      if (Math.random() >= 1 - this.intensity) {
-        if (this.cameraState === 0) {
-          this.cameraState = 1
-
-          this.setGranularity(Math.random() * this.maxGranularity)
-
-          const newPosition = this.camera.position.clone()
-          newPosition.x += (Math.random() - 0.5) * 10
-          newPosition.y += (Math.random() - 0.5) * 10
-          newPosition.z += (Math.random() - 0.5) * 10
-
-          this.camera.position.copy(newPosition)
-
-          this.camera.lookAt(0, 0, 0)
-        } else {
-          this.cameraState = 0
-
-          this.camera.position.copy(this.initialPosition)
-          this.camera.lookAt(0, 0, 0)
-        }
+    if (this.isGlitched && Math.random() >= 1 - this.intensity) {
+      this.setGranularity(Math.random() * this.maxGranularity)
+      if (this.cameraState === 0) {
+        this.cameraState = 1
+        const newPosition = this.camera.position.clone()
+        newPosition.x += (Math.random() - 0.5) * 10
+        newPosition.y += (Math.random() - 0.5) * 10
+        newPosition.z += (Math.random() - 0.5) * 10
+        this.camera.position.copy(newPosition)
+        this.camera.lookAt(0, 0, 0)
+      } else {
+        this.cameraState = 0
+        this.camera.position.copy(this.initialPosition)
+        this.camera.lookAt(0, 0, 0)
       }
-
-      this.duration -= 1
     } else {
       this.setGranularity(0)
-
-      this.duration = this._duration * Math.random()
-      this.delay = this._delay * Math.random()
     }
   }
 

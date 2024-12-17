@@ -2,15 +2,15 @@ import { useReducer } from 'react'
 
 import { Canvas } from '@react-three/fiber'
 
+import { EffectComposer, SSAO, Bloom, Noise } from '@react-three/postprocessing'
+
 import { BlendFunction } from 'postprocessing'
 
-import { EffectComposer, SSAO, Bloom, Noise } from '@react-three/postprocessing'
+import { initialMaxPoints, initialStepSize } from '../../constants'
 
 import { parameterReducer } from './reducers'
 
 import { useGUI } from './hooks'
-
-import { initialMaxPoints, initialStepSize } from '../../constants'
 
 import Rotate from '../Rotate'
 import UnitCube from '../UnitCube'
@@ -26,6 +26,7 @@ const initialParameters = {
 
 export default function App() {
   const [parameters, dispatch] = useReducer(parameterReducer, initialParameters)
+
   useGUI({ parameters, dispatch })
 
   return (
