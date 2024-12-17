@@ -15,6 +15,7 @@ import { useGUI } from './hooks'
 import Rotate from '../Rotate'
 import UnitCube from '../UnitCube'
 import WienerProcess from '../WienerProcess'
+import GlitchComposer from '../GlitchComposer'
 import PixelationGlitch from '../PixelationGlitch'
 
 const rotationCallback = ({ x, y, z }) => ({ x: x - 0.01, y: y - 0.01, z: z + 0.01 })
@@ -42,11 +43,9 @@ export default function App() {
 
         <Bloom intensity={2} luminanceThreshold={0.0} luminanceSmoothing={1} mipmapBlur={true} />
 
-        {/*
-        <Glitch delay={[1, 10]} duration={[0.1, 1.0]} strength={[0.01, 0.2]} mode={GlitchMode.SPORADIC} active ratio={0.8} />
-        */}
-
-        <PixelationGlitch maxGranularity={100} intensity={1} duration={30} delay={240} />
+        <GlitchComposer duration={30} delay={240}>
+          <PixelationGlitch maxGranularity={100} intensity={1} />
+        </GlitchComposer>
 
         <SSAO />
       </EffectComposer>
