@@ -9,6 +9,7 @@ export default class CameraGlitchEffect extends GlitchEffect {
     this.camera = camera
     this.initialPosition = camera.position.clone()
     this.intensity = intensity
+    this.cameraState = 0
   }
 
   glitchCamera() {
@@ -24,7 +25,14 @@ export default class CameraGlitchEffect extends GlitchEffect {
   }
 
   update() {
-    this.isGlitched ? this.glitchCamera() : this.resetCamera()
+    if (this.isGlitched && this.cameraState === 0) {
+      this.cameraState = 1
+      this.glitchCamera()
+    } else if (this.isGlitched) {
+      this.cameraState = 0
+      this.resetCamera()
+    }
+
     this.camera.lookAt(0, 0, 0)
   }
 }
