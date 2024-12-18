@@ -6,14 +6,14 @@ import PixelationGlitchEffect from './PixelationGlitchEffect'
 
 import { GlitchContext } from '../../context'
 
-export const PixelationGlitch = forwardRef(({ maxGranularity = 30, randomizeGranularity = false, intensity = 1 }, ref) => {
+export const PixelationGlitch = forwardRef(({ granularity = 30, randomizeGranularity = false, intensity = 1 }, ref) => {
   const { camera } = useThree()
 
   const isGlitched = useContext(GlitchContext)
 
   const effect = useMemo(
-    () => new PixelationGlitchEffect(maxGranularity, randomizeGranularity, intensity, false, camera),
-    [maxGranularity, randomizeGranularity, intensity, camera]
+    () => new PixelationGlitchEffect(granularity, randomizeGranularity, intensity, false, camera),
+    [granularity, randomizeGranularity, intensity, camera]
   )
 
   useFrame(() => (effect.isGlitched = isGlitched), [isGlitched])

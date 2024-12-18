@@ -5,7 +5,7 @@ import { Effect } from 'postprocessing'
 import fragmentShader from './fragmentShader'
 
 export default class PixelationGlitchEffect extends Effect {
-  constructor(maxGranularity = 30.0, randomizeGranularity, intensity = 1, isGlitched, camera) {
+  constructor(granularity = 30.0, randomizeGranularity, intensity = 1, isGlitched, camera) {
     super('PixelationGlitchEffect', fragmentShader, {
       uniforms: new Map([
         ['active', new Uniform(false)],
@@ -17,7 +17,7 @@ export default class PixelationGlitchEffect extends Effect {
 
     this.randomizeGranularity = randomizeGranularity
 
-    this.maxGranularity = maxGranularity
+    this.maxGranularity = granularity
     this._granularity = 0
     this.granularity = 0
 

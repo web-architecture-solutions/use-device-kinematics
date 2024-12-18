@@ -29,7 +29,7 @@ export default function App() {
         <Bloom intensity={2} luminanceThreshold={0.0} luminanceSmoothing={1} mipmapBlur={true} />
 
         <GlitchComposer duration={30} delay={240} randomizeDuration={true} randomizeDelay={true}>
-          <PixelationGlitch maxGranularity={100} randomizeGranularity={true} intensity={0.2} />
+          <PixelationGlitch granularity={100} randomizeGranularity={true} intensity={0.2} />
         </GlitchComposer>
 
         <SSAO />
