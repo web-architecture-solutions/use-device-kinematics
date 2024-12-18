@@ -10,6 +10,7 @@ import WienerProcess from '../WienerProcess'
 import GlitchComposer from '../GlitchComposer'
 import PixelationGlitch from '../PixelationGlitch'
 import CameraGlitch from '../CameraGlitch'
+import ChromaticAberrationGlitch from '../ChromaticAberrationGlitch'
 
 import { camera, rotationCallback, wienerProcessParameters, glitchParameters } from './constants'
 
@@ -29,6 +30,7 @@ export default function App() {
 
       <EffectComposer smaa>
         <GlitchComposer delay={delay} randomizeDelay={randomizeDelay} duration={duration} randomizeDuration={randomizeDuration}>
+          <ChromaticAberrationGlitch offset={[0, 0]} intensity={intensity} />
           <CameraGlitch intensity={intensity} />
 
           <PixelationGlitch

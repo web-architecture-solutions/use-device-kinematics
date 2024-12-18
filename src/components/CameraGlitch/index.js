@@ -6,14 +6,16 @@ import CameraGlitchEffect from './CameraGlitchEffect'
 
 import { GlitchContext } from '../../context'
 
-export const CameraGlitch = forwardRef(({ intensity = 1 }, ref) => {
+const CameraGlitch = forwardRef(({ intensity = 1 }, ref) => {
   const { camera } = useThree()
 
   const isGlitched = useContext(GlitchContext)
 
-  const effect = useMemo(() => new CameraGlitchEffect(camera, intensity), [camera, intensity])
+  const effect = useMemo(() => new CameraGlitchEffect({ camera, intensity }), [camera, intensity])
 
-  useFrame(() => (effect.isGlitched = isGlitched), [isGlitched])
+  useFrame(() => {
+    effect.isGlitched = isGlitched
+  }, [isGlitched])
 
   return <primitive ref={ref} object={effect} dispose={null} />
 })
