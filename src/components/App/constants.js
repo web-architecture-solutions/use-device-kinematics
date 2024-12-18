@@ -11,8 +11,8 @@ export const glitchParameters = {
   delay: 240,
   randomizeDelay: true,
   duration: 30,
+  intensity: 0.2,
   randomizeDuration: true,
   pixelizationGranularity: 100,
-  randomizePixelizationGranularity: true,
-  pixelizationIntensity: 0.2
+  randomizePixelizationGranularity: true
 }

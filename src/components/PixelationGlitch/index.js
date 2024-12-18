@@ -12,7 +12,7 @@ export const PixelationGlitch = forwardRef(({ granularity = 30, randomizeGranula
   const isGlitched = useContext(GlitchContext)
 
   const effect = useMemo(
-    () => new PixelationGlitchEffect(granularity, randomizeGranularity, intensity, false, camera),
+    () => new PixelationGlitchEffect(granularity, randomizeGranularity, intensity, camera),
     [granularity, randomizeGranularity, intensity, camera]
   )
 

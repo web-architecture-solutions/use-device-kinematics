@@ -5,7 +5,7 @@ import { Effect } from 'postprocessing'
 import fragmentShader from './fragmentShader'
 
 export default class PixelationGlitchEffect extends Effect {
-  constructor(granularity = 30.0, randomizeGranularity, intensity = 1, isGlitched, camera) {
+  constructor(granularity = 30.0, randomizeGranularity, intensity = 1) {
     super('PixelationGlitchEffect', fragmentShader, {
       uniforms: new Map([
         ['active', new Uniform(false)],
@@ -23,12 +23,7 @@ export default class PixelationGlitchEffect extends Effect {
 
     this.intensity = intensity
 
-    this.isGlitched = isGlitched
-
-    this.initialPosition = camera.position.clone()
-    this.camera = camera
-
-    this.cameraState = 0
+    this._isGlitched = false
   }
 
   get granularity() {
@@ -55,22 +50,17 @@ export default class PixelationGlitchEffect extends Effect {
     this.granularity = value
   }
 
+  get isGlitched() {
+    return this._isGlitched && Math.random() >= 1 - this.intensity
+  }
+
+  set isGlitched(value) {
+    this._isGlitched = value
+  }
+
   update() {
-    if (this.isGlitched && Math.random() >= 1 - this.intensity) {
+    if (this.isGlitched) {
       this.setGranularity(this.randomizeGranularity ? Math.random() * this.maxGranularity : this.maxGranularity)
-      if (this.cameraState === 0) {
-        this.cameraState = 1
-        const newPosition = this.camera.position.clone()
-        newPosition.x += (Math.random() - 0.5) * 10
-        newPosition.y += (Math.random() - 0.5) * 10
-        newPosition.z += (Math.random() - 0.5) * 10
-        this.camera.position.copy(newPosition)
-        this.camera.lookAt(0, 0, 0)
-      } else {
-        this.cameraState = 0
-        this.camera.position.copy(this.initialPosition)
-        this.camera.lookAt(0, 0, 0)
-      }
     } else {
       this.setGranularity(0)
     }
@@ -80,9 +70,8 @@ export default class PixelationGlitchEffect extends Effect {
     const resolution = this.resolution
     resolution.set(width, height)
 
-    const d = this.granularity
-    const x = d / resolution.x
-    const y = d / resolution.y
+    const x = this.granularity / resolution.x
+    const y = this.granularity / resolution.y
     this.uniforms.get('d').value.set(x, y, 1.0 / x, 1.0 / y)
   }
 }
