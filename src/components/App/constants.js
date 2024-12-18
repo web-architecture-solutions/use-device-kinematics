@@ -8,9 +8,9 @@ export const wienerProcessParameters = {
 }
 
 export const glitchParameters = {
-  delay: 60,
+  delay: 240,
   randomizeDelay: true,
-  duration: 30,
+  duration: 60,
   intensity: 0.2,
   randomizeDuration: true,
   pixelizationGranularity: 100,

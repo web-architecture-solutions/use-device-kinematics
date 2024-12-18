@@ -24,17 +24,17 @@ export default class CameraGlitchEffect extends Effect {
   update() {
     const isGlitched = this.isGlitched
     if (isGlitched && this.cameraState === 0) {
+      this.cameraState = 1
       const newPosition = this.camera.position.clone()
       newPosition.x += (Math.random() - 0.5) * 10
       newPosition.y += (Math.random() - 0.5) * 10
       newPosition.z += (Math.random() - 0.5) * 10
       this.camera.position.copy(newPosition)
       this.camera.lookAt(0, 0, 0)
-      this.cameraState = 1
     } else if (isGlitched && this.cameraState === 1) {
+      this.cameraState = 0
       this.camera.position.copy(this.initialPosition)
       this.camera.lookAt(0, 0, 0)
-      this.cameraState = 0
     }
   }
 }

@@ -28,18 +28,19 @@ export default function App() {
       </Rotate>
 
       <EffectComposer smaa>
-        <Noise blendFunction={BlendFunction.SOFT_LIGHT} />
-
-        <Bloom intensity={2} luminanceThreshold={0.0} luminanceSmoothing={1} mipmapBlur={true} />
-
         <GlitchComposer delay={delay} randomizeDelay={randomizeDelay} duration={duration} randomizeDuration={randomizeDuration}>
           <CameraGlitch intensity={intensity} />
+
           <PixelationGlitch
             granularity={pixelizationGranularity}
             randomizeGranularity={randomizePixelizationGranularity}
             intensity={intensity}
           />
         </GlitchComposer>
+
+        <Noise blendFunction={BlendFunction.SOFT_LIGHT} />
+
+        <Bloom intensity={2} luminanceThreshold={0.0} luminanceSmoothing={1} mipmapBlur={true} />
 
         <SSAO />
       </EffectComposer>
