@@ -14,7 +14,7 @@ const fragmentShader = `
 `
 
 export default class PixelationGlitchEffect extends Effect {
-  constructor(maxGranularity = 30.0, intensity = 1, isGlitched, camera) {
+  constructor(maxGranularity = 30.0, randomizeGranularity, intensity = 1, isGlitched, camera) {
     super('PixelationGlitchEffect', fragmentShader, {
       uniforms: new Map([
         ['active', new Uniform(false)],
@@ -23,6 +23,8 @@ export default class PixelationGlitchEffect extends Effect {
     })
 
     this.resolution = new Vector2()
+
+    this.randomizeGranularity = randomizeGranularity
 
     this.maxGranularity = maxGranularity
     this._granularity = 0
@@ -64,7 +66,7 @@ export default class PixelationGlitchEffect extends Effect {
 
   update() {
     if (this.isGlitched && Math.random() >= 1 - this.intensity) {
-      this.setGranularity(Math.random() * this.maxGranularity)
+      this.setGranularity(this.randomizeGranularity ? Math.random() * this.maxGranularity : this.maxGranularity)
       if (this.cameraState === 0) {
         this.cameraState = 1
         const newPosition = this.camera.position.clone()
