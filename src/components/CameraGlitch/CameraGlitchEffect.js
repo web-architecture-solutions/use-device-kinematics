@@ -14,9 +14,9 @@ export default class CameraGlitchEffect extends GlitchEffect {
 
   glitchCamera() {
     const newPosition = this.camera.position.clone()
-    newPosition.x = Math.random() > 0.5 ? newPosition.x + (Math.random() - 0.5) * 2 : newPosition.x - (Math.random() - 0.5) * 2
-    newPosition.y = Math.random() > 0.5 ? newPosition.y + (Math.random() - 0.5) * 2 : newPosition.y - (Math.random() - 0.5) * 2
-    newPosition.z = Math.random() > 0.5 ? newPosition.z + (Math.random() - 0.5) * 2 : newPosition.z - (Math.random() - 0.5) * 2
+    newPosition.x = newPosition.x + (Math.random() - 0.5) * 10
+    newPosition.y = newPosition.y + (Math.random() - 0.5) * 10
+    newPosition.z = newPosition.z + (Math.random() - 0.5) * 10
     this.camera.position.copy(newPosition)
   }
 
