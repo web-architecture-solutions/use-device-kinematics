@@ -1,19 +1,10 @@
 import { Effect } from 'postprocessing'
 
-import { Uniform, Vector2, Vector4 } from 'three'
-
 import fragmentShader from './fragmentShader'
 
 export default class CameraGlitchEffect extends Effect {
   constructor(camera, intensity) {
-    super('CameraGlitchEffect', fragmentShader, {
-      uniforms: new Map([
-        ['active', new Uniform()],
-        ['d', new Uniform()]
-      ])
-    })
-
-    this.resolution = new Vector2()
+    super('CameraGlitchEffect', fragmentShader)
 
     this.camera = camera
     this.initialPosition = camera.position.clone()
@@ -28,11 +19,6 @@ export default class CameraGlitchEffect extends Effect {
 
   get isGlitched() {
     return this._isGlitched && Math.random() >= 1 - this.intensity
-  }
-
-  setSize(width, height) {
-    const resolution = this.resolution
-    resolution.set(width, height)
   }
 
   update() {
