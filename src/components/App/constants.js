@@ -6,3 +6,13 @@ export const wienerProcessParameters = {
   maxPoints: 500,
   stepSize: 0.2
 }
+
+export const glitchParameters = {
+  delay: 240,
+  randomizeDelay: true,
+  duration: 30,
+  randomizeDuration: true,
+  pixelizationGranularity: 100,
+  randomizePixelizationGranularity: true,
+  pixelizationIntensity: 0.2
+}

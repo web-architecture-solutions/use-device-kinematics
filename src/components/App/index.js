@@ -10,11 +10,21 @@ import WienerProcess from '../WienerProcess'
 import GlitchComposer from '../GlitchComposer'
 import PixelationGlitch from '../PixelationGlitch'
 
-import { camera, wienerProcessParameters, rotationCallback } from './constants'
+import { camera, rotationCallback, wienerProcessParameters, glitchParameters } from './constants'
 
 import styles from './style.module.css'
 
 export default function App() {
+  const {
+    delay,
+    randomizeDelay,
+    duration,
+    randomizeDuration,
+    pixelizationGranularity,
+    randomizePixelizationGranularity,
+    pixelizationIntensity
+  } = glitchParameters
+
   return (
     <Canvas camera={camera} className={styles.Canvas}>
       <Rotate callback={rotationCallback}>
@@ -28,8 +38,12 @@ export default function App() {
 
         <Bloom intensity={2} luminanceThreshold={0.0} luminanceSmoothing={1} mipmapBlur={true} />
 
-        <GlitchComposer duration={30} delay={240} randomizeDuration={true} randomizeDelay={true}>
-          <PixelationGlitch granularity={100} randomizeGranularity={true} intensity={0.2} />
+        <GlitchComposer delay={delay} randomizeDelay={randomizeDelay} duration={duration} randomizeDuration={randomizeDuration}>
+          <PixelationGlitch
+            granularity={pixelizationGranularity}
+            randomizeGranularity={randomizePixelizationGranularity}
+            intensity={pixelizationIntensity}
+          />
         </GlitchComposer>
 
         <SSAO />
