@@ -1,16 +1,8 @@
-import { useReducer } from 'react'
-
 import { Canvas } from '@react-three/fiber'
 
 import { EffectComposer, SSAO, Bloom, Noise } from '@react-three/postprocessing'
 
 import { BlendFunction } from 'postprocessing'
-
-import { initialMaxPoints, initialStepSize } from '../../constants'
-
-import { parameterReducer } from './reducers'
-
-import { useGUI } from './hooks'
 
 import Rotate from '../Rotate'
 import UnitCube from '../UnitCube'
@@ -18,24 +10,17 @@ import WienerProcess from '../WienerProcess'
 import GlitchComposer from '../GlitchComposer'
 import PixelationGlitch from '../PixelationGlitch'
 
-const rotationCallback = ({ x, y, z }) => ({ x: x - 0.01, y: y - 0.01, z: z + 0.01 })
+import { camera, wienerProcessParameters, rotationCallback } from './constants'
 
-const initialParameters = {
-  maxPoints: initialMaxPoints,
-  stepSize: initialStepSize
-}
+import styles from './style.module.css'
 
 export default function App() {
-  const [parameters, dispatch] = useReducer(parameterReducer, initialParameters)
-
-  useGUI({ parameters, dispatch })
-
   return (
-    <Canvas camera={{ position: [3, 3, 3], fov: 50 }} style={{ background: 'black' }}>
+    <Canvas camera={camera} className={styles.Canvas}>
       <Rotate callback={rotationCallback}>
         <UnitCube />
 
-        <WienerProcess parameters={parameters} />
+        <WienerProcess parameters={wienerProcessParameters} />
       </Rotate>
 
       <EffectComposer smaa>

@@ -1,10 +1,6 @@
 import * as THREE from 'three'
 
-import { initialStepSize } from '../../constants'
-
 export default class Point {
-  static stepSize = initialStepSize
-
   constructor(x, y, z) {
     this.x = x
     this.y = y

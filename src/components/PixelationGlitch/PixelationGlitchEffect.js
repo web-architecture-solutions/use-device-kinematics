@@ -2,16 +2,7 @@ import { Uniform, Vector2, Vector4 } from 'three'
 
 import { Effect } from 'postprocessing'
 
-const fragmentShader = `
-  uniform bool active;
-  uniform vec4 d;
-
-  void mainUv(inout vec2 uv) {
-    if(active) {
-      uv = d.xy * (floor(uv * d.zw) + 0.5);
-    }
-  }
-`
+import fragmentShader from './fragmentShader'
 
 export default class PixelationGlitchEffect extends Effect {
   constructor(maxGranularity = 30.0, randomizeGranularity, intensity = 1, isGlitched, camera) {

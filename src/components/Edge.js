@@ -1,12 +1,6 @@
 import * as THREE from 'three'
 
-import { vertices, vertexColors } from '../constants'
-
-export default function Edge({ start, end }) {
-  const startVertex = vertices[start]
-  const endVertex = vertices[end]
-  const startColor = vertexColors[start]
-  const endColor = vertexColors[end]
+export default function Edge({ startVertex, endVertex, startColor, endColor }) {
   const geometry = new THREE.BufferGeometry()
 
   geometry.setAttribute('position', new THREE.Float32BufferAttribute([...startVertex, ...endVertex], 3))
