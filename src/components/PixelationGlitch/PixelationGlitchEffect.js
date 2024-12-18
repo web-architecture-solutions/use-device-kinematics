@@ -1,10 +1,10 @@
 import { Uniform, Vector2, Vector4 } from 'three'
 
-import { Effect } from 'postprocessing'
-
 import fragmentShader from './fragmentShader'
 
-export default class PixelationGlitchEffect extends Effect {
+import GlitchEffect from '../../GlitchEffect'
+
+export default class PixelationGlitchEffect extends GlitchEffect {
   constructor({ granularity = 30.0, randomizeGranularity, intensity = 1 }) {
     super('PixelationGlitchEffect', fragmentShader, {
       uniforms: new Map([
@@ -22,8 +22,6 @@ export default class PixelationGlitchEffect extends Effect {
     this.granularity = 0
 
     this.intensity = intensity
-
-    this._isGlitched = false
   }
 
   get granularity() {
@@ -48,14 +46,6 @@ export default class PixelationGlitchEffect extends Effect {
 
   setGranularity(value) {
     this.granularity = value
-  }
-
-  get isGlitched() {
-    return this._isGlitched && Math.random() >= 1 - this.intensity
-  }
-
-  set isGlitched(value) {
-    this._isGlitched = value
   }
 
   update() {

@@ -1,11 +1,13 @@
 import { Uniform, Vector2 } from 'three'
 
-import { EffectAttribute, Effect } from 'postprocessing'
+import { EffectAttribute } from 'postprocessing'
 
 import fragmentShader from './fragmentShader'
 import vertexShader from './vertexShader'
 
-export default class ChromaticAberrationEffect extends Effect {
+import GlitchEffect from '../../GlitchEffect'
+
+export default class ChromaticAberrationEffect extends GlitchEffect {
   constructor({ offset = new Vector2(1e-3, 5e-4), radialModulation = false, modulationOffset = 0.15, intensity = 1 } = {}) {
     super('ChromaticAberrationEffect', fragmentShader, {
       vertexShader,
@@ -17,7 +19,6 @@ export default class ChromaticAberrationEffect extends Effect {
     })
     this.radialModulation = radialModulation
     this.intensity = intensity
-    this._isGlitched = false
   }
 
   get offset() {
@@ -51,14 +52,6 @@ export default class ChromaticAberrationEffect extends Effect {
 
   setOffset(value) {
     this.offset = value
-  }
-
-  get isGlitched() {
-    return this._isGlitched && Math.random() >= 1 - this.intensity
-  }
-
-  set isGlitched(value) {
-    this._isGlitched = value
   }
 
   update() {

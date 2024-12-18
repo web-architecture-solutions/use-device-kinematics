@@ -30,8 +30,9 @@ export default function App() {
 
       <EffectComposer smaa>
         <GlitchComposer delay={delay} randomizeDelay={randomizeDelay} duration={duration} randomizeDuration={randomizeDuration}>
-          <ChromaticAberrationGlitch offset={[0, 0]} intensity={intensity} />
           <CameraGlitch intensity={intensity} />
+
+          <ChromaticAberrationGlitch offset={[0, 0]} intensity={intensity} />
 
           <PixelationGlitch
             granularity={pixelizationGranularity}

@@ -1,23 +1,14 @@
-import { Effect } from 'postprocessing'
+import GlitchEffect from '../../GlitchEffect'
 
 import fragmentShader from './fragmentShader'
 
-export default class CameraGlitchEffect extends Effect {
+export default class CameraGlitchEffect extends GlitchEffect {
   constructor({ camera, intensity }) {
     super('CameraGlitchEffect', fragmentShader)
 
     this.camera = camera
     this.initialPosition = camera.position.clone()
     this.intensity = intensity
-    this._isGlitched = false
-  }
-
-  set isGlitched(value) {
-    this._isGlitched = value
-  }
-
-  get isGlitched() {
-    return this._isGlitched && Math.random() >= 1 - this.intensity
   }
 
   glitchCamera() {
