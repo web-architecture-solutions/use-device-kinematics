@@ -14,13 +14,10 @@ export default class PixelationGlitchEffect extends GlitchEffect {
     })
 
     this.resolution = new Vector2()
-
     this.randomizeGranularity = randomizeGranularity
-
     this.maxGranularity = granularity
     this._granularity = 0
     this.granularity = 0
-
     this.intensity = intensity
   }
 
@@ -30,11 +27,7 @@ export default class PixelationGlitchEffect extends GlitchEffect {
 
   set granularity(value) {
     let d = Math.floor(value)
-
-    if (d % 2 > 0) {
-      d += 1
-    }
-
+    if (d % 2 > 0) d += 1
     this._granularity = d
     this.uniforms.get('active').value = d > 0
     this.setSize(this.resolution.width, this.resolution.height)
@@ -49,17 +42,14 @@ export default class PixelationGlitchEffect extends GlitchEffect {
   }
 
   update() {
-    if (this.isGlitched) {
-      this.setGranularity(this.randomizeGranularity ? Math.random() * this.maxGranularity : this.maxGranularity)
-    } else {
-      this.setGranularity(0)
-    }
+    this.isGlitched
+      ? this.setGranularity(this.randomizeGranularity ? Math.random() * this.maxGranularity : this.maxGranularity)
+      : this.setGranularity(0)
   }
 
   setSize(width, height) {
     const resolution = this.resolution
     resolution.set(width, height)
-
     const x = this.granularity / resolution.x
     const y = this.granularity / resolution.y
     this.uniforms.get('d').value.set(x, y, 1.0 / x, 1.0 / y)

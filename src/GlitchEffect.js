@@ -8,7 +8,7 @@ export default class GlitchEffect extends Effect {
   }
 
   get isGlitched() {
-    return this._isGlitched && Math.random() >= 1 - this.intensity
+    return this._isGlitched && Math.random() <= this.intensity
   }
 
   set isGlitched(value) {
