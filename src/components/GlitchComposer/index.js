@@ -6,21 +6,19 @@ import { GlitchContext } from '../../context'
 
 import { reducer } from './reducers'
 
-const initialState = {
-  isGlitched: false,
-  delay: 240,
-  duration: 30
-}
-
 export default function GlitchComposer({
   children,
-  delay: maxDelay = 240,
-  duration: maxDuration = 30,
+  delay = 240,
+  duration = 30,
   disabled = false,
   randomizeDelay = false,
   randomizeDuration = false
 }) {
-  const [state, dispatch] = useReducer(reducer, initialState)
+  const [state, dispatch] = useReducer(reducer, {
+    delay,
+    duration,
+    isGlitched: false
+  })
 
   useFrame(() => {
     if (disabled) return
@@ -32,8 +30,8 @@ export default function GlitchComposer({
     } else {
       dispatch({
         type: 'RESET',
-        delay: randomizeDelay ? Math.random() * maxDelay : delay,
-        duration: randomizeDuration ? Math.random() * maxDuration : duration
+        delay: randomizeDelay ? Math.random() * delay : delay,
+        duration: randomizeDuration ? Math.random() * duration : duration
       })
     }
   })
