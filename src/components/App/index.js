@@ -14,18 +14,22 @@ import ChromaticAberrationGlitch from '../ChromaticAberrationGlitch'
 
 import { camera, rotationCallback, wienerProcessParameters, glitchParameters } from './constants'
 
+import { useMouseVelocity } from './hooks'
+
 import styles from './style.module.css'
 
 export default function App() {
   const { delay, randomizeDelay, duration, intensity, randomizeDuration, pixelizationGranularity, randomizePixelizationGranularity } =
     glitchParameters
 
+  const mouseVelocity = useMouseVelocity()
+
   return (
     <Canvas camera={camera} className={styles.Canvas}>
       <Rotate callback={rotationCallback}>
         <UnitCube />
 
-        <WienerProcess parameters={wienerProcessParameters} />
+        <WienerProcess parameters={{ mouseVelocity, ...wienerProcessParameters }} />
       </Rotate>
 
       <EffectComposer smaa>
