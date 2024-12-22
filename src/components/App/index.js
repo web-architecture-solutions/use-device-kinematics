@@ -12,7 +12,7 @@ import WienerProcess from '../WienerProcess'
 import GlitchComposer from '../GlitchComposer'
 import PixelationGlitch from '../PixelationGlitch'
 import CameraGlitch from '../CameraGlitch'
-import ChromaticAberrationGlitch from '../ChromaticAberrationGlitch'
+//import ChromaticAberrationGlitch from '../ChromaticAberrationGlitch'
 
 import { camera, rotationCallback, wienerProcessParameters, glitchParameters } from './constants'
 
@@ -22,7 +22,7 @@ export default function App() {
   const { delay, randomizeDelay, duration, intensity, randomizeDuration, pixelizationGranularity, randomizePixelizationGranularity } =
     glitchParameters
 
-  const { velocity: mouseVelocity, trapTriggered, setTrapTriggered } = useMouseVelocity({ accelerationTrapThreshold: 0.05 })
+  const { velocity: mouseVelocity, trapTriggered, setTrapTriggered } = useMouseVelocity({ accelerationTrapThreshold: 0.1 })
 
   return (
     <>
@@ -43,7 +43,7 @@ export default function App() {
             setTrapTriggered={setTrapTriggered}>
             <CameraGlitch intensity={intensity} />
 
-            <ChromaticAberrationGlitch offset={[0, 0]} intensity={intensity} />
+            {/*<ChromaticAberrationGlitch offset={[0, 0]} intensity={intensity} />*/}
 
             <PixelationGlitch
               granularity={pixelizationGranularity}
