@@ -1,26 +1,27 @@
-import { useState } from 'react'
-
+import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-
 import { GlitchContext } from '../../context'
 
 export default function GlitchComposer({
   children,
-  duration: intitalDuration = 30,
+  duration: initialDuration = 30,
   disabled = false,
   randomizeDuration = false,
   isGlitched = false,
-  setTrapTriggered
+  setTrapTriggered,
+  setVelocity
 }) {
-  const [duration, setDuration] = useState(intitalDuration)
+  const durationRef = useRef(initialDuration)
 
   useFrame(() => {
     if (disabled) return
-    if (duration > 0) {
-      setDuration((currentDuration) => currentDuration - 1)
+    setVelocity(0)
+
+    if (durationRef.current > 0) {
+      durationRef.current -= 1
     } else {
       setTrapTriggered(false)
-      setDuration(randomizeDuration ? Math.random() * intitalDuration : intitalDuration)
+      durationRef.current = randomizeDuration ? Math.random() * initialDuration : initialDuration
     }
   })
 

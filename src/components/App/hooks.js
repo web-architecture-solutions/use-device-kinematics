@@ -36,12 +36,10 @@ export function useMouseVelocity({ accelerationTrapThreshold = 0.01 }) {
 
     window.addEventListener('mousemove', handleMouseMove)
 
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove)
-    }
+    return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [accelerationTrapThreshold])
 
-  return { velocity, acceleration, trapTriggered, setTrapTriggered }
+  return { velocity, setVelocity, acceleration, trapTriggered, setTrapTriggered }
 }
 
 export default useMouseVelocity

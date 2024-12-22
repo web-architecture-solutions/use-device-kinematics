@@ -22,7 +22,7 @@ export default function App() {
   const { delay, randomizeDelay, duration, intensity, randomizeDuration, pixelizationGranularity, randomizePixelizationGranularity } =
     glitchParameters
 
-  const { velocity: mouseVelocity, trapTriggered, setTrapTriggered } = useMouseVelocity({ accelerationTrapThreshold: 0.1 })
+  const { velocity: mouseVelocity, setVelocity, trapTriggered, setTrapTriggered } = useMouseVelocity({ accelerationTrapThreshold: 0.1 })
 
   return (
     <>
@@ -40,8 +40,8 @@ export default function App() {
             randomizeDelay={randomizeDelay}
             duration={duration}
             randomizeDuration={randomizeDuration}
-            setTrapTriggered={setTrapTriggered}>
-            <CameraGlitch intensity={intensity} />
+            setTrapTriggered={setTrapTriggered}setVelocity={setVelocity}>
+            <CameraGlitch intensity={intensity}  />
 
             {/*<ChromaticAberrationGlitch offset={[0, 0]} intensity={intensity} />*/}
 
