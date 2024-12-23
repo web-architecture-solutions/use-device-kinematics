@@ -4,7 +4,7 @@ import { EffectComposer, SSAO, Bloom, Noise } from '@react-three/postprocessing'
 
 import { BlendFunction } from 'postprocessing'
 
-import { useMouseVelocity } from './hooks'
+import useMouseVelocity from './hooks/useMouseVelocity'
 
 import Rotate from '../Rotate'
 import UnitCube from '../UnitCube'
@@ -40,8 +40,9 @@ export default function App() {
             randomizeDelay={randomizeDelay}
             duration={duration}
             randomizeDuration={randomizeDuration}
-            setTrapTriggered={setTrapTriggered}setVelocity={setVelocity}>
-            <CameraGlitch intensity={intensity}  />
+            setTrapTriggered={setTrapTriggered}
+            setVelocity={setVelocity}>
+            <CameraGlitch intensity={intensity} />
 
             {/*<ChromaticAberrationGlitch offset={[0, 0]} intensity={intensity} />*/}
 

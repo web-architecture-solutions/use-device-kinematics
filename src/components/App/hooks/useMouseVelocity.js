@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 
-export function useMouseVelocity({ accelerationTrapThreshold = 0.01 }) {
+export default function useMouseVelocity({ accelerationTrapThreshold = 0.01 }) {
   const [velocity, setVelocity] = useState(0)
   const [acceleration, setAcceleration] = useState(0)
   const [trapTriggered, setTrapTriggered] = useState(false)
@@ -41,5 +41,3 @@ export function useMouseVelocity({ accelerationTrapThreshold = 0.01 }) {
 
   return { velocity, setVelocity, acceleration, trapTriggered, setTrapTriggered }
 }
-
-export default useMouseVelocity
