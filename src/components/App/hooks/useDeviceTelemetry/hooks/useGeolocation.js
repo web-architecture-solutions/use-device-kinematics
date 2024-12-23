@@ -2,21 +2,10 @@ import { useRef } from 'react'
 
 import useDeviceAPI from './useDeviceAPI'
 
-import { calculateVelocity } from '../physics'
+import { calculateComponentVelocity, calculateDisplacement, calculateTotalVelocity } from '../physics'
 
 const isFeaturePresent = typeof navigator !== 'undefined' && navigator.geolocation
-
 const featureDetectionError = { type: 'geolocation', message: 'Geolocation is not supported by this browser.' }
-
-function callback(handleDeviceEvent, errors) {
-  const handleError = ({ message }) => errors.add('geolocation', message)
-  const watcherId = navigator.geolocation.watchPosition(handleDeviceEvent, handleError, {
-    enableHighAccuracy,
-    timeout,
-    maximumAge
-  })
-  return () => navigator.geolocation.clearWatch(watcherId)
-}
 
 /**
  * Custom hook to capture geolocation data with optional configuration.
@@ -30,14 +19,29 @@ function callback(handleDeviceEvent, errors) {
 export default function useGeolocation({ enableHighAccuracy = false, timeout = Infinity, maximumAge = 0, debounce = 0 } = {}) {
   const previousCoords = useRef(null)
 
-  const calulateFallbackVelocity = (coords) =>
-    previousCoords.current && coords
-      ? calculateVelocity({ ...previousCoords.current, timestamp: previousCoords.current.timestamp }, { ...coords, timestamp })
-      : null
-
   function update(setData) {
     return ({ coords, timestamp }) => {
+      let latitudinalVelocity = null
+      let longitudinalVelocity = null
+      let velocity = null
+      let deltaLat = null
+      let deltaLon = null
+
+      if (previousCoords.current && coords) {
+        const displacement = calculateDisplacement(previousCoords.current, { ...coords, timestamp })
+        deltaLat = displacement.deltaLat
+        deltaLon = displacement.deltaLon
+
+        const velocityComponents = calculateComponentVelocity(deltaLat, deltaLon, (timestamp - previousCoords.current.timestamp) / 1000)
+        latitudinalVelocity = velocityComponents.latitudinalVelocity
+        longitudinalVelocity = velocityComponents.longitudinalVelocity
+        velocity = coords.speed ?? calculateTotalVelocity(latitudinalVelocity, longitudinalVelocity)
+      } else {
+        velocity = coords.speed
+      }
+
       previousCoords.current = { ...coords, timestamp }
+
       setData({
         latitude: coords.latitude || 0,
         longitude: coords.longitude || 0,
@@ -45,10 +49,26 @@ export default function useGeolocation({ enableHighAccuracy = false, timeout = I
         altitude: coords.altitude || null,
         altitudeAccuracy: coords.altitudeAccuracy || null,
         heading: coords.heading || null,
-        speed: (coords.speed ?? calulateFallbackVelocity(coords)) || null,
-        timestamp
+        velocity: velocity || 0,
+        latitudinalVelocity: latitudinalVelocity || 0,
+        longitudinalVelocity: longitudinalVelocity || 0,
+        deltaLat: deltaLat || 0,
+        deltaLon: deltaLon || 0,
+        timestamp: timestamp || null
       })
     }
+  }
+
+  function callback(handleDeviceEvent, errors) {
+    const handleError = ({ message }) => errors.add('geolocation', message)
+
+    const watcherId = navigator.geolocation.watchPosition(handleDeviceEvent, handleError, {
+      enableHighAccuracy,
+      timeout,
+      maximumAge
+    })
+
+    return () => navigator.geolocation.clearWatch(watcherId)
   }
 
   return useDeviceAPI({
