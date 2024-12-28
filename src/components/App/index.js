@@ -7,7 +7,7 @@ export default function App() {
     <div>
       <h1>Geolocation</h1>
 
-      {Object.keys(errors).length > 0 ? (
+      {errors && Object.keys(errors).length > 0 ? (
         <table>
           <thead>
             <tr>
@@ -23,7 +23,7 @@ export default function App() {
             ))}
           </tbody>
         </table>
-      ) : (
+      ) : data && Object.keys(data).length > 0 ? (
         <table>
           <thead>
             <tr>
@@ -40,7 +40,7 @@ export default function App() {
             ))}
           </tbody>
         </table>
-      )}
+      ) : null}
     </div>
   )
 }
