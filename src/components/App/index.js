@@ -22,7 +22,7 @@ export default function App() {
   const { delay, randomizeDelay, duration, intensity, randomizeDuration, pixelizationGranularity, randomizePixelizationGranularity } =
     glitchParameters
 
-  const mouseVelocity = useMouseVelocity()
+  const { velocity: mouseVelocity, setVelocity, trapTriggered, setTrapTriggered } = useMouseVelocity({ accelerationTrapThreshold: 0.1 })
 
   return (
     <Canvas camera={camera} className={styles.Canvas}>
@@ -33,7 +33,14 @@ export default function App() {
       </Rotate>
 
       <EffectComposer smaa>
-        <GlitchComposer delay={delay} randomizeDelay={randomizeDelay} duration={duration} randomizeDuration={randomizeDuration}>
+        <GlitchComposer
+          isGlitched={trapTriggered}
+          delay={delay}
+          randomizeDelay={randomizeDelay}
+          duration={duration}
+          randomizeDuration={randomizeDuration}
+          setTrapTriggered={setTrapTriggered}
+          setVelocity={setVelocity}>
           <CameraGlitch intensity={intensity} />
 
           <ChromaticAberrationGlitch offset={[0, 0]} intensity={intensity} />
