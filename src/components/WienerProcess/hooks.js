@@ -1,16 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useRef, useEffect } from 'react'
 
 import GeometryBuffer from './GeometryBuffer'
 
-export function useGeometryBuffer(lineRef, parameters) {
-  const initialGeometryBuffer = new GeometryBuffer(lineRef, parameters).initialize()
+export const useGeometryBuffer = (lineRef, parameters) => {
+  const bufferRef = useRef(null)
 
-  const [geometryBuffer, setGeometryBuffer] = useState(initialGeometryBuffer)
+  if (!bufferRef.current) {
+    bufferRef.current = new GeometryBuffer(lineRef, parameters)
+    bufferRef.current.initialize()
+  }
 
   useEffect(() => {
-    const geometryBuffer = new GeometryBuffer(lineRef, parameters).initialize()
-    setGeometryBuffer(geometryBuffer)
+    bufferRef.current.parameters = parameters
   }, [parameters])
 
-  return geometryBuffer
+  return bufferRef.current
 }

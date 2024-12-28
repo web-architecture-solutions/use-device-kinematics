@@ -1,4 +1,4 @@
-import GlitchEffect from '../../GlitchEffect'
+import GlitchEffect from '../../lib/GlitchEffect'
 
 import fragmentShader from './fragmentShader'
 
@@ -14,9 +14,9 @@ export default class CameraGlitchEffect extends GlitchEffect {
 
   glitchCamera() {
     const newPosition = this.camera.position.clone()
-    newPosition.x = newPosition.x + (Math.random() - 0.5) * 10
-    newPosition.y = newPosition.y + (Math.random() - 0.5) * 10
-    newPosition.z = newPosition.z + (Math.random() - 0.5) * 10
+    newPosition.x = newPosition.x + 2 * (Math.random() - 0.5) * 5
+    newPosition.y = newPosition.y + 2 * (Math.random() - 0.5) * 5
+    newPosition.z = newPosition.z + 2 * (Math.random() - 0.5) * 5
     this.camera.position.copy(newPosition)
   }
 

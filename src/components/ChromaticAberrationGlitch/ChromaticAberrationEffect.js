@@ -5,7 +5,7 @@ import { EffectAttribute } from 'postprocessing'
 import fragmentShader from './fragmentShader'
 import vertexShader from './vertexShader'
 
-import GlitchEffect from '../../GlitchEffect'
+import GlitchEffect from '../../lib/GlitchEffect'
 
 export default class ChromaticAberrationEffect extends GlitchEffect {
   constructor({ offset = new Vector2(1e-3, 5e-4), radialModulation = false, modulationOffset = 0.15, intensity = 1 } = {}) {

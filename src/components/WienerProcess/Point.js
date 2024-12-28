@@ -23,19 +23,4 @@ export default class Point {
   get magnitude() {
     return Math.sqrt(this.coords.reduce((sum, coord) => sum + coord * coord, 0))
   }
-
-  get nextPoint() {
-    const newCoords = this.coords.map((coord) => {
-      const newCoord = this.randomStep(coord)
-      if (newCoord > 1) return 2 - newCoord
-      if (newCoord < -1) return -2 - newCoord
-      return newCoord
-    })
-    return new Point(...newCoords)
-  }
-
-  randomStep(coord) {
-    const randomStep = (Math.random() - 0.5) * this.constructor.stepSize
-    return coord + randomStep
-  }
 }

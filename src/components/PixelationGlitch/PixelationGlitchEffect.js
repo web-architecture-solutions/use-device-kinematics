@@ -2,7 +2,7 @@ import { Uniform, Vector2, Vector4 } from 'three'
 
 import fragmentShader from './fragmentShader'
 
-import GlitchEffect from '../../GlitchEffect'
+import GlitchEffect from '../../lib/GlitchEffect'
 
 export default class PixelationGlitchEffect extends GlitchEffect {
   constructor({ granularity = 30.0, randomizeGranularity, intensity = 1 }) {
