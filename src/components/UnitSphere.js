@@ -18,7 +18,6 @@ const createGradientCircle = (axis, radius = 1, segments = 64, colorStops, rotat
     const theta = t * Math.PI * 2 // Angle around the circle
 
     let position
-    // Compute positions based on the axis
     if (axis === 'xy') {
       position = new THREE.Vector3(Math.cos(theta) * radius, Math.sin(theta) * radius, 0)
     } else if (axis === 'yz') {
@@ -27,7 +26,6 @@ const createGradientCircle = (axis, radius = 1, segments = 64, colorStops, rotat
       position = new THREE.Vector3(Math.cos(theta) * radius, 0, Math.sin(theta) * radius)
     }
 
-    // Apply rotation if specified
     if (rotationAxis && rotationAngle) {
       position.applyMatrix4(rotationMatrix)
     }
@@ -96,7 +94,7 @@ export default function UnitSphere() {
     <>
       {createLine(equator)}
       {createLine(meridian)}
-      {createLine(thirdCircle)} {/* Render the new third circle */}
+      {createLine(thirdCircle)}
     </>
   )
 }
