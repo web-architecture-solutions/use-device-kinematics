@@ -1,40 +1,29 @@
-import { useReducer } from 'react'
-
+import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-
 import { GlitchContext } from '../../context'
-
-import { reducer } from './reducers'
 
 export default function GlitchComposer({
   children,
-  delay = 240,
-  duration = 30,
+  duration: initialDuration = 30,
   disabled = false,
-  randomizeDelay = false,
-  randomizeDuration = false
+  randomizeDuration = false,
+  isGlitched = false,
+  setTrapTriggered,
+  setVelocity
 }) {
-  const [state, dispatch] = useReducer(reducer, {
-    delay,
-    duration,
-    isGlitched: false
-  })
+  const durationRef = useRef(initialDuration)
 
   useFrame(() => {
     if (disabled) return
+    setVelocity(0)
 
-    if (state.delay > 0) {
-      dispatch({ type: 'DECREMENT_DELAY' })
-    } else if (state.duration > 0) {
-      dispatch({ type: 'DECREMENT_DURATION' })
+    if (durationRef.current > 0) {
+      durationRef.current -= 1
     } else {
-      dispatch({
-        type: 'RESET',
-        delay: randomizeDelay ? Math.random() * delay : delay,
-        duration: randomizeDuration ? Math.random() * duration : duration
-      })
+      setTrapTriggered(false)
+      durationRef.current = randomizeDuration ? Math.random() * initialDuration : initialDuration
     }
   })
 
-  return <GlitchContext.Provider value={state.isGlitched}>{children}</GlitchContext.Provider>
+  return <GlitchContext.Provider value={isGlitched}>{children}</GlitchContext.Provider>
 }
