@@ -5,6 +5,8 @@ export default function App() {
 
   return (
     <div>
+      <h1>Geolocation</h1>
+
       {Object.keys(errors).length > 0 ? (
         <table>
           <thead>
@@ -25,7 +27,7 @@ export default function App() {
         <table>
           <thead>
             <tr>
-              <th>Geolocation Data</th>
+              <th>Data</th>
             </tr>
           </thead>
 
