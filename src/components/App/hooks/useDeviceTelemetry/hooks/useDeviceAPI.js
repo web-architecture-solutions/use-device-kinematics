@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 
+import useDebouncedCallback from './useDebouncedCallback'
+import useErrorHandling from './useErrorHandling'
+
 export default function useDeviceAPI({
   update: _update,
   isFeaturePresent,

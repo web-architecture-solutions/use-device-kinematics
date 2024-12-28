@@ -8,11 +8,9 @@ import useGeolocation from './hooks/useGeolocation'
  * @param {Object} config - Configuration options.
  * @returns {Object} Processed telemetry data and errors.
  */
-function useDeviceTelemetry(config = {}) {
+export default function useDeviceTelemetry(config = {}) {
   const motion = useDeviceMotion(config)
   const geolocation = useGeolocation(config)
   const combinedErrors = useMemo(() => ({ ...motion.errors, ...geolocation.errors }), [motion.errors, geolocation.errors])
   return { motionData: motion.data, geolocationData: geolocation.data, errors: combinedErrors }
 }
-
-export { useDeviceMotion, useGeolocation, useDeviceTelemetry }

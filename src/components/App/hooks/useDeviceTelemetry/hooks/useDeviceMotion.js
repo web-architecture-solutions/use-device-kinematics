@@ -18,49 +18,48 @@ export default function useDeviceMotion({ debounce = 0 } = {}) {
   const previousTimestamp = useRef(null)
 
   function update(setData) {
-    return ({ acceleration, accelerationIncludingGravity, rotationRate: angularVelocity, timestamp }) => {
+    return ({
+      acceleration = { x: 0, y: 0, z: 0 },
+      accelerationIncludingGravity = { x: 0, y: 0, z: 0 },
+      rotationRate: angularVelocity = { alpha: 0, beta: 0, gamma: 0 },
+      timestamp
+    }) => {
       const timeDiff = previousTimestamp.current ? (timestamp - previousTimestamp.current) / 1000 : null
 
-      let totalAngularAcceleration = 0
-      let angularAcceleration = { alpha: 0, beta: 0, gamma: 0 }
+      const angularAcceleration = timeDiff
+        ? calculateComponentAngularAcceleration(
+            angularVelocity.alpha,
+            previousAngularVelocity.current?.alpha || 0,
+            angularVelocity.beta,
+            previousAngularVelocity.current?.beta || 0,
+            angularVelocity.gamma,
+            previousAngularVelocity.current?.gamma || 0,
+            timeDiff
+          )
+        : { alpha: 0, beta: 0, gamma: 0 }
 
-      if (angularVelocity && previousAngularVelocity.current && timeDiff) {
-        const { alpha: currentAlpha, beta: currentBeta, gamma: currentGamma } = angularVelocity
-        const { alpha: previousAlpha, beta: previousBeta, gamma: previousGamma } = previousAngularVelocity.current
-
-        angularAcceleration = calculateComponentAngularAcceleration(
-          currentAlpha,
-          previousAlpha,
-          currentBeta,
-          previousBeta,
-          currentGamma,
-          previousGamma,
-          timeDiff
-        )
-
-        totalAngularAcceleration = calculateTotalAngularAcceleration(
-          currentAlpha - previousAlpha,
-          currentBeta - previousBeta,
-          currentGamma - previousGamma,
-          timeDiff
-        )
-      }
-
-      const totalLinearAcceleration = acceleration
-        ? Math.sqrt(Math.pow(acceleration.x || 0, 2) + Math.pow(acceleration.y || 0, 2) + Math.pow(acceleration.z || 0, 2))
+      const totalAngularAcceleration = timeDiff
+        ? calculateTotalAngularAcceleration(
+            angularVelocity.alpha - (previousAngularVelocity.current?.alpha || 0),
+            angularVelocity.beta - (previousAngularVelocity.current?.beta || 0),
+            angularVelocity.gamma - (previousAngularVelocity.current?.gamma || 0),
+            timeDiff
+          )
         : 0
+
+      const totalLinearAcceleration = Math.sqrt(acceleration.x ** 2 + acceleration.y ** 2 + acceleration.z ** 2)
 
       previousAngularVelocity.current = angularVelocity
       previousTimestamp.current = timestamp
 
       setData({
-        acceleration: acceleration || { x: 0, y: 0, z: 0 },
-        accelerationIncludingGravity: accelerationIncludingGravity || { x: 0, y: 0, z: 0 },
-        angularVelocity: angularVelocity || { alpha: 0, beta: 0, gamma: 0 },
-        angularAcceleration: angularAcceleration || 0,
-        totalAngularAcceleration: totalAngularAcceleration || 0,
-        totalLinearAcceleration: totalLinearAcceleration || 0,
-        timestamp: timestamp || null
+        acceleration,
+        accelerationIncludingGravity,
+        angularVelocity,
+        angularAcceleration,
+        totalAngularAcceleration,
+        totalLinearAcceleration,
+        timestamp
       })
     }
   }
