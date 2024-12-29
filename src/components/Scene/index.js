@@ -1,5 +1,7 @@
 import { EffectComposer, SSAO, Bloom, Noise } from '@react-three/postprocessing'
 
+import { useFrame } from '@react-three/fiber'
+
 import { BlendFunction } from 'postprocessing'
 
 import Rotate from '../Rotate'
@@ -14,7 +16,9 @@ import { rotationCallback, wienerProcessParameters, glitchParameters } from './c
 
 import { useMouseVelocity } from './hooks'
 
-export default function Scene() {
+export default function Scene({ setHueRotation }) {
+  useFrame(() => setHueRotation((currentHueRotation) => (currentHueRotation + 1) % 360))
+
   const { delay, randomizeDelay, duration, intensity, randomizeDuration, pixelizationGranularity, randomizePixelizationGranularity } =
     glitchParameters
 
