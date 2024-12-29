@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber'
 
-import { camera } from '../../constants'
+import { camera } from './constants'
 
 import Scene from '../Scene'
 

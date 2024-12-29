@@ -2,17 +2,17 @@ import { EffectComposer, SSAO, Bloom, Noise } from '@react-three/postprocessing'
 
 import { BlendFunction } from 'postprocessing'
 
-import Rotate from './Rotate'
-import UnitCube from './UnitCube'
-import WienerProcess from './WienerProcess'
-import GlitchComposer from './GlitchComposer'
-import PixelationGlitch from './PixelationGlitch'
-import CameraGlitch from './CameraGlitch'
-import ChromaticAberrationGlitch from './ChromaticAberrationGlitch'
+import Rotate from '../Rotate'
+import UnitCube from '../UnitCube'
+import WienerProcess from '../WienerProcess'
+import GlitchComposer from '../GlitchComposer'
+import PixelationGlitch from '../PixelationGlitch'
+import CameraGlitch from '../CameraGlitch'
+import ChromaticAberrationGlitch from '../ChromaticAberrationGlitch'
 
-import { rotationCallback, wienerProcessParameters, glitchParameters } from '../constants'
+import { rotationCallback, wienerProcessParameters, glitchParameters } from './constants'
 
-import { useMouseVelocity } from '../hooks'
+import { useMouseVelocity } from './hooks'
 
 export default function Scene() {
   const { delay, randomizeDelay, duration, intensity, randomizeDuration, pixelizationGranularity, randomizePixelizationGranularity } =

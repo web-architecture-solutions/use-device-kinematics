@@ -1,5 +1,3 @@
-export const camera = { position: [3, 3, 3], fov: 50 }
-
 export const rotationCallback = ({ x, y, z }) => ({ x: x - 0.01, y: y - 0.01, z: z + 0.01 })
 
 export const wienerProcessParameters = {
