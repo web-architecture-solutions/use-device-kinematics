@@ -11,9 +11,11 @@ export default function App() {
   return (
     <div className={styles.App}>
       <Frame>
-        <Canvas camera={camera} className={styles.Canvas}>
-          <Scene />
-        </Canvas>
+        <div className={styles.canvasContainer}>
+          <Canvas camera={camera} className={styles.Canvas}>
+            <Scene />
+          </Canvas>
+        </div>
       </Frame>
     </div>
   )
