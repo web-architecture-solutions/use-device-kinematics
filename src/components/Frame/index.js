@@ -1,12 +1,8 @@
-import { useRadialMousePosition } from './hooks'
-
-import styles from './style.module.css'
+import styles from './style.module.scss'
 
 export default function Frame({ children }) {
-  const { theta } = useRadialMousePosition()
-
   return (
-    <div className={styles.Frame} style={{ filter: `hue-rotate(${theta}deg)` }}>
+    <div className={styles.Frame}>
       {children}
 
       <div className={styles.mask}></div>

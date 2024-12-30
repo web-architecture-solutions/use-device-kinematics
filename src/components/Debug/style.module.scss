@@ -7,6 +7,14 @@
     position: fixed;
     top: 0;
     right: 0;
-  
-    width: 200px;
+
+    td {
+      &:first-of-type {
+        text-align: left;
+      }
+
+      &:last-of-type {
+        text-align: right;
+      }
+    }
   }

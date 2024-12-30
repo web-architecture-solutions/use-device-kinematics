@@ -9,6 +9,8 @@ import { GlitchContext } from '../../context'
 const PixelationGlitch = forwardRef(({ granularity = 30, randomizeGranularity = false, intensity = 1 }, ref) => {
   const isGlitched = useContext(GlitchContext)
 
+  console.log(isGlitched)
+
   const effect = useMemo(
     () => new PixelationGlitchEffect({ granularity, randomizeGranularity, intensity }),
     [granularity, randomizeGranularity, intensity]

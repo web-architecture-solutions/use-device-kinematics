@@ -1,0 +1,56 @@
+$maskWidth: 0rem;
+$borderWidth: 0px;
+
+.Frame {
+  position: relative;
+}
+
+.mask {
+  backdrop-filter: blur(4px);
+
+  mask-image: linear-gradient(to bottom, black $maskWidth, transparent $maskWidth), linear-gradient(to top, black $maskWidth, transparent $maskWidth),
+    linear-gradient(to right, black $maskWidth, transparent $maskWidth), linear-gradient(to left, black $maskWidth, transparent $maskWidth);
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+
+  -webkit-mask-image: linear-gradient(to bottom, black $maskWidth, transparent $maskWidth), linear-gradient(to top, black $maskWidth, transparent $maskWidth),
+    linear-gradient(to right, black $maskWidth, transparent $maskWidth), linear-gradient(to left, black $maskWidth, transparent $maskWidth);
+  -webkit-mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+
+  pointer-events: none;
+
+  z-index: 1;
+}
+
+.border {
+  border: solid $borderWidth #5c5c5c;
+
+  position: absolute;
+  top: $maskWidth;
+  right: $maskWidth;
+  bottom: $maskWidth;
+  left: $maskWidth;
+
+  z-index: 1;
+}
+
+@media (orientation: landscape) {
+  .Frame {
+    height: 62vh;
+    width: 62vh;
+  }
+}
+
+@media (orientation: portrait) {
+  .Frame {
+    height: 62vw;
+    width: 62vw;
+  }
+}

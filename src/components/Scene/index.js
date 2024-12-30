@@ -1,33 +1,27 @@
 import { EffectComposer, SSAO, Bloom, Noise } from '@react-three/postprocessing'
 
-import { useFrame } from '@react-three/fiber'
-
 import { BlendFunction } from 'postprocessing'
 
 import Rotate from '../Rotate'
 import UnitCube from '../UnitCube'
-import WienerProcess from '../WienerProcess'
+import RandomWalk from '../RandomWalk'
 import GlitchComposer from '../GlitchComposer'
 import PixelationGlitch from '../PixelationGlitch'
 import CameraGlitch from '../CameraGlitch'
 import ChromaticAberrationGlitch from '../ChromaticAberrationGlitch'
 
-import { rotationCallback, wienerProcessParameters, glitchParameters } from './constants'
+import { rotationCallback, randomWalkParameters, glitchParameters } from './constants'
 
-import { useMouseVelocity } from './hooks'
+const { delay, randomizeDelay, duration, intensity, randomizeDuration, pixelizationGranularity, randomizePixelizationGranularity } =
+  glitchParameters
 
-export default function Scene() {
-  const { delay, randomizeDelay, duration, intensity, randomizeDuration, pixelizationGranularity, randomizePixelizationGranularity } =
-    glitchParameters
-
-  const { velocity: mouseVelocity, setVelocity, trapTriggered, setTrapTriggered } = useMouseVelocity({ accelerationTrapThreshold: 0.1 })
-
+export default function Scene({ mouseVelocity, setVelocity, trapTriggered, setTrapTriggered }) {
   return (
     <>
       <Rotate callback={rotationCallback}>
         <UnitCube />
 
-        <WienerProcess parameters={{ mouseVelocity, ...wienerProcessParameters }} />
+        <RandomWalk parameters={{ mouseVelocity, ...randomWalkParameters }} />
       </Rotate>
 
       <EffectComposer smaa>

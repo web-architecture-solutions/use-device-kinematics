@@ -4,7 +4,7 @@ import { useFrame } from '@react-three/fiber'
 
 import { useGeometryBuffer } from './hooks'
 
-export default function WienerProcess({ parameters }) {
+export default function RandomWalk({ parameters }) {
   const lineRef = useRef()
   const geometryBuffer = useGeometryBuffer(lineRef, parameters)
 
