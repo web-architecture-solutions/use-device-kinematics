@@ -1,5 +1,3 @@
-import { useState } from 'react'
-
 import { Canvas } from '@react-three/fiber'
 
 import Container from '../Container'
@@ -13,8 +11,6 @@ import { useRadialMousePosition } from './hooks'
 import styles from './style.module.css'
 
 export default function App() {
-  const [hueRotation, setHueRotation] = useState(0)
-
   const { theta } = useRadialMousePosition()
 
   return (
@@ -23,7 +19,7 @@ export default function App() {
         <Frame>
           <div className={styles.canvasContainer} style={{ filter: `hue-rotate(${theta}deg)` }}>
             <Canvas camera={camera} className={styles.Canvas}>
-              <Scene setHueRotation={setHueRotation} />
+              <Scene />
             </Canvas>
           </div>
         </Frame>

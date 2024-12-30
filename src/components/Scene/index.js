@@ -16,9 +16,7 @@ import { rotationCallback, wienerProcessParameters, glitchParameters } from './c
 
 import { useMouseVelocity } from './hooks'
 
-export default function Scene({ setHueRotation }) {
-  useFrame(() => setHueRotation((currentHueRotation) => (currentHueRotation + 1) % 360))
-
+export default function Scene() {
   const { delay, randomizeDelay, duration, intensity, randomizeDuration, pixelizationGranularity, randomizePixelizationGranularity } =
     glitchParameters
 
