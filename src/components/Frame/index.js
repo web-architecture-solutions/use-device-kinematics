@@ -8,6 +8,9 @@ export default function Frame({ children }) {
   return (
     <div className={styles.Frame} style={{ filter: `hue-rotate(${theta}deg)` }}>
       {children}
+
+      <div className={styles.mask}></div>
+      <div className={styles.border}></div>
     </div>
   )
 }

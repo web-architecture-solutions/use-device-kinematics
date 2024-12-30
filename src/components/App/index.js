@@ -16,8 +16,6 @@ export default function App() {
           <Canvas camera={camera} className={styles.Canvas}>
             <Scene />
           </Canvas>
-          <div className={styles.mask}></div>
-          <div className={styles.border}></div>
         </Frame>
       </Container>
     </div>
