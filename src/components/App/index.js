@@ -13,10 +13,11 @@ export default function App() {
     <div className={styles.App}>
       <Container>
         <Frame>
-          <div className={styles.mask}></div>
           <Canvas camera={camera} className={styles.Canvas}>
             <Scene />
           </Canvas>
+          <div className={styles.mask}></div>
+          <div className={styles.border}></div>
         </Frame>
       </Container>
     </div>

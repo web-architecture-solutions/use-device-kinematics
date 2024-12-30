@@ -26,3 +26,15 @@
   -webkit-mask-size: 100% 100%;
   -webkit-mask-repeat: no-repeat;
 }
+
+.border {
+  border: solid 1px #5c5c5c;
+
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+
+  z-index: 1;
+}
