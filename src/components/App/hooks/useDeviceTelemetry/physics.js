@@ -12,11 +12,11 @@ export function calculateDisplacement(coord1, coord2) {
   const deltaLat = ((coord2.latitude - coord1.latitude) * Math.PI) / 180
   const deltaLon = ((coord2.longitude - coord1.longitude) * Math.PI) / 180
 
-  const a = Math.sin(deltaLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLon / 2) ** 2
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-
+  // Calculate displacement in latitude (meters)
   const deltaLatMeters = deltaLat * R
-  const deltaLonMeters = deltaLon * R
+
+  // Calculate displacement in longitude (meters)
+  const deltaLonMeters = deltaLon * R * Math.cos((lat1 + lat2) / 2)
 
   return {
     deltaLat: deltaLatMeters,
