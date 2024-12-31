@@ -5,18 +5,29 @@
  * @param {Object} coord2 - The second geolocation coordinate.
  * @returns {{deltaLat: number, deltaLon: number}} Signed displacement in latitude and longitude (in meters).
  */
+
 export function calculateDisplacement(coord1, coord2) {
-  const R = 6371e3 // Earth's radius in meters
-  const lat1 = (coord1.latitude * Math.PI) / 180
-  const lat2 = (coord2.latitude * Math.PI) / 180
-  const deltaLat = ((coord2.latitude - coord1.latitude) * Math.PI) / 180
-  const deltaLon = ((coord2.longitude - coord1.longitude) * Math.PI) / 180
+  const R = 6371e3
+  const latDiff = coord2.latitude - coord1.latitude
+  const lonDiff = coord2.longitude - coord1.longitude
 
-  // Calculate displacement in latitude (meters)
-  const deltaLatMeters = deltaLat * R
+  // Amplification based on 4 decimal places
+  const AMPLIFICATION_FACTOR = 10000 // Amplify by 10^4
 
-  // Calculate displacement in longitude (meters)
-  const deltaLonMeters = deltaLon * R * Math.cos((lat1 + lat2) / 2)
+  const amplifiedLatDiff = latDiff * AMPLIFICATION_FACTOR
+  const amplifiedLonDiff = lonDiff * AMPLIFICATION_FACTOR
+
+  // Convert amplified differences to radians
+  const deltaLatRad = (amplifiedLatDiff * Math.PI) / 180
+  const deltaLonRad = (amplifiedLonDiff * Math.PI) / 180
+
+  //Clamp the amplified values to prevent excessive jumps
+  const MAX_AMPLIFIED_DELTA = 10 // Adjust as needed
+  const deltaLatMeters = Math.max(-MAX_AMPLIFIED_DELTA, Math.min(MAX_AMPLIFIED_DELTA, deltaLatRad * R))
+  const deltaLonMeters = Math.max(
+    -MAX_AMPLIFIED_DELTA,
+    Math.min(MAX_AMPLIFIED_DELTA, deltaLonRad * R * Math.cos(((coord1.latitude * Math.PI) / 180 + (coord2.latitude * Math.PI) / 180) / 2))
+  )
 
   return {
     deltaLat: deltaLatMeters,

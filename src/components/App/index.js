@@ -1,8 +1,6 @@
 import useGeolocation from './hooks/useDeviceTelemetry/hooks/useGeolocation'
 
-export default function App() {
-  const { data, errors } = useGeolocation({ enableHighAccuracy: true })
-
+function Foo({ data, errors }) {
   return (
     <div>
       <h1>Geolocation</h1>
@@ -35,7 +33,7 @@ export default function App() {
             {Object.entries(data).map(([key, value]) => (
               <tr>
                 <td>{key}</td>
-                <td>{value}</td>
+                <td>{JSON.stringify(value)}</td>
               </tr>
             ))}
           </tbody>
@@ -43,4 +41,10 @@ export default function App() {
       ) : null}
     </div>
   )
+}
+
+export default function App() {
+  const { data, errors } = useGeolocation({ enableHighAccuracy: true })
+
+  return <Foo data={data} errors={errors} />
 }

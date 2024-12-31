@@ -1,7 +1,7 @@
-import { useRef } from 'react'
-
 import useDeviceAPI from './useDeviceAPI'
+
 import { calculateComponentVelocity, calculateDisplacement, calculateTotalVelocity } from '../physics'
+import { useState } from 'react'
 
 const isFeaturePresent = typeof navigator !== 'undefined' && navigator.geolocation
 const featureDetectionError = { type: 'geolocation', message: 'Geolocation is not supported by this browser.' }
@@ -16,51 +16,43 @@ const featureDetectionError = { type: 'geolocation', message: 'Geolocation is no
  * @returns {Object} Geolocation data and errors.
  */
 export default function useGeolocation({ enableHighAccuracy = false, timeout = Infinity, maximumAge = 0, debounce = 0 } = {}) {
-  const previousCoords = useRef(null)
+  const [previousCoords, setPreviousCoords] = useState({})
+  const [currentCoords, setCurrentCoords] = useState({})
 
   function update(setData) {
     return ({ coords, timestamp }) => {
-      if (!coords) return
+      setPreviousCoords(currentCoords)
 
-      const currentCoords = { ...coords, timestamp }
-
-      if (!previousCoords.current) {
-        previousCoords.current = currentCoords
-        return setData({
-          latitude: coords.latitude ?? 0,
-          longitude: coords.longitude ?? 0,
-          accuracy: coords.accuracy ?? 0,
-          altitude: coords.altitude ?? null,
-          altitudeAccuracy: coords.altitudeAccuracy ?? null,
-          heading: coords.heading ?? null,
-          velocity: coords.speed,
-          latitudinalVelocity: null,
-          longitudinalVelocity: null,
-          deltaLat: null,
-          deltaLon: null,
-          timestamp
-        })
+      const newCoords = {
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        accuracy: coords.accuracy,
+        altitude: coords.altitude,
+        altitudeAccuracy: coords.altitudeAccuracy,
+        heading: coords.heading,
+        timestamp
       }
 
-      const timeDiff = (timestamp - previousCoords.current.timestamp) / 1000
-      const { deltaLat, deltaLon } = calculateDisplacement(previousCoords.current, currentCoords)
-      const { latitudinalVelocity, longitudinalVelocity } = calculateComponentVelocity(deltaLat, deltaLon, timeDiff)
-      const velocity = calculateTotalVelocity(latitudinalVelocity, longitudinalVelocity)
+      setCurrentCoords(newCoords)
 
-      previousCoords.current = currentCoords
+      //const timeDiff = (timestamp - previousCoords.timestamp) / 1000
+      //const { deltaLat, deltaLon } = calculateDisplacement(currentCoords, previousCoords)
+      //const { latitudinalVelocity, longitudinalVelocity } = calculateComponentVelocity(deltaLat, deltaLon, timeDiff)
+      //const totalVelocity = calculateTotalVelocity(latitudinalVelocity, longitudinalVelocity)
+      //const velocity = coords.speed ?? totalVelocity
 
       setData({
-        latitude: coords.latitude ?? 0,
-        longitude: coords.longitude ?? 0,
-        accuracy: coords.accuracy ?? 0,
-        altitude: coords.altitude ?? null,
-        altitudeAccuracy: coords.altitudeAccuracy ?? null,
-        heading: coords.heading ?? null,
-        velocity,
-        latitudinalVelocity,
-        longitudinalVelocity,
-        deltaLat,
-        deltaLon,
+        currentCoords,
+        previousCoords,
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        accuracy: coords.accuracy,
+        altitude: coords.altitude,
+        altitudeAccuracy: coords.altitudeAccuracy,
+        //deltaLat,
+        //deltaLon,
+        heading: coords.heading,
+        //velocity,
         timestamp
       })
     }
