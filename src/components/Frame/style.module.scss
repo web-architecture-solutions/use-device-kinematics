@@ -1,12 +1,26 @@
-$maskWidth: 0rem;
-$borderWidth: 0px;
+$maskWidth: 2rem;
+$borderWidth: 1px;
+
+$backgroundColor: rgb(255, 255, 255, 1);
 
 .Frame {
+  background-color: black;
+
   position: relative;
 }
 
 .mask {
-  backdrop-filter: blur(4px);
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+
+  color: white; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden; 
 
   mask-image: linear-gradient(to bottom, black $maskWidth, transparent $maskWidth), linear-gradient(to top, black $maskWidth, transparent $maskWidth),
     linear-gradient(to right, black $maskWidth, transparent $maskWidth), linear-gradient(to left, black $maskWidth, transparent $maskWidth);
@@ -18,15 +32,26 @@ $borderWidth: 0px;
   -webkit-mask-size: 100% 100%;
   -webkit-mask-repeat: no-repeat;
 
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
+  backdrop-filter: #{'invert()'};
+}
 
-  pointer-events: none;
-
-  z-index: 1;
+.mask::before {
+  content: '';
+  
+  width: 100%;
+  height: 100%;
+  pointer-events: none; 
+  
+  background: 
+    linear-gradient(to top, rgba(0, 0, 0, 0), $backgroundColor $maskWidth),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0), $backgroundColor $maskWidth),
+    linear-gradient(to left, rgba(0, 0, 0, 0), $backgroundColor $maskWidth),
+    linear-gradient(to right, rgba(0, 0, 0, 0), $backgroundColor $maskWidth);
+  
+  background-repeat: no-repeat;
+  background-size: 100% $maskWidth, 100% $maskWidth, $maskWidth 100%, $maskWidth 100%;
+  background-position: top, bottom, left, right;
+  mix-blend-mode: multiply; 
 }
 
 .border {
