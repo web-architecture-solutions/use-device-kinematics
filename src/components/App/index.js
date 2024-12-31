@@ -1,46 +1,65 @@
-import useGeolocation from './hooks/useDeviceTelemetry/hooks/useGeolocation'
+import { Canvas } from '@react-three/fiber'
+
+import { useMouseVelocity } from './hooks'
+
+import { EffectComposer, SSAO, Bloom, Noise } from '@react-three/postprocessing'
+
+import { BlendFunction } from 'postprocessing'
+
+import Rotate from '../Rotate'
+import UnitCube from '../UnitCube'
+import WienerProcess from '../WienerProcess'
+import GlitchComposer from '../GlitchComposer'
+import PixelationGlitch from '../PixelationGlitch'
+import CameraGlitch from '../CameraGlitch'
+import ChromaticAberrationGlitch from '../ChromaticAberrationGlitch'
+
+import styles from './style.module.css'
+
+import { camera, rotationCallback, wienerProcessParameters, glitchParameters } from './constants'
 
 export default function App() {
-  const { data, errors } = useGeolocation({ enableHighAccuracy: true })
+  const { delay, randomizeDelay, duration, intensity, randomizeDuration, pixelizationGranularity, randomizePixelizationGranularity } =
+    glitchParameters
+
+  const { velocity: mouseVelocity, setVelocity, trapTriggered, setTrapTriggered } = useMouseVelocity({ accelerationTrapThreshold: 0.1 })
 
   return (
-    <div>
-      <h1>Geolocation</h1>
+    <div className={styles.App}>
+      <Canvas camera={camera} className={styles.Canvas}>
+        <Rotate callback={rotationCallback}>
+          <UnitCube />
 
-      {errors && Object.keys(errors).length > 0 ? (
-        <table>
-          <thead>
-            <tr>
-              <th>Errors</th>
-            </tr>
-          </thead>
+          <WienerProcess parameters={{ mouseVelocity, ...wienerProcessParameters }} />
+        </Rotate>
 
-          <tbody>
-            {Object.entries(errors).map(([_, message]) => (
-              <tr>
-                <td>{message}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : data && Object.keys(data).length > 0 ? (
-        <table>
-          <thead>
-            <tr>
-              <th>Data</th>
-            </tr>
-          </thead>
+        <EffectComposer smaa>
+          <GlitchComposer
+            isGlitched={trapTriggered}
+            delay={delay}
+            randomizeDelay={randomizeDelay}
+            duration={duration}
+            randomizeDuration={randomizeDuration}
+            setTrapTriggered={setTrapTriggered}
+            setVelocity={setVelocity}>
+            <CameraGlitch intensity={intensity} />
 
-          <tbody>
-            {Object.entries(data).map(([key, value]) => (
-              <tr>
-                <td>{key}</td>
-                <td>{value}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : null}
+            <ChromaticAberrationGlitch offset={[0, 0]} intensity={intensity} />
+
+            <PixelationGlitch
+              granularity={pixelizationGranularity}
+              randomizeGranularity={randomizePixelizationGranularity}
+              intensity={intensity}
+            />
+          </GlitchComposer>
+
+          <Noise blendFunction={BlendFunction.SOFT_LIGHT} />
+
+          <Bloom intensity={2} luminanceThreshold={0.0} luminanceSmoothing={1} mipmapBlur={true} />
+
+          <SSAO />
+        </EffectComposer>
+      </Canvas>
     </div>
   )
 }
