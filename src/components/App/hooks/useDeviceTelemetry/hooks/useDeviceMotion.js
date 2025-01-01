@@ -4,14 +4,16 @@ const isFeaturePresent = typeof window !== 'undefined' && window.DeviceMotionEve
 const featureDetectionError = { type: 'deviceMotion', message: 'DeviceMotionEvent is not supported by this browser.' }
 
 export default function useDeviceMotion({ debounce = 0 } = {}) {
-  const listener = (setData) => (event) => {
-    setData({
-      acceleration: event.acceleration,
-      accelerationIncludingGravity: event.accelerationIncludingGravity,
-      rotationRate: event.rotationRate,
-      interval: event.interval
-    })
-  }
+  const listener =
+    (setData) =>
+    ({ acceleration, accelerationIncludingGravity, rotationRate, interval }) => {
+      setData({
+        acceleration,
+        accelerationIncludingGravity,
+        rotationRate,
+        interval
+      })
+    }
 
   const handler = (listener, _, setIsListening) => {
     window.addEventListener('devicemotion', listener)

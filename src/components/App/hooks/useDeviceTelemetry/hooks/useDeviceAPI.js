@@ -42,7 +42,7 @@ export default function useDeviceAPI({
   useEffect(() => {
     if (!isFeaturePresent) {
       errors.add(type, message)
-      return
+      return null
     }
     if (permissionGranted) {
       const debouncedListener = debounce > 0 ? useDebouncedCallback(cachedListener, debounce) : cachedListener
