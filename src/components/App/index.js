@@ -1,50 +1,23 @@
-import useGeolocation from './hooks/useDeviceTelemetry/hooks/useGeolocation'
-
-function Foo({ data, errors }) {
-  return (
-    <div>
-      <h1>Geolocation</h1>
-
-      {errors && Object.keys(errors).length > 0 ? (
-        <table>
-          <thead>
-            <tr>
-              <th>Errors</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {Object.entries(errors).map(([_, message]) => (
-              <tr>
-                <td>{message}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : data && Object.keys(data).length > 0 ? (
-        <table>
-          <thead>
-            <tr>
-              <th>Data</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {Object.entries(data).map(([key, value]) => (
-              <tr>
-                <td>{key}</td>
-                <td>{JSON.stringify(value)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : null}
-    </div>
-  )
-}
+import useDeviceMotion from './hooks/useDeviceTelemetry/hooks/useDeviceMotion'
 
 export default function App() {
-  const { data, errors } = useGeolocation({ enableHighAccuracy: true })
+  const { data, errors, isListening, startListening } = useDeviceMotion()
 
-  return <Foo data={data} errors={errors} />
+  return (
+    <div>
+      <h1>Device Motion Data</h1>
+
+      {errors && errors.length > 0 ? (
+        Object.entries(errors).map(({ message }) => <p>Error: {message}</p>)
+      ) : data ? (
+        <pre>{JSON.stringify(data, null, 2)}</pre>
+      ) : (
+        <p>{isListening ? 'Listening for motion data...' : 'Click the button to start.'}</p>
+      )}
+
+      <button onClick={startListening} disabled={isListening}>
+        {isListening ? 'Listening...' : 'Start Listening'}
+      </button>
+    </div>
+  )
 }
