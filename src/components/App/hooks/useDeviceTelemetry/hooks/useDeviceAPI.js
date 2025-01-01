@@ -13,7 +13,7 @@ export default function useDeviceAPI({
   requestPermission = null
 }) {
   const [data, setData] = useState(null)
-  const [permissionGranted, setPermissionGranted] = useState(false)
+  const [permissionGranted, setPermissionGranted] = useState(requestPermission ? false : true)
   const [isListening, setIsListening] = useState(null)
 
   const errors = useErrorHandling()
@@ -34,7 +34,7 @@ export default function useDeviceAPI({
             errors.add('devicemotion', message)
           }
         } else {
-          setPermissionGranted(true)
+          throw new Error('requestPermission must be a function')
         }
       }, [requestPermission, errors])
     : null

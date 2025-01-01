@@ -1,7 +1,7 @@
-import useDeviceMotion from './hooks/useDeviceTelemetry/hooks/useDeviceMotion'
+import useGeolocation from './hooks/useDeviceTelemetry/hooks/useGeolocation'
 
 export default function App() {
-  const { data, errors, isListening, startListening } = useDeviceMotion()
+  const { data, errors } = useGeolocation()
 
   return (
     <div>
@@ -11,13 +11,7 @@ export default function App() {
         Object.entries(errors).map(([_, message]) => <p>Error: {message}</p>)
       ) : data ? (
         <pre>{JSON.stringify(data, null, 2)}</pre>
-      ) : (
-        <p>{isListening ? 'Listening for data...' : 'Click the button to start.'}</p>
-      )}
-
-      <button onClick={startListening} disabled={isListening}>
-        {isListening ? 'Listening...' : 'Start Listening'}
-      </button>
+      ) : null}
     </div>
   )
 }
