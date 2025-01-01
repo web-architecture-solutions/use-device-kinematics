@@ -22,8 +22,25 @@ export default function useSensorData(config = {}) {
     motion.startListening()
     orientation.startListening()
   }
+
   return {
-    data: { ...motion.data, ...orientation.data, ...geolocation.data },
+    data: {
+      linearAcceleration: motion.data?.acceleration,
+      linearAccelerationIncludingGravity: motion.data?.accelerationIncludingGravity,
+      angularAcceleration: motion.data?.rotationRate,
+      accelerationInterval: motion.data?.interval,
+      yaw: orientation.data?.alpha,
+      pitch: orientation.data?.beta,
+      roll: orientation.data?.gamma,
+      latitude: geolocation.data?.latitude,
+      longitude: geolocation.data?.longitude,
+      geolocationAccuracy: geolocation.data?.accuracy,
+      altitude: geolocation.data?.altitude,
+      geolocationAltiduteAccuracy: geolocation.data?.altitudeAccuracy,
+      heading: geolocation.data?.heading,
+      speed: geolocation.data?.speed,
+      timestamp: geolocation.data?.timestamp
+    },
     errors,
     isListening,
     startListening
