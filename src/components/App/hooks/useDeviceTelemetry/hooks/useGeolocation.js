@@ -13,8 +13,9 @@ const featureDetectionError = { type: 'geolocation', message: 'Geolocation is no
  * @returns {Object} Geolocation data and errors.
  */
 export default function useGeolocation({ enableHighAccuracy = false, timeout = Infinity, maximumAge = 0, debounce = 0 } = {}) {
-  function listener(setData) {
-    return ({ coords, timestamp }) => {
+  const listener =
+    (setData) =>
+    ({ coords, timestamp }) =>
       setData({
         latitude: coords.latitude,
         longitude: coords.longitude,
@@ -25,10 +26,8 @@ export default function useGeolocation({ enableHighAccuracy = false, timeout = I
         speed: coords.speed,
         timestamp
       })
-    }
-  }
 
-  function handler(listener, errors) {
+  function handler(listener, _, errors) {
     const handleError = ({ message }) => errors.add('geolocation', message)
 
     const watcherId = navigator.geolocation.watchPosition(listener, handleError, {

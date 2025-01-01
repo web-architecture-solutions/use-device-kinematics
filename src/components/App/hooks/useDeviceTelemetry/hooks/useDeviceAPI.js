@@ -28,7 +28,7 @@ export default function useDeviceAPI({
             if (permission === 'granted') {
               setPermissionGranted(true)
             } else {
-              errors.add('devicemotion', 'User denied permission to access API')
+              errors.add('devicemotion', 'User denied permission to access the API.')
             }
           } catch ({ message }) {
             errors.add('devicemotion', message)
@@ -42,14 +42,14 @@ export default function useDeviceAPI({
   useEffect(() => {
     if (!isFeaturePresent) {
       errors.add(type, message)
-      return null
+      return
     }
     if (permissionGranted) {
       const debouncedListener = debounce > 0 ? useDebouncedCallback(cachedListener, debounce) : cachedListener
-      const cleanup = handler(debouncedListener, errors, setIsListening)
-      return cleanup && typeof cleanup === 'function' ? () => cleanup() : null
+      const cleanup = handler(debouncedListener, setIsListening, errors)
+      return () => (cleanup && typeof cleanup === 'function' ? cleanup : null)
     }
   }, [listener, handler, cachedListener, debounce, errors, permissionGranted, enableHighAccuracy, timeout, maximumAge])
 
-  return { data, errors, startListening, permissionGranted, isListening }
+  return { data, errors, startListening, isListening }
 }

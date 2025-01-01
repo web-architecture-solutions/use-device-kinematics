@@ -1,18 +1,18 @@
-import useDeviceOrientation from './hooks/useDeviceTelemetry/hooks/useDeviceOrientation'
+import useDeviceMotion from './hooks/useDeviceTelemetry/hooks/useDeviceMotion'
 
 export default function App() {
-  const { data, errors, isListening, startListening } = useDeviceOrientation()
+  const { data, errors, isListening, startListening } = useDeviceMotion()
 
   return (
     <div>
-      <h1>Device Orientation Data</h1>
+      <h1>Sensor Data</h1>
 
       {errors && errors.length > 0 ? (
-        Object.entries(errors).map(({ message }) => <p>Error: {message}</p>)
+        Object.entries(errors).map(([_, message]) => <p>Error: {message}</p>)
       ) : data ? (
         <pre>{JSON.stringify(data, null, 2)}</pre>
       ) : (
-        <p>{isListening ? 'Listening for orientation data...' : 'Click the button to start.'}</p>
+        <p>{isListening ? 'Listening for data...' : 'Click the button to start.'}</p>
       )}
 
       <button onClick={startListening} disabled={isListening}>
