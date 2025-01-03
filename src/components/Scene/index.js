@@ -24,7 +24,7 @@ export default function Scene() {
         <RandomWalk parameters={{ ...randomWalkParameters }} />
       </Rotate>
 
-      <EffectComposer smaa>
+      <EffectComposer>
         <GlitchComposer delay={delay} randomizeDelay={randomizeDelay} duration={duration} randomizeDuration={randomizeDuration}>
           <CameraGlitch intensity={intensity} />
 
@@ -40,8 +40,6 @@ export default function Scene() {
         <Noise blendFunction={BlendFunction.SOFT_LIGHT} />
 
         <Bloom intensity={2} luminanceThreshold={0.0} luminanceSmoothing={1} mipmapBlur={true} />
-
-        <SSAO />
       </EffectComposer>
     </>
   )
