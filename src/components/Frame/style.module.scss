@@ -66,14 +66,28 @@ $backgroundColor: rgb(255, 255, 255, 1);
   z-index: 1;
 }
 
-@media (orientation: landscape) {
+@media (orientation: landscape) and (max-width: 767px) {
+  .Frame {
+    height: 100vh;
+    width: 100vh;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 767px) {
+  .Frame {
+    height: 100vw;
+    width: 100vw;
+  }
+}
+
+@media (orientation: landscape) and (min-width: 768px) {
   .Frame {
     height: 62vh;
     width: 62vh;
   }
 }
 
-@media (orientation: portrait) {
+@media (orientation: portrait) and (min-width: 768px) {
   .Frame {
     height: 62vw;
     width: 62vw;
