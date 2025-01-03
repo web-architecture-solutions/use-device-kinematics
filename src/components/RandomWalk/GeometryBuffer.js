@@ -2,8 +2,6 @@ import * as THREE from 'three'
 
 import Point from './Point'
 
-import Random from '../../lib/Random'
-
 export default class GeometryBuffer {
   constructor(lineRef, parameters) {
     this.lineRef = lineRef
@@ -47,7 +45,7 @@ export default class GeometryBuffer {
   }
 
   randomStep(coord) {
-    const randomStep = 2 * (Math.random() - 0.5) * this.parameters.stepSize * this.parameters.mouseVelocity
+    const randomStep = 2 * (Math.random() - 0.5) * this.parameters.stepSize
     return coord + randomStep
   }
 

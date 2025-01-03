@@ -15,24 +15,17 @@ import { rotationCallback, randomWalkParameters, glitchParameters } from './cons
 const { delay, randomizeDelay, duration, intensity, randomizeDuration, pixelizationGranularity, randomizePixelizationGranularity } =
   glitchParameters
 
-export default function Scene({ mouseVelocity, setVelocity, trapTriggered, setTrapTriggered }) {
+export default function Scene() {
   return (
     <>
       <Rotate callback={rotationCallback}>
         <UnitCube />
 
-        <RandomWalk parameters={{ mouseVelocity, ...randomWalkParameters }} />
+        <RandomWalk parameters={{ ...randomWalkParameters }} />
       </Rotate>
 
       <EffectComposer smaa>
-        <GlitchComposer
-          isGlitched={trapTriggered}
-          delay={delay}
-          randomizeDelay={randomizeDelay}
-          duration={duration}
-          randomizeDuration={randomizeDuration}
-          setTrapTriggered={setTrapTriggered}
-          setVelocity={setVelocity}>
+        <GlitchComposer delay={delay} randomizeDelay={randomizeDelay} duration={duration} randomizeDuration={randomizeDuration}>
           <CameraGlitch intensity={intensity} />
 
           <ChromaticAberrationGlitch offset={[0, 0]} intensity={intensity} />
