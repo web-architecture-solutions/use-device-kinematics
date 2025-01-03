@@ -6,7 +6,6 @@ export default function Frame({ children }) {
       {children}
 
       <div className={styles.mask}></div>
-      <div className={styles.border}></div>
     </div>
   )
 }

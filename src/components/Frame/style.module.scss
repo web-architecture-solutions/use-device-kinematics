@@ -1,10 +1,10 @@
 $maskWidth: 2rem;
-$borderWidth: 1px;
 
 $backgroundColor: rgb(255, 255, 255, 1);
+$frameColor: black;
 
 .Frame {
-  background-color: black;
+  background-color: $frameColor;
 
   position: relative;
 }
@@ -22,13 +22,13 @@ $backgroundColor: rgb(255, 255, 255, 1);
   justify-content: center;
   overflow: hidden; 
 
-  mask-image: linear-gradient(to bottom, black $maskWidth, transparent $maskWidth), linear-gradient(to top, black $maskWidth, transparent $maskWidth),
-    linear-gradient(to right, black $maskWidth, transparent $maskWidth), linear-gradient(to left, black $maskWidth, transparent $maskWidth);
+  mask-image: linear-gradient(to bottom, $frameColor $maskWidth, transparent $maskWidth), linear-gradient(to top, $frameColor $maskWidth, transparent $maskWidth),
+    linear-gradient(to right, $frameColor $maskWidth, transparent $maskWidth), linear-gradient(to left, $frameColor $maskWidth, transparent $maskWidth);
   mask-size: 100% 100%;
   mask-repeat: no-repeat;
 
-  -webkit-mask-image: linear-gradient(to bottom, black $maskWidth, transparent $maskWidth), linear-gradient(to top, black $maskWidth, transparent $maskWidth),
-    linear-gradient(to right, black $maskWidth, transparent $maskWidth), linear-gradient(to left, black $maskWidth, transparent $maskWidth);
+  -webkit-mask-image: linear-gradient(to bottom, $frameColor $maskWidth, transparent $maskWidth), linear-gradient(to top, $frameColor $maskWidth, transparent $maskWidth),
+    linear-gradient(to right, $frameColor $maskWidth, transparent $maskWidth), linear-gradient(to left, $frameColor $maskWidth, transparent $maskWidth);
   -webkit-mask-size: 100% 100%;
   -webkit-mask-repeat: no-repeat;
 
@@ -52,18 +52,6 @@ $backgroundColor: rgb(255, 255, 255, 1);
   background-size: 100% $maskWidth, 100% $maskWidth, $maskWidth 100%, $maskWidth 100%;
   background-position: top, bottom, left, right;
   mix-blend-mode: multiply; 
-}
-
-.border {
-  border: solid $borderWidth #5c5c5c;
-
-  position: absolute;
-  top: $maskWidth;
-  right: $maskWidth;
-  bottom: $maskWidth;
-  left: $maskWidth;
-
-  z-index: 1;
 }
 
 @media (orientation: landscape) and (max-width: 767px) {
