@@ -45,7 +45,7 @@ export default class GeometryBuffer {
   }
 
   randomStep(coord) {
-    const randomStep = 2 * (Math.random() - 0.5) * this.parameters.stepSize * this.parameters.mouseVelocity
+    const randomStep = 2 * (Math.random() - 0.5) * this.parameters.stepSize
     return coord + randomStep
   }
 
