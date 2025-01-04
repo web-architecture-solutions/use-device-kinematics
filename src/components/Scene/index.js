@@ -1,4 +1,4 @@
-import { EffectComposer, SSAO, Bloom, Noise } from '@react-three/postprocessing'
+import { EffectComposer, Bloom, Noise } from '@react-three/postprocessing'
 
 import { BlendFunction } from 'postprocessing'
 
@@ -15,7 +15,7 @@ import { rotationCallback, randomWalkParameters, glitchParameters } from './cons
 const { delay, randomizeDelay, duration, intensity, randomizeDuration, pixelizationGranularity, randomizePixelizationGranularity } =
   glitchParameters
 
-export default function Scene({ mouseVelocity, setVelocity, trapTriggered, setTrapTriggered }) {
+export default function Scene({ mouseVelocity, trapTriggered, setTrapTriggered }) {
   return (
     <>
       <Rotate callback={rotationCallback}>
@@ -24,15 +24,14 @@ export default function Scene({ mouseVelocity, setVelocity, trapTriggered, setTr
         <RandomWalk parameters={{ mouseVelocity, ...randomWalkParameters }} />
       </Rotate>
 
-      <EffectComposer smaa>
+      <EffectComposer>
         <GlitchComposer
           isGlitched={trapTriggered}
           delay={delay}
           randomizeDelay={randomizeDelay}
           duration={duration}
           randomizeDuration={randomizeDuration}
-          setTrapTriggered={setTrapTriggered}
-          setVelocity={setVelocity}>
+          setTrapTriggered={setTrapTriggered}>
           <CameraGlitch intensity={intensity} />
 
           <ChromaticAberrationGlitch offset={[0, 0]} intensity={intensity} />
@@ -47,8 +46,6 @@ export default function Scene({ mouseVelocity, setVelocity, trapTriggered, setTr
         <Noise blendFunction={BlendFunction.SOFT_LIGHT} />
 
         <Bloom intensity={2} luminanceThreshold={0.0} luminanceSmoothing={1} mipmapBlur={true} />
-
-        <SSAO />
       </EffectComposer>
     </>
   )

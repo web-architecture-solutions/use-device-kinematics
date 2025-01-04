@@ -10,7 +10,7 @@ export function useMouseVelocity({ accelerationTrapThreshold = 0.01 }) {
 
   useEffect(() => {
     const handleMouseMove = (event) => {
-      const now = Date.now()
+      const now = performance.now()
       const deltaTime = now - lastTimestamp.current
 
       if (deltaTime > 0) {
@@ -39,7 +39,7 @@ export function useMouseVelocity({ accelerationTrapThreshold = 0.01 }) {
     return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [accelerationTrapThreshold])
 
-  return { velocity, setVelocity, acceleration, trapTriggered, setTrapTriggered }
+  return { velocity, acceleration, trapTriggered, setTrapTriggered }
 }
 
 export function useRadialMousePosition() {

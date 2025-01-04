@@ -8,15 +8,12 @@ export default function GlitchComposer({
   disabled = false,
   randomizeDuration = false,
   isGlitched = false,
-  setTrapTriggered,
-  setVelocity
+  setTrapTriggered
 }) {
   const durationRef = useRef(initialDuration)
 
   useFrame(() => {
     if (disabled) return
-    setVelocity(0)
-
     if (durationRef.current > 0) {
       durationRef.current -= 1
     } else {

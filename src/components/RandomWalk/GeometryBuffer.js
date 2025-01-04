@@ -2,8 +2,6 @@ import * as THREE from 'three'
 
 import Point from './Point'
 
-import Random from '../../lib/Random'
-
 export default class GeometryBuffer {
   constructor(lineRef, parameters) {
     this.lineRef = lineRef

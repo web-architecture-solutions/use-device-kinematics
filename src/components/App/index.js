@@ -13,20 +13,14 @@ import styles from './style.module.css'
 export default function App() {
   const { theta } = useRadialMousePosition()
 
-  const { velocity: mouseVelocity, setVelocity, trapTriggered, setTrapTriggered } = useMouseVelocity({ accelerationTrapThreshold: 0.1 })
+  const { velocity: mouseVelocity, trapTriggered, setTrapTriggered } = useMouseVelocity({ accelerationTrapThreshold: 0.1 })
 
   return (
     <div className={styles.App}>
       <Container>
         <Frame>
           <Canvas camera={camera} className={styles.Canvas} style={{ filter: `hue-rotate(${theta}deg)` }}>
-            <Scene
-              mouseVelocity={mouseVelocity}
-              setVelocity={setVelocity}
-              trapTriggered={trapTriggered}
-              setTrapTriggered={setTrapTriggered}
-              theta={theta}
-            />
+            <Scene mouseVelocity={mouseVelocity} trapTriggered={trapTriggered} setTrapTriggered={setTrapTriggered} theta={theta} />
           </Canvas>
         </Frame>
       </Container>
