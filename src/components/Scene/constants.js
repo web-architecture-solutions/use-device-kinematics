@@ -7,7 +7,7 @@ export const randomWalkParameters = {
 
 export const glitchParameters = {
   duration: 30,
-  intensity: 0.5,
+  intensity: 1,
   randomizeDuration: false,
   pixelizationGranularity: 200,
   randomizePixelizationGranularity: true
