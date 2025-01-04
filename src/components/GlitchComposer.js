@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { GlitchContext } from '../../context'
+import { GlitchContext } from '../context'
 
 export default function GlitchComposer({
   children,
