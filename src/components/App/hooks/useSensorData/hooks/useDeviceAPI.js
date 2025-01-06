@@ -10,7 +10,8 @@ export default function useDeviceAPI({
   listener,
   handler,
   options: { debounce = 0, enableHighAccuracy, timeout, maximumAge } = {},
-  requestPermission = null
+  requestPermission = null,
+  thunkCleanup = false
 }) {
   const [data, setData] = useState(null)
   const [permissionGranted, setPermissionGranted] = useState(requestPermission ? false : true)
@@ -47,7 +48,10 @@ export default function useDeviceAPI({
     if (permissionGranted) {
       const debouncedListener = debounce > 0 ? useDebouncedCallback(cachedListener, debounce) : cachedListener
       const cleanup = handler(debouncedListener, setIsListening, errors)
-      return cleanup && typeof cleanup === 'function' ? cleanup : () => null
+      if (cleanup && typeof cleanup === 'function') {
+        return thunkCleanup ? () => cleanup : cleanup
+      }
+      return () => null
     }
   }, [listener, handler, cachedListener, debounce, errors, permissionGranted, enableHighAccuracy, timeout, maximumAge])
 

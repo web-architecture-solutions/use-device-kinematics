@@ -3,6 +3,20 @@ import useDeviceAPI from './useDeviceAPI'
 const isFeaturePresent = typeof navigator !== 'undefined' && navigator.geolocation
 const featureDetectionError = { type: 'geolocation', message: 'Geolocation is not supported by this browser.' }
 
+const listener =
+  (setData) =>
+  ({ coords, timestamp }) =>
+    setData({
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+      accuracy: coords.accuracy,
+      altitude: coords.altitude,
+      altitudeAccuracy: coords.altitudeAccuracy,
+      heading: coords.heading,
+      speed: coords.speed,
+      timestamp
+    })
+
 /**
  * Custom hook to capture geolocation data with optional configuration.
  * @param {Object} config - Configuration options for the hook.
@@ -13,20 +27,6 @@ const featureDetectionError = { type: 'geolocation', message: 'Geolocation is no
  * @returns {Object} Geolocation data and errors.
  */
 export default function useGeolocation({ enableHighAccuracy = false, timeout = Infinity, maximumAge = 0, debounce = 0 } = {}) {
-  const listener =
-    (setData) =>
-    ({ coords, timestamp }) =>
-      setData({
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-        accuracy: coords.accuracy,
-        altitude: coords.altitude,
-        altitudeAccuracy: coords.altitudeAccuracy,
-        heading: coords.heading,
-        speed: coords.speed,
-        timestamp
-      })
-
   function handler(listener, _, errors) {
     const handleError = ({ message }) => errors.add('geolocation', message)
 
@@ -44,6 +44,7 @@ export default function useGeolocation({ enableHighAccuracy = false, timeout = I
     isFeaturePresent,
     featureDetectionError,
     options: { enableHighAccuracy, timeout, maximumAge, debounce },
-    handler
+    handler,
+    thunkCleanup: false
   })
 }
