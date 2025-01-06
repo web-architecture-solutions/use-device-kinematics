@@ -4,18 +4,19 @@ const listenerType = 'deviceorientation'
 const isFeaturePresent = typeof window !== 'undefined' && window.DeviceOrientationEvent
 const featureDetectionError = { type: listenerType, message: 'DeviceOrientationEvent is not supported by this browser.' }
 
-const listenerFactory =
-  (setData) =>
-  ({ absolute, alpha, beta, gamma }) =>
+function listenerFactory(setData) {
+  return ({ absolute, alpha, beta, gamma }) => {
     setData({
       absolute,
       alpha,
       beta,
       gamma
     })
+  }
+}
 
-export default function useDeviceOrientation({ debounce = 0 } = {}) {
-  const handler = (listener, setIsListening) => {
+function handlerFactory() {
+  return (listener, setIsListening) => {
     window.addEventListener(listenerType, listener)
     setIsListening(true)
 
@@ -24,14 +25,15 @@ export default function useDeviceOrientation({ debounce = 0 } = {}) {
       setIsListening(false)
     }
   }
+}
 
+export default function useDeviceOrientation({ debounce = 0 } = {}) {
   return useDeviceAPI({
     listenerFactory,
     isFeaturePresent,
     featureDetectionError,
-    handler,
+    handlerFactory,
     options: { debounce },
-    requestPermission: DeviceOrientationEvent?.requestPermission,
-    thunkCleanup: true
+    requestPermission: DeviceOrientationEvent?.requestPermission
   })
 }

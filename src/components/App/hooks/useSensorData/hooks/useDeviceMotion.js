@@ -3,17 +3,19 @@ import useDeviceAPI from './useDeviceAPI'
 const isFeaturePresent = typeof window !== 'undefined' && window.DeviceMotionEvent
 const featureDetectionError = { type: 'devicemotion', message: 'DeviceMotionEvent is not supported by this browser.' }
 
-const listenerFactory = (setData) => (event) => {
-  setData({
-    acceleration: event.acceleration,
-    accelerationIncludingGravity: event.accelerationIncludingGravity,
-    rotationRate: event.rotationRate,
-    interval: event.interval
-  })
+function listenerFactory(setData) {
+  return ({ acceleration, accelerationIncludingGravity, rotationRate, interval }) => {
+    setData({
+      acceleration,
+      accelerationIncludingGravity,
+      rotationRate,
+      interval
+    })
+  }
 }
 
-export default function useDeviceMotion({ debounce = 0 } = {}) {
-  const handler = (listener, setIsListening) => {
+function handlerFactory() {
+  return (listener, setIsListening) => {
     window.addEventListener('devicemotion', listener)
     setIsListening(true)
 
@@ -22,14 +24,15 @@ export default function useDeviceMotion({ debounce = 0 } = {}) {
       setIsListening(false)
     }
   }
+}
 
+export default function useDeviceMotion({ debounce = 0 } = {}) {
   return useDeviceAPI({
     listenerFactory,
     isFeaturePresent,
     featureDetectionError,
-    handler,
+    handlerFactory,
     options: { debounce },
-    requestPermission: DeviceMotionEvent?.requestPermission,
-    thunkCleanup: true
+    requestPermission: DeviceMotionEvent?.requestPermission
   })
 }

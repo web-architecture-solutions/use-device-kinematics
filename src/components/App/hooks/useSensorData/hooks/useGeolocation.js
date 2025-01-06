@@ -3,9 +3,8 @@ import useDeviceAPI from './useDeviceAPI'
 const isFeaturePresent = typeof navigator !== 'undefined' && navigator.geolocation
 const featureDetectionError = { type: 'geolocation', message: 'Geolocation is not supported by this browser.' }
 
-const listenerFactory =
-  (setData) =>
-  ({ coords, timestamp }) =>
+function listenerFactory(setData) {
+  return ({ coords, timestamp }) => {
     setData({
       latitude: coords.latitude,
       longitude: coords.longitude,
@@ -16,18 +15,11 @@ const listenerFactory =
       speed: coords.speed,
       timestamp
     })
+  }
+}
 
-/**
- * Custom hook to capture geolocation data with optional configuration.
- * @param {Object} config - Configuration options for the hook.
- * @param {boolean} [config.enableHighAccuracy=false] - Whether to use high-accuracy geolocation.
- * @param {number} [config.timeout=Infinity] - Timeout for geolocation requests.
- * @param {number} [config.maximumAge=0] - Maximum age of cached location data in milliseconds.
- * @param {number} [config.debounce=0] - Debounce delay for location updates.
- * @returns {Object} Geolocation data and errors.
- */
-export default function useGeolocation({ enableHighAccuracy = false, timeout = Infinity, maximumAge = 0, debounce = 0 } = {}) {
-  function handler(listener, _, errors) {
+function handlerFactory({ enableHighAccuracy, timeout, maximumAge }) {
+  return (listener, _, errors) => {
     const handleError = ({ message }) => errors.add('geolocation', message)
 
     const watcherId = navigator.geolocation.watchPosition(listener, handleError, {
@@ -38,13 +30,17 @@ export default function useGeolocation({ enableHighAccuracy = false, timeout = I
 
     return () => navigator.geolocation.clearWatch(watcherId)
   }
+}
 
+export function useGeolocation({ enableHighAccuracy = false, timeout = Infinity, maximumAge = 0, debounce = 0 } = {}) {
   return useDeviceAPI({
     listenerFactory,
     isFeaturePresent,
     featureDetectionError,
     options: { enableHighAccuracy, timeout, maximumAge, debounce },
-    handler,
+    handlerFactory,
     thunkCleanup: false
   })
 }
+
+export default useGeolocation
