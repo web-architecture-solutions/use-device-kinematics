@@ -19,8 +19,8 @@ export default function useSensorData(config = {}) {
   )
   const isListening = motion.isListening || orientation.isListening
   const startListening = () => {
-    motion.startListening()
-    orientation.startListening()
+    if (motion.startListening && typeof motion.startListening === 'function') motion.startListening()
+    if (orientation.startListening && typeof orientation.startListening === 'function') orientation.startListening()
   }
 
   return {
@@ -36,7 +36,7 @@ export default function useSensorData(config = {}) {
       longitude: geolocation.data?.longitude,
       geolocationAccuracy: geolocation.data?.accuracy,
       altitude: geolocation.data?.altitude,
-      geolocationAltiduteAccuracy: geolocation.data?.altitudeAccuracy,
+      geolocationAltitudeAccuracy: geolocation.data?.altitudeAccuracy,
       heading: geolocation.data?.heading,
       speed: geolocation.data?.speed,
       timestamp: geolocation.data?.timestamp

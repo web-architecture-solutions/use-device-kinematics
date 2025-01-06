@@ -47,7 +47,7 @@ export default function useDeviceAPI({
     if (permissionGranted) {
       const debouncedListener = debounce > 0 ? useDebouncedCallback(cachedListener, debounce) : cachedListener
       const cleanup = handler(debouncedListener, setIsListening, errors)
-      return () => (cleanup && typeof cleanup === 'function' ? cleanup : null)
+      return cleanup && typeof cleanup === 'function' ? cleanup : () => null
     }
   }, [listener, handler, cachedListener, debounce, errors, permissionGranted, enableHighAccuracy, timeout, maximumAge])
 
