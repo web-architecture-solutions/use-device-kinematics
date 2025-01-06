@@ -20,7 +20,7 @@ function handlerFactory() {
     window.addEventListener(listenerType, listener)
     setIsListening(true)
 
-    return () => {
+    return () => () => {
       window.removeEventListener(listenerType, listener)
       setIsListening(false)
     }

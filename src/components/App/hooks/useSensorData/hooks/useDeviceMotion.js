@@ -19,7 +19,7 @@ function handlerFactory() {
     window.addEventListener('devicemotion', listener)
     setIsListening(true)
 
-    return () => {
+    return () => () => {
       window.removeEventListener('devicemotion', listener)
       setIsListening(false)
     }
