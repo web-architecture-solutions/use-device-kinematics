@@ -8,11 +8,13 @@ export default function useSensorData(config = {}) {
   const motion = useDeviceMotion(config)
   const orientation = useDeviceOrienation(config)
   const geolocation = useGeolocation(config)
+
   const errors = useMemo(
     () => ({ ...motion.errors, ...orientation.errors, ...geolocation.errors }),
     [motion.errors, orientation.errors, geolocation.errors]
   )
   const isListening = motion.isListening || orientation.isListening || geolocation.isListening
+
   const startListening = () => {
     if (motion.startListening && typeof motion.startListening === 'function') motion.startListening()
     if (orientation.startListening && typeof orientation.startListening === 'function') orientation.startListening()
