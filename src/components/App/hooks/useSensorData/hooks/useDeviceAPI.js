@@ -7,7 +7,7 @@ import useErrorHandling from './useErrorHandling'
 export default function useDeviceAPI({
   isFeaturePresent,
   featureDetectionError: { type, message } = {},
-  listener,
+  listenerFactory,
   handler,
   options: { debounce = 0, enableHighAccuracy, timeout, maximumAge } = {},
   requestPermission = null,
@@ -19,7 +19,7 @@ export default function useDeviceAPI({
 
   const errors = useErrorHandling()
 
-  const cachedListener = useCallback(listener(setData), [])
+  const cachedListener = useCallback(listenerFactory(setData), [])
 
   const startListening = requestPermission
     ? useCallback(async () => {
@@ -53,7 +53,7 @@ export default function useDeviceAPI({
       }
       return () => null
     }
-  }, [listener, handler, cachedListener, debounce, errors, permissionGranted, enableHighAccuracy, timeout, maximumAge])
+  }, [listenerFactory, handler, cachedListener, debounce, errors, permissionGranted, enableHighAccuracy, timeout, maximumAge])
 
   return { data, errors, startListening, isListening }
 }

@@ -4,7 +4,7 @@ const listenerType = 'deviceorientation'
 const isFeaturePresent = typeof window !== 'undefined' && window.DeviceOrientationEvent
 const featureDetectionError = { type: listenerType, message: 'DeviceOrientationEvent is not supported by this browser.' }
 
-const listener =
+const listenerFactory =
   (setData) =>
   ({ absolute, alpha, beta, gamma }) =>
     setData({
@@ -26,7 +26,7 @@ export default function useDeviceOrientation({ debounce = 0 } = {}) {
   }
 
   return useDeviceAPI({
-    listener,
+    listenerFactory,
     isFeaturePresent,
     featureDetectionError,
     handler,

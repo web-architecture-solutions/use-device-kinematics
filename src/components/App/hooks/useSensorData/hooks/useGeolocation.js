@@ -3,7 +3,7 @@ import useDeviceAPI from './useDeviceAPI'
 const isFeaturePresent = typeof navigator !== 'undefined' && navigator.geolocation
 const featureDetectionError = { type: 'geolocation', message: 'Geolocation is not supported by this browser.' }
 
-const listener =
+const listenerFactory =
   (setData) =>
   ({ coords, timestamp }) =>
     setData({
@@ -40,7 +40,7 @@ export default function useGeolocation({ enableHighAccuracy = false, timeout = I
   }
 
   return useDeviceAPI({
-    listener,
+    listenerFactory,
     isFeaturePresent,
     featureDetectionError,
     options: { enableHighAccuracy, timeout, maximumAge, debounce },
