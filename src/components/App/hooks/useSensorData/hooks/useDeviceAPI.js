@@ -1,8 +1,10 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 import useDebouncedCallback from './useDebouncedCallback'
 
 import useErrorHandling from './useErrorHandling'
+
+import useEvent from './useEvent'
 
 export default function useDeviceAPI({
   isFeaturePresent,
@@ -10,7 +12,8 @@ export default function useDeviceAPI({
   listenerFactory,
   handlerFactory,
   options = {},
-  requestPermission = null
+  requestPermission = null,
+  useEvent: _useEvent = false
 }) {
   const { debounce = 0, enableHighAccuracy, timeout, maximumAge } = options
 
@@ -20,7 +23,7 @@ export default function useDeviceAPI({
 
   const errors = useErrorHandling()
 
-  const listener = listenerFactory(setData)
+  const listener = _useEvent ? useEvent(listenerFactory(setData)) : listenerFactory(setData)
 
   const startListening = requestPermission
     ? useCallback(async () => {

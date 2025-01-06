@@ -20,7 +20,7 @@ function handlerFactory() {
     window.addEventListener(listenerType, listener)
     setIsListening(true)
 
-    return () => () => {
+    return () => {
       window.removeEventListener(listenerType, listener)
       setIsListening(false)
     }
@@ -34,6 +34,7 @@ export default function useDeviceOrientation({ debounce = 0 } = {}) {
     featureDetectionError,
     handlerFactory,
     options: { debounce },
-    requestPermission: DeviceOrientationEvent?.requestPermission
+    requestPermission: DeviceOrientationEvent?.requestPermission,
+    useEvent: true
   })
 }

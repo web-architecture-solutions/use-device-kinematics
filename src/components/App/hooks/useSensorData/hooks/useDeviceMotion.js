@@ -19,7 +19,7 @@ function handlerFactory() {
     window.addEventListener('devicemotion', listener)
     setIsListening(true)
 
-    return () => () => {
+    return () => {
       window.removeEventListener('devicemotion', listener)
       setIsListening(false)
     }
@@ -33,6 +33,7 @@ export default function useDeviceMotion({ debounce = 0 } = {}) {
     featureDetectionError,
     handlerFactory,
     options: { debounce },
-    requestPermission: DeviceMotionEvent?.requestPermission
+    requestPermission: DeviceMotionEvent?.requestPermission,
+    useEvent: true
   })
 }
