@@ -38,8 +38,7 @@ export function useGeolocation({ enableHighAccuracy = false, timeout = Infinity,
     isFeaturePresent,
     featureDetectionError,
     options: { enableHighAccuracy, timeout, maximumAge, debounce },
-    handlerFactory,
-    thunkCleanup: false
+    handlerFactory
   })
 }
 
