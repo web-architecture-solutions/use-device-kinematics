@@ -1,4 +1,4 @@
-import useSensorData from './hooks/useSensorData'
+import useSensorData from '../../hooks/useSensorData'
 
 export default function App() {
   const { data, errors, isListening, startListening } = useSensorData({ enableHighAccuracy: true })

@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 
-import useDeviceMotion from './hooks/useDeviceMotion'
-import useDeviceOrienation from './hooks/useDeviceOrientation'
-import useGeolocation from './hooks/useGeolocation'
+import useDeviceMotion from './useDeviceMotion'
+import useDeviceOrienation from './useDeviceOrientation'
+import useGeolocation from './useGeolocation'
 
 export default function useSensorData(config = {}) {
   const motion = useDeviceMotion(config)
