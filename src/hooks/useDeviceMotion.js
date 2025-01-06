@@ -1,7 +1,8 @@
 import useDeviceAPI from './useDeviceAPI'
 
-const isFeaturePresent = typeof window !== 'undefined' && window.DeviceMotionEvent
-const featureDetectionError = { type: 'devicemotion', message: 'DeviceMotionEvent is not supported by this browser.' }
+const listenerType = 'devicemotion'
+const isFeaturePresent = typeof window !== 'undefined' && window.DeviceMotionEvent && window.DeviceMotionEvent.requestPermission
+const featureDetectionError = { type: listenerType, message: 'DeviceMotionEvent is not supported by this browser.' }
 
 function listenerFactory(setData) {
   return ({ acceleration, accelerationIncludingGravity, rotationRate, interval }) => {
@@ -16,11 +17,11 @@ function listenerFactory(setData) {
 
 function handlerFactory() {
   return (listener, setIsListening) => {
-    window.addEventListener('devicemotion', listener)
+    window.addEventListener(listenerType, listener)
     setIsListening(true)
 
     return () => {
-      window.removeEventListener('devicemotion', listener)
+      window.removeEventListener(listenerType, listener)
       setIsListening(false)
     }
   }

@@ -1,40 +1,20 @@
 import useDeviceAPI from './useDeviceAPI'
 
+const listenerType = 'geolocation'
 const isFeaturePresent = typeof navigator !== 'undefined' && navigator.geolocation
-const featureDetectionError = { type: 'geolocation', message: 'Geolocation is not supported by this browser.' }
+const featureDetectionError = { type: listenerType, message: 'Geolocation is not supported by this browser.' }
 
 const requestPermission = async () => {
   return new Promise((resolve) => {
-    if (!navigator.geolocation) {
-      resolve('denied') // Geolocation not supported
-      return
-    }
-
-    navigator.permissions.query({ name: 'geolocation' }).then((result) => {
-      if (result.state === 'granted') {
-        resolve('granted')
-        return
+    navigator.permissions.query({ name: listenerType }).then(({ state }) => {
+      if (state === 'granted' || state === 'denied') {
+        resolve(state)
+      } else {
+        navigator.geolocation.getCurrentPosition(
+          () => resolve('granted'),
+          () => resolve('denied')
+        )
       }
-
-      if (result.state === 'denied') {
-        resolve('denied')
-        return
-      }
-
-      // If the permission is 'prompt' or 'prompt-no-persist' we need to actually try to get the location.
-      navigator.geolocation.getCurrentPosition(
-        () => {
-          resolve('granted') // Success means permission granted
-        },
-        (error) => {
-          if (error.code === error.PERMISSION_DENIED) {
-            resolve('denied') // User denied permission
-          } else {
-            resolve('denied') // Other errors also treated as denied for simplicity
-          }
-        },
-        { enableHighAccuracy: false, timeout: 5000, maximumAge: 0 } // Add options to getCurrentPosition
-      )
     })
   })
 }
@@ -56,7 +36,7 @@ function listenerFactory(setData) {
 
 function handlerFactory({ enableHighAccuracy, timeout, maximumAge }) {
   return (listener, _, errors) => {
-    const handleError = ({ message }) => errors.add('geolocation', message)
+    const handleError = ({ message }) => errors.add(listenerType, message)
 
     const watcherId = navigator.geolocation.watchPosition(listener, handleError, {
       enableHighAccuracy,

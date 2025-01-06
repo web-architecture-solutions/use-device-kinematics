@@ -33,10 +33,12 @@ export default function useDeviceAPI({
       } catch ({ message }) {
         errors.add(type, message)
       }
-    } else {
+    } else if (isFeaturePresent) {
       throw new Error('requestPermission must be a function')
     }
   }, [requestPermission, errors])
+
+  console.log('FOO', isFeaturePresent)
 
   useEffect(() => {
     if (!isFeaturePresent) {

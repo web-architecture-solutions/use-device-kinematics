@@ -1,7 +1,7 @@
 import useDeviceAPI from './useDeviceAPI'
 
 const listenerType = 'deviceorientation'
-const isFeaturePresent = typeof window !== 'undefined' && window.DeviceOrientationEvent
+const isFeaturePresent = typeof window !== 'undefined' && window.DeviceOrientationEvent && window.DeviceOrientationEvent.requestPermission
 const featureDetectionError = { type: listenerType, message: 'DeviceOrientationEvent is not supported by this browser.' }
 
 function listenerFactory(setData) {
