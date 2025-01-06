@@ -12,33 +12,31 @@ export default function useDeviceAPI({
   listenerFactory,
   handlerFactory,
   options = {},
-  requestPermission = null,
+  requestPermission,
   useEvent: _useEvent = false
 }) {
   const { debounce = 0, enableHighAccuracy, timeout, maximumAge } = options
 
   const [data, setData] = useState(null)
-  const [permissionGranted, setPermissionGranted] = useState(requestPermission ? false : true)
-  const [isListening, setIsListening] = useState(null)
+  const [permissionGranted, setPermissionGranted] = useState(false)
+  const [isListening, setIsListening] = useState(false)
 
   const errors = useErrorHandling()
 
   const listener = _useEvent ? useEvent(listenerFactory(setData)) : listenerFactory(setData)
 
-  const startListening = requestPermission
-    ? useCallback(async () => {
-        if (typeof requestPermission === 'function') {
-          try {
-            const permission = await requestPermission()
-            permission === 'granted' ? setPermissionGranted(true) : errors.add(type, 'User denied permission to access the API.')
-          } catch ({ message }) {
-            errors.add('devicemotion', message)
-          }
-        } else {
-          throw new Error('requestPermission must be a function')
-        }
-      }, [requestPermission, errors])
-    : null
+  const startListening = useCallback(async () => {
+    if (typeof requestPermission === 'function') {
+      try {
+        const permission = await requestPermission()
+        permission === 'granted' ? setPermissionGranted(true) : errors.add(type, 'User denied permission to access the API.')
+      } catch ({ message }) {
+        errors.add(type, message)
+      }
+    } else {
+      throw new Error('requestPermission must be a function')
+    }
+  }, [requestPermission, errors])
 
   useEffect(() => {
     if (!isFeaturePresent) {

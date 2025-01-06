@@ -3,6 +3,42 @@ import useDeviceAPI from './useDeviceAPI'
 const isFeaturePresent = typeof navigator !== 'undefined' && navigator.geolocation
 const featureDetectionError = { type: 'geolocation', message: 'Geolocation is not supported by this browser.' }
 
+const requestPermission = async () => {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve('denied') // Geolocation not supported
+      return
+    }
+
+    navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+      if (result.state === 'granted') {
+        resolve('granted')
+        return
+      }
+
+      if (result.state === 'denied') {
+        resolve('denied')
+        return
+      }
+
+      // If the permission is 'prompt' or 'prompt-no-persist' we need to actually try to get the location.
+      navigator.geolocation.getCurrentPosition(
+        () => {
+          resolve('granted') // Success means permission granted
+        },
+        (error) => {
+          if (error.code === error.PERMISSION_DENIED) {
+            resolve('denied') // User denied permission
+          } else {
+            resolve('denied') // Other errors also treated as denied for simplicity
+          }
+        },
+        { enableHighAccuracy: false, timeout: 5000, maximumAge: 0 } // Add options to getCurrentPosition
+      )
+    })
+  })
+}
+
 function listenerFactory(setData) {
   return ({ coords, timestamp }) => {
     setData({
@@ -39,7 +75,8 @@ export function useGeolocation({ enableHighAccuracy = false, timeout = Infinity,
     featureDetectionError,
     options: { enableHighAccuracy, timeout, maximumAge, debounce },
     handlerFactory,
-    useEvent: false
+    useEvent: false,
+    requestPermission
   })
 }
 
