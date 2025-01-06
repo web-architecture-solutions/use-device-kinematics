@@ -25,19 +25,25 @@ export default function useSensorData(config = {}) {
     data: {
       linearAcceleration: motion.data?.acceleration,
       linearAccelerationIncludingGravity: motion.data?.accelerationIncludingGravity,
-      angularAcceleration: motion.data?.rotationRate,
-      accelerationInterval: motion.data?.interval,
-      yaw: orientation.data?.alpha,
-      pitch: orientation.data?.beta,
-      roll: orientation.data?.gamma,
-      latitude: geolocation.data?.latitude,
-      longitude: geolocation.data?.longitude,
-      geolocationAccuracy: geolocation.data?.accuracy,
-      altitude: geolocation.data?.altitude,
-      geolocationAltitudeAccuracy: geolocation.data?.altitudeAccuracy,
-      heading: geolocation.data?.heading,
-      speed: geolocation.data?.speed,
-      timestamp: geolocation.data?.timestamp
+      angularVelocity: motion.data?.rotationRate,
+      motionInterval: motion.data?.interval,
+      orientation: {
+        yaw: orientation.data?.alpha,
+        pitch: orientation.data?.beta,
+        roll: orientation.data?.gamma
+      },
+      position: {
+        latitude: geolocation.data?.latitude,
+        longitude: geolocation.data?.longitude,
+        altitude: geolocation.data?.altitude,
+        accuracy: geolocation.data?.accuracy,
+        altitudeAccuracy: geolocation.data?.altitudeAccuracy,
+      },
+      velocity: {
+        heading: geolocation.data?.heading,
+        speed: geolocation.data?.speed
+      },
+      geolocationTimestamp: geolocation.data?.timestamp
     },
     errors,
     isListening,

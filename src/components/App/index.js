@@ -12,11 +12,11 @@ export default function App() {
       ) : isListening ? (
         <pre>{JSON.stringify(data, null, 2)}</pre>
       ) : (
-        <p>Click the button to start.</p>
+        <p>Click button to start.</p>
       )}
 
       <button onClick={startListening} disabled={isListening}>
-        {isListening ? 'Listening...' : 'Start Listening'}
+        {isListening ? 'OFF' : 'ON'}
       </button>
     </div>
   )
