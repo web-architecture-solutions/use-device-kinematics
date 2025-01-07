@@ -18,10 +18,8 @@ export default function useSensorData(config = {}) {
     [motion.isListening, orientation.isListening, geolocation.isListening]
   )
 
-  const startListening = useCallback(() => {
-    motion.startListening()
-    orientation.startListening()
-    geolocation.startListening()
+  const startListening = useCallback(async () => {
+    await Promise.all([motion.startListening(), orientation.startListening(), geolocation.startListening()])
   }, [motion.startListening, orientation.startListening, geolocation.startListening])
 
   return {
