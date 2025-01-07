@@ -4,6 +4,41 @@ import useDeviceMotion from './useDeviceMotion'
 import useDeviceOrienation from './useDeviceOrientation'
 import useGeolocation from './useGeolocation'
 
+function transformSensorData(motionData, orientationData, geolocationData) {
+  const data = {
+    linearAcceleration: motionData?.acceleration,
+    linearAccelerationIncludingGravity: motionData?.accelerationIncludingGravity,
+    angularVelocity: motionData?.rotationRate,
+    motionInterval: motionData?.interval,
+    geolocationTimestamp: geolocationData?.timestamp
+  }
+
+  if (geolocationData) {
+    data.position = {
+      latitude: geolocationData?.latitude,
+      longitude: geolocationData?.longitude,
+      altitude: geolocationData?.altitude,
+      accuracy: geolocationData?.accuracy,
+      altitudeAccuracy: geolocationData?.altitudeAccuracy
+    }
+
+    data.velocity = {
+      heading: geolocationData?.heading,
+      speed: geolocationData?.speed
+    }
+  }
+
+  if (orientationData) {
+    data.orientation = {
+      yaw: orientationData.alpha,
+      pitch: orientationData.beta,
+      roll: orientationData.gamma
+    }
+  }
+
+  return data
+}
+
 export default function useSensorData(config = {}) {
   const motion = useDeviceMotion(config)
   const orientation = useDeviceOrienation(config)
@@ -22,39 +57,8 @@ export default function useSensorData(config = {}) {
     await Promise.all([motion.startListening(), orientation.startListening(), geolocation.startListening()])
   }, [motion.startListening, orientation.startListening, geolocation.startListening])
 
-  const data = {
-    linearAcceleration: motion.data?.acceleration,
-    linearAccelerationIncludingGravity: motion.data?.accelerationIncludingGravity,
-    angularVelocity: motion.data?.rotationRate,
-    motionInterval: motion.data?.interval,
-    geolocationTimestamp: geolocation.data?.timestamp
-  }
-
-  if (geolocation.data) {
-    data.position = {
-      latitude: geolocation.data?.latitude,
-      longitude: geolocation.data?.longitude,
-      altitude: geolocation.data?.altitude,
-      accuracy: geolocation.data?.accuracy,
-      altitudeAccuracy: geolocation.data?.altitudeAccuracy
-    }
-
-    data.velocity = {
-      heading: geolocation.data?.heading,
-      speed: geolocation.data?.speed
-    }
-  }
-
-  if (orientation.data) {
-    data.orientation = {
-      yaw: orientation.data.alpha,
-      pitch: orientation.data.beta,
-      roll: orientation.data.gamma
-    }
-  }
-
   return {
-    data,
+    data: transformSensorData(motion.data, orientation.data, geolocation.data),
     errors,
     isListening,
     startListening
