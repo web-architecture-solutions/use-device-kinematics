@@ -38,8 +38,6 @@ export default function useDeviceAPI({
     }
   }, [requestPermission, errors])
 
-  console.log('FOO', isFeaturePresent)
-
   useEffect(() => {
     if (!isFeaturePresent) {
       errors.add(type, message)
