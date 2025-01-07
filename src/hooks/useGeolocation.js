@@ -35,7 +35,7 @@ function listenerFactory(setData) {
 }
 
 function handlerFactory({ enableHighAccuracy, timeout, maximumAge }) {
-  return (listener, _, errors) => {
+  return (listener, setIsListening, errors) => {
     const handleError = ({ message }) => errors.add(listenerType, message)
 
     const watcherId = navigator.geolocation.watchPosition(listener, handleError, {
@@ -44,7 +44,12 @@ function handlerFactory({ enableHighAccuracy, timeout, maximumAge }) {
       maximumAge
     })
 
-    return () => navigator.geolocation.clearWatch(watcherId)
+    setIsListening(true)
+
+    return () => {
+      navigator.geolocation.clearWatch(watcherId)
+      setIsListening(false)
+    }
   }
 }
 

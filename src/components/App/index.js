@@ -7,13 +7,9 @@ export default function App() {
     <div>
       <h1>Sensor Data</h1>
 
-      {errors && Object.keys(errors).length > 0 ? (
-        <pre>{JSON.stringify(errors, null, 2)}</pre>
-      ) : isListening ? (
-        <pre>{JSON.stringify(data, null, 2)}</pre>
-      ) : (
-        <p>Click button to start.</p>
-      )}
+      {errors && Object.keys(errors).length > 0 ? <pre>{JSON.stringify(errors, null, 2)}</pre> : null}
+
+      {isListening ? <pre>{JSON.stringify(data, null, 2)}</pre> : <p>Click button to start.</p>}
 
       <button onClick={startListening} disabled={isListening}>
         {isListening ? 'OFF' : 'ON'}
