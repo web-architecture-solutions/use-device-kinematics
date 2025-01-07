@@ -39,6 +39,10 @@ export function calculateTotalAngularVelocity(alpha, beta, gamma) {
   return Math.sqrt(Math.pow(alpha, 2) + Math.pow(beta, 2) + Math.pow(gamma, 2))
 }
 
+export function calculateTotalAcceleration(x, y, z) {
+  return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2))
+}
+
 export function calculateVelocity(angularVelocity, curvature) {
   return angularVelocity / curvature
 }

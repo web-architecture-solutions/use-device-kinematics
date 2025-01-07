@@ -1,18 +1,35 @@
-import { useCallback, useMemo, useEffect, useState } from 'react'
+import { useCallback, useMemo, useEffect, useState, useRef } from 'react'
 
 import useDeviceMotion from './useDeviceMotion'
 import useDeviceOrienation from './useDeviceOrientation'
 import useGeolocation from './useGeolocation'
 
-import { calculateCurvature, calculateTotalAngularVelocity, calculateVelocity } from '../lib/physics'
+import useCurvature from './useCurvature'
+import useTotalAngularVelocity from './useTotalAngularVelocity'
+import useTotalAccleration from './useTotalAcceleration'
 
-function transformSensorData(motionData, orientationData, geolocationData, points, curvature, totalAngularVelocity, velocity) {
+import { calculateVelocity } from '../lib/physics'
+
+function transformSensorData(
+  motionData,
+  orientationData,
+  geolocationData,
+  timestamp,
+  points,
+  curvature,
+  totalAngularVelocity,
+  velocity,
+  totalAcceleration,
+  accelerationSamples,
+  velocity2
+) {
   const data = {
     linearAcceleration: motionData?.acceleration,
     linearAccelerationIncludingGravity: motionData?.accelerationIncludingGravity,
     angularVelocity: motionData?.rotationRate,
     motionInterval: motionData?.interval,
-    geolocationTimestamp: geolocationData?.timestamp
+    geolocationTimestamp: geolocationData?.timestamp,
+    timestamp
   }
 
   if (geolocationData) {
@@ -42,10 +59,74 @@ function transformSensorData(motionData, orientationData, geolocationData, point
     points,
     curvature,
     totalAngularVelocity,
-    velocity
+    velocity,
+    totalAcceleration,
+    accelerationSamples,
+    velocity2
   }
 
   return data
+}
+
+function useClock(updateFrequency = 10) {
+  const startTime = useRef(null)
+  const [globalTimestamp, setGlobalTimestamp] = useState(0)
+
+  useEffect(() => {
+    startTime.current = performance.now()
+
+    const intervalId = setInterval(() => {
+      setGlobalTimestamp(performance.now() - startTime.current)
+    }, updateFrequency)
+
+    return () => clearInterval(intervalId)
+  }, [])
+
+  return globalTimestamp
+}
+
+function integrateAccelerationTrapezoidal(data) {
+  if (data.length < 2) {
+    return { velocity: 0, displacement: 0 }
+  }
+
+  let velocity = 0
+  let displacement = 0
+
+  for (let i = 1; i < data.length; i++) {
+    const dt = data[i]?.timestamp - data[i - 1]?.timestamp
+    const dv = 0.5 * (data[i]?.acceleration + data[i - 1]?.acceleration) * dt
+    const dd = 0.5 * (velocity + velocity + dv) * dt
+    velocity += dv
+    displacement += dd
+  }
+
+  return { velocity, displacement }
+}
+
+function integrateAccelerationSimpson(data) {
+  if (data.length < 3) {
+    return integrateAccelerationTrapezoidal(data)
+  }
+
+  let velocity = 0
+  let displacement = 0
+
+  for (let i = 2; i < data.length; i++) {
+    const dt1 = data[i - 1]?.timestamp - data[i - 2]?.timestamp
+    const dt2 = data[i]?.timestamp - data[i - 1]?.timestamp
+
+    if (Math.abs(dt1 - dt2) > 1e-6) {
+      return integrateAccelerationTrapezoidal(data)
+    }
+    const dt = (dt1 + dt2) / 2
+    const dv = (dt / 3) * (data[i]?.acceleration + 4 * data[i - 1]?.acceleration + data[i - 2]?.acceleration)
+    const dd = (dt / 3) * (velocity + 4 * (velocity + dv) + velocity)
+    velocity += dv
+    displacement += dd
+  }
+
+  return { velocity, displacement }
 }
 
 export default function useSensorData(config = {}) {
@@ -53,40 +134,41 @@ export default function useSensorData(config = {}) {
   const orientation = useDeviceOrienation(config)
   const geolocation = useGeolocation(config)
 
-  const [points, setPoints] = useState([null, null, null])
-  const [curvature, setCurvature] = useState(null)
-  const [totalAngularVelocity, setTotalAngularVelocity] = useState(null)
   const [velocity, setVelocity] = useState(null)
 
-  useEffect(() => {
-    if (geolocation.data?.latitude && geolocation.data?.longitude) {
-      setPoints(([_, p, q]) => [p, q, { latitude: geolocation.data.latitude, longitude: geolocation.data.longitude }])
-    }
-  }, [geolocation.data?.latitude, geolocation.data?.longitude])
+  const { curvature, points } = useCurvature({ latitude: geolocation.data?.latitude, longitude: geolocation.data?.longitude })
 
-  useEffect(() => {
-    const [p1, p2, p3] = points
-    if (p1 && p2 && p3) {
-      const curvature = calculateCurvature(points[0], points[1], points[2])
-      setCurvature(curvature)
-    }
-  }, [points[0], points[1], points[2]])
+  const totalAngularVelocity = useTotalAngularVelocity({
+    alpha: motion.data?.rotationRate.alpha,
+    beta: motion.data?.rotationRate.beta,
+    gamma: motion.data?.rotationRate.gamma
+  })
 
-  useEffect(() => {
-    if (motion.data) {
-      const _totalAngularVelocity = calculateTotalAngularVelocity(
-        motion.data.rotationRate.alpha,
-        motion.data.rotationRate.beta,
-        motion.data.rotationRate.gamma
-      )
-      setTotalAngularVelocity(_totalAngularVelocity)
-    }
-  }, [motion.data?.rotationRate.alpha, motion.data?.rotationRate.beta, motion.data?.rotationRate.gamma])
+  const totalAcceleration = useTotalAccleration({
+    x: motion.data?.acceleration.x,
+    y: motion.data?.acceleration.y,
+    z: motion.data?.acceleration.z
+  })
 
   useEffect(() => {
     const _velocity = curvature ? calculateVelocity(totalAngularVelocity, curvature) : null
     setVelocity(_velocity)
   }, [totalAngularVelocity, curvature])
+
+  const timestamp = useClock()
+
+  const [accelerationSamples, setAccelerationSamples] = useState(Array.from({ length: 10 }, () => null))
+
+  const { velocity: velocity2 } = integrateAccelerationSimpson(accelerationSamples)
+
+  useEffect(() => {
+    if (totalAcceleration) {
+      setAccelerationSamples((oldAccelerationSamples) => [
+        ...oldAccelerationSamples.slice(1),
+        { acceleration: totalAcceleration, timestamp }
+      ])
+    }
+  }, [totalAcceleration])
 
   const errors = useMemo(
     () => ({ ...motion.errors, ...orientation.errors, ...geolocation.errors }),
@@ -102,7 +184,19 @@ export default function useSensorData(config = {}) {
   }, [motion.startListening, orientation.startListening, geolocation.startListening])
 
   return {
-    data: transformSensorData(motion.data, orientation.data, geolocation.data, points, curvature, totalAngularVelocity, velocity),
+    data: transformSensorData(
+      motion.data,
+      orientation.data,
+      geolocation.data,
+      timestamp,
+      points,
+      curvature,
+      totalAngularVelocity,
+      velocity,
+      totalAcceleration,
+      accelerationSamples,
+      velocity2
+    ),
     errors,
     isListening,
     startListening
