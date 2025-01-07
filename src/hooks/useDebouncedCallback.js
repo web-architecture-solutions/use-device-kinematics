@@ -2,6 +2,7 @@ import { useRef, useCallback } from 'react'
 
 export default function useDebouncedCallback(callback, delay, options = {}) {
   const { leading = false, trailing = true } = options
+
   const timer = useRef(null)
   const isLeadingCalled = useRef(false)
 

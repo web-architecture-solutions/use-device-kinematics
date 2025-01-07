@@ -10,7 +10,9 @@ const listener = ({ absolute, alpha, beta, gamma }) => ({ absolute, alpha, beta,
 
 function handler(listener, setIsListening) {
   window.addEventListener(listenerType, listener)
+
   setIsListening(true)
+
   return () => {
     window.removeEventListener(listenerType, listener)
     setIsListening(false)

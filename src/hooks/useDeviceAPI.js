@@ -43,7 +43,9 @@ export default function useDeviceAPI({
       errors.add(listenerType, featureDetectionError)
       return
     }
+    
     if (!permissionGranted) return
+
     const debouncedListener = debounce > 0 ? useDebouncedCallback(stabilizedListener, debounce) : stabilizedListener
     const cleanup = handler(debouncedListener, setIsListening, errors)
     return cleanup && typeof cleanup === 'function' ? cleanup : () => null
