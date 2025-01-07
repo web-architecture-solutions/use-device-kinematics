@@ -33,11 +33,8 @@ const listener = ({ coords, timestamp }) => ({
 function handlerFactory(options) {
   return (listener, setIsListening, errors) => {
     const handleError = ({ message }) => errors.add(listenerType, message)
-
     const watcherId = navigator.geolocation.watchPosition(listener, handleError, options)
-
     setIsListening(true)
-
     return () => {
       navigator.geolocation.clearWatch(watcherId)
       setIsListening(false)

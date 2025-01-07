@@ -16,7 +16,6 @@ const listener = ({ acceleration, accelerationIncludingGravity, rotationRate, in
 function handler(listener, setIsListening) {
   window.addEventListener(listenerType, listener)
   setIsListening(true)
-
   return () => {
     window.removeEventListener(listenerType, listener)
     setIsListening(false)
