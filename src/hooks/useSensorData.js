@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useEffect, useState, useRef } from 'react'
+import { useCallback, useMemo, useEffect, useState } from 'react'
 
 import useDeviceMotion from './useDeviceMotion'
 import useDeviceOrienation from './useDeviceOrientation'
@@ -8,9 +8,15 @@ import useCurvature from './useCurvature'
 import useTotalAngularVelocity from './useTotalAngularVelocity'
 import useTotalAccleration from './useTotalAcceleration'
 
+import useClock from './useClock'
+
+import useHeading from './useHeading'
+
 import { calculateVelocity } from '../lib/physics'
 
-function transformSensorData(
+import useIntegratedVelocity from './useIntegratedVelocity'
+
+function transformSensorData({
   motionData,
   orientationData,
   geolocationData,
@@ -21,8 +27,9 @@ function transformSensorData(
   velocity,
   totalAcceleration,
   accelerationSamples,
-  velocity2
-) {
+  velocity2,
+  heading
+}) {
   const data = {
     linearAcceleration: motionData?.acceleration,
     linearAccelerationIncludingGravity: motionData?.accelerationIncludingGravity,
@@ -62,71 +69,11 @@ function transformSensorData(
     velocity,
     totalAcceleration,
     accelerationSamples,
-    velocity2
+    velocity2,
+    heading
   }
 
   return data
-}
-
-function useClock(updateFrequency = 10) {
-  const startTime = useRef(null)
-  const [globalTimestamp, setGlobalTimestamp] = useState(0)
-
-  useEffect(() => {
-    startTime.current = performance.now()
-
-    const intervalId = setInterval(() => {
-      setGlobalTimestamp(performance.now() - startTime.current)
-    }, updateFrequency)
-
-    return () => clearInterval(intervalId)
-  }, [])
-
-  return globalTimestamp
-}
-
-function integrateAccelerationTrapezoidal(data) {
-  if (data.length < 2) {
-    return { velocity: 0, displacement: 0 }
-  }
-
-  let velocity = 0
-  let displacement = 0
-
-  for (let i = 1; i < data.length; i++) {
-    const dt = data[i]?.timestamp - data[i - 1]?.timestamp
-    const dv = 0.5 * (data[i]?.acceleration + data[i - 1]?.acceleration) * dt
-    const dd = 0.5 * (velocity + velocity + dv) * dt
-    velocity += dv
-    displacement += dd
-  }
-
-  return { velocity, displacement }
-}
-
-function integrateAccelerationSimpson(data) {
-  if (data.length < 3) {
-    return integrateAccelerationTrapezoidal(data)
-  }
-
-  let velocity = 0
-  let displacement = 0
-
-  for (let i = 2; i < data.length; i++) {
-    const dt1 = data[i - 1]?.timestamp - data[i - 2]?.timestamp
-    const dt2 = data[i]?.timestamp - data[i - 1]?.timestamp
-
-    if (Math.abs(dt1 - dt2) > 1e-6) {
-      return integrateAccelerationTrapezoidal(data)
-    }
-    const dt = (dt1 + dt2) / 2
-    const dv = (dt / 3) * (data[i]?.acceleration + 4 * data[i - 1]?.acceleration + data[i - 2]?.acceleration)
-    const dd = (dt / 3) * (velocity + 4 * (velocity + dv) + velocity)
-    velocity += dv
-    displacement += dd
-  }
-
-  return { velocity, displacement }
 }
 
 export default function useSensorData(config = {}) {
@@ -144,6 +91,8 @@ export default function useSensorData(config = {}) {
     gamma: motion.data?.rotationRate.gamma
   })
 
+  const timestamp = useClock()
+
   const totalAcceleration = useTotalAccleration({
     x: motion.data?.acceleration.x,
     y: motion.data?.acceleration.y,
@@ -155,20 +104,9 @@ export default function useSensorData(config = {}) {
     setVelocity(_velocity)
   }, [totalAngularVelocity, curvature])
 
-  const timestamp = useClock()
+  const { velocity: velocity2, accelerationSamples } = useIntegratedVelocity({ totalAcceleration, timestamp })
 
-  const [accelerationSamples, setAccelerationSamples] = useState(Array.from({ length: 10 }, () => null))
-
-  const { velocity: velocity2 } = integrateAccelerationSimpson(accelerationSamples)
-
-  useEffect(() => {
-    if (totalAcceleration) {
-      setAccelerationSamples((oldAccelerationSamples) => [
-        ...oldAccelerationSamples.slice(1),
-        { acceleration: totalAcceleration, timestamp }
-      ])
-    }
-  }, [totalAcceleration])
+  const heading = useHeading({ alpha: orientation.data?.alpha, beta: orientation.data?.beta, gamma: orientation.data?.gamma })
 
   const errors = useMemo(
     () => ({ ...motion.errors, ...orientation.errors, ...geolocation.errors }),
@@ -184,10 +122,10 @@ export default function useSensorData(config = {}) {
   }, [motion.startListening, orientation.startListening, geolocation.startListening])
 
   return {
-    data: transformSensorData(
-      motion.data,
-      orientation.data,
-      geolocation.data,
+    data: transformSensorData({
+      motionData: motion.data,
+      orientationData: orientation.data,
+      geolocationData: geolocation.data,
       timestamp,
       points,
       curvature,
@@ -195,8 +133,9 @@ export default function useSensorData(config = {}) {
       velocity,
       totalAcceleration,
       accelerationSamples,
-      velocity2
-    ),
+      velocity2,
+      heading
+    }),
     errors,
     isListening,
     startListening

@@ -2,7 +2,8 @@ const R = 6371000
 
 const toRadians = (degrees) => degrees * (Math.PI / 180)
 
-function calculateHaversineDistance(p1, p2) {
+export function calculateHaversineDistance(p1, p2) {
+  if (!p1 || !p2) return null
   const deltaLat = toRadians(p2.latitude - p1.latitude)
   const deltaLon = toRadians(p2.longitude - p1.longitude)
   const a =
@@ -36,7 +37,7 @@ export function calculateCurvature(p1, p2, p3) {
 }
 
 export function calculateTotalAngularVelocity(alpha, beta, gamma) {
-  return Math.sqrt(Math.pow(alpha, 2) + Math.pow(beta, 2) + Math.pow(gamma, 2))
+  return Math.sqrt(Math.pow(alpha * (Math.PI / 180), 2) + Math.pow(beta * (Math.PI / 180), 2) + Math.pow(gamma * (Math.PI / 180), 2))
 }
 
 export function calculateTotalAcceleration(x, y, z) {
@@ -45,4 +46,48 @@ export function calculateTotalAcceleration(x, y, z) {
 
 export function calculateVelocity(angularVelocity, curvature) {
   return angularVelocity / curvature
+}
+
+function integrateAccelerationTrapezoidal(data) {
+  if (data.length < 2) {
+    return { velocity: 0, displacement: 0 }
+  }
+
+  let velocity = 0
+  let displacement = 0
+
+  for (let i = 1; i < data.length; i++) {
+    const dt = data[i]?.timestamp - data[i - 1]?.timestamp
+    const dv = 0.5 * (data[i]?.acceleration + data[i - 1]?.acceleration) * dt
+    const dd = 0.5 * (velocity + velocity + dv) * dt
+    velocity += dv
+    displacement += dd
+  }
+
+  return { velocity, displacement }
+}
+
+export function integrateAccelerationSimpson(data) {
+  if (data.length < 3) {
+    return integrateAccelerationTrapezoidal(data)
+  }
+
+  let velocity = 0
+  let displacement = 0
+
+  for (let i = 2; i < data.length; i++) {
+    const dt1 = data[i - 1]?.timestamp - data[i - 2]?.timestamp
+    const dt2 = data[i]?.timestamp - data[i - 1]?.timestamp
+
+    if (Math.abs(dt1 - dt2) > 1e-6) {
+      return integrateAccelerationTrapezoidal(data)
+    }
+    const dt = (dt1 + dt2) / 2
+    const dv = (dt / 3) * (data[i]?.acceleration + 4 * data[i - 1]?.acceleration + data[i - 2]?.acceleration)
+    const dd = (dt / 3) * (velocity + 4 * (velocity + dv) + velocity)
+    velocity += dv
+    displacement += dd
+  }
+
+  return { velocity, displacement }
 }
