@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import useDeviceMotion from './useDeviceMotion'
 import useDeviceOrienation from './useDeviceOrientation'
@@ -13,13 +13,16 @@ export default function useSensorData(config = {}) {
     () => ({ ...motion.errors, ...orientation.errors, ...geolocation.errors }),
     [motion.errors, orientation.errors, geolocation.errors]
   )
-  const isListening = motion.isListening || orientation.isListening || geolocation.isListening
+  const isListening = useMemo(
+    () => motion.isListening || orientation.isListening || geolocation.isListening,
+    [motion.isListening, orientation.isListening, geolocation.isListening]
+  )
 
-  const startListening = () => {
-    if (motion.startListening && typeof motion.startListening === 'function') motion.startListening()
-    if (orientation.startListening && typeof orientation.startListening === 'function') orientation.startListening()
-    if (geolocation.startListening && typeof geolocation.startListening === 'function') geolocation.startListening()
-  }
+  const startListening = useCallback(() => {
+    motion.startListening()
+    orientation.startListening()
+    geolocation.startListening()
+  }, [motion.startListening, orientation.startListening, geolocation.startListening])
 
   return {
     data: {
@@ -37,7 +40,7 @@ export default function useSensorData(config = {}) {
         longitude: geolocation.data?.longitude,
         altitude: geolocation.data?.altitude,
         accuracy: geolocation.data?.accuracy,
-        altitudeAccuracy: geolocation.data?.altitudeAccuracy,
+        altitudeAccuracy: geolocation.data?.altitudeAccuracy
       },
       velocity: {
         heading: geolocation.data?.heading,
