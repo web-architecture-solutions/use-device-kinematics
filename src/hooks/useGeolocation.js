@@ -2,7 +2,7 @@ import useDeviceAPI from './useDeviceAPI'
 
 const listenerType = 'geolocation'
 const isFeaturePresent = typeof navigator !== 'undefined' && navigator.geolocation
-const featureDetectionError = { type: listenerType, message: 'Geolocation is not supported by this browser.' }
+const featureDetectionError = 'Geolocation is not supported by this browser.'
 
 const requestPermission = async () => {
   return new Promise((resolve) => {
@@ -19,30 +19,22 @@ const requestPermission = async () => {
   })
 }
 
-function listenerFactory(setData) {
-  return ({ coords, timestamp }) => {
-    setData({
-      latitude: coords.latitude,
-      longitude: coords.longitude,
-      accuracy: coords.accuracy,
-      altitude: coords.altitude,
-      altitudeAccuracy: coords.altitudeAccuracy,
-      heading: coords.heading,
-      speed: coords.speed,
-      timestamp
-    })
-  }
-}
+const listener = ({ coords, timestamp }) => ({
+  latitude: coords.latitude,
+  longitude: coords.longitude,
+  accuracy: coords.accuracy,
+  altitude: coords.altitude,
+  altitudeAccuracy: coords.altitudeAccuracy,
+  heading: coords.heading,
+  speed: coords.speed,
+  timestamp
+})
 
-function handlerFactory({ enableHighAccuracy, timeout, maximumAge }) {
+function handlerFactory(options) {
   return (listener, setIsListening, errors) => {
     const handleError = ({ message }) => errors.add(listenerType, message)
 
-    const watcherId = navigator.geolocation.watchPosition(listener, handleError, {
-      enableHighAccuracy,
-      timeout,
-      maximumAge
-    })
+    const watcherId = navigator.geolocation.watchPosition(listener, handleError, options)
 
     setIsListening(true)
 
@@ -53,16 +45,20 @@ function handlerFactory({ enableHighAccuracy, timeout, maximumAge }) {
   }
 }
 
-export function useGeolocation({ enableHighAccuracy = false, timeout = Infinity, maximumAge = 0, debounce = 0 } = {}) {
-  return useDeviceAPI({
-    listenerFactory,
+const useGeolocation = ({ enableHighAccuracy = false, timeout = Infinity, maximumAge = 0, debounce = 0 } = {}) =>
+  useDeviceAPI({
+    listenerType,
     isFeaturePresent,
     featureDetectionError,
-    options: { enableHighAccuracy, timeout, maximumAge, debounce },
-    handlerFactory,
-    useEvent: false,
-    requestPermission
+    requestPermission,
+    listener,
+    handler: handlerFactory({
+      enableHighAccuracy,
+      timeout,
+      maximumAge
+    }),
+    debounce,
+    useEvent: false
   })
-}
 
 export default useGeolocation

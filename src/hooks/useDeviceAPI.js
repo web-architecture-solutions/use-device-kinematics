@@ -7,49 +7,49 @@ import useErrorHandling from './useErrorHandling'
 import useEvent from './useEvent'
 
 export default function useDeviceAPI({
+  listenerType,
   isFeaturePresent,
-  featureDetectionError: { type, message } = {},
-  listenerFactory,
-  handlerFactory,
-  options = {},
+  featureDetectionError,
+  listener: _listener,
+  handler,
+  debounce = 0,
   requestPermission,
   useEvent: _useEvent = false
 }) {
-  const { debounce = 0, enableHighAccuracy, timeout, maximumAge } = options
-
   const [data, setData] = useState(null)
   const [permissionGranted, setPermissionGranted] = useState(false)
   const [isListening, setIsListening] = useState(false)
 
   const errors = useErrorHandling()
 
-  const listener = _useEvent ? useEvent(listenerFactory(setData)) : listenerFactory(setData)
+  const listener = (event) => setData(_listener(event))
+  const stabilizedListener = _useEvent ? useEvent(listener) : listener
 
   const startListening = useCallback(async () => {
     if (typeof requestPermission === 'function') {
       try {
         const permission = await requestPermission()
-        permission === 'granted' ? setPermissionGranted(true) : errors.add(type, 'User denied permission to access the API.')
+        permission === 'granted' ? setPermissionGranted(true) : errors.add(listenerType, 'User denied permission to access the API.')
       } catch ({ message }) {
-        errors.add(type, message)
+        errors.add(listenerType, message)
       }
     } else if (isFeaturePresent) {
       throw new Error('requestPermission must be a function')
     }
-  }, [requestPermission, errors])
+  }, [isFeaturePresent, requestPermission, errors, listenerType])
 
   useEffect(() => {
     if (!isFeaturePresent) {
-      errors.add(type, message)
+      errors.add(listenerType, featureDetectionError)
       return
     }
+
     if (!permissionGranted) return
 
-    const debouncedListener = debounce > 0 ? useDebouncedCallback(listener, debounce) : listener
-    const handler = handlerFactory(options)
+    const debouncedListener = debounce > 0 ? useDebouncedCallback(stabilizedListener, debounce) : stabilizedListener
     const cleanup = handler(debouncedListener, setIsListening, errors)
     return cleanup && typeof cleanup === 'function' ? cleanup : () => null
-  }, [listenerFactory, handlerFactory, listener, debounce, errors, permissionGranted, enableHighAccuracy, timeout, maximumAge])
+  }, [stabilizedListener, handler, isFeaturePresent, permissionGranted, debounce, setIsListening])
 
   return { data, errors, startListening, isListening }
 }

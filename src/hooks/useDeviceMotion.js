@@ -2,39 +2,37 @@ import useDeviceAPI from './useDeviceAPI'
 
 const listenerType = 'devicemotion'
 const isFeaturePresent = typeof window !== 'undefined' && window.DeviceMotionEvent && window.DeviceMotionEvent.requestPermission
-const featureDetectionError = { type: listenerType, message: 'DeviceMotionEvent is not supported by this browser.' }
+const featureDetectionError = 'DeviceMotionEvent is not supported by this browser.'
 
-function listenerFactory(setData) {
-  return ({ acceleration, accelerationIncludingGravity, rotationRate, interval }) => {
-    setData({
-      acceleration,
-      accelerationIncludingGravity,
-      rotationRate,
-      interval
-    })
+const requestPermission = DeviceMotionEvent?.requestPermission
+
+const listener = ({ acceleration, accelerationIncludingGravity, rotationRate, interval }) => ({
+  acceleration,
+  accelerationIncludingGravity,
+  rotationRate,
+  interval
+})
+
+function handler(listener, setIsListening) {
+  window.addEventListener(listenerType, listener)
+  setIsListening(true)
+
+  return () => {
+    window.removeEventListener(listenerType, listener)
+    setIsListening(false)
   }
 }
 
-function handlerFactory() {
-  return (listener, setIsListening) => {
-    window.addEventListener(listenerType, listener)
-    setIsListening(true)
-
-    return () => {
-      window.removeEventListener(listenerType, listener)
-      setIsListening(false)
-    }
-  }
-}
-
-export default function useDeviceMotion({ debounce = 0 } = {}) {
-  return useDeviceAPI({
-    listenerFactory,
+const useDeviceMotion = ({ debounce = 0 } = {}) =>
+  useDeviceAPI({
+    listenerType,
     isFeaturePresent,
     featureDetectionError,
-    handlerFactory,
-    options: { debounce },
-    requestPermission: DeviceMotionEvent?.requestPermission,
+    requestPermission,
+    listener,
+    handler,
+    debounce,
     useEvent: true
   })
-}
+
+export default useDeviceMotion
