@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react'
 
+import KalmanFilter from 'kalman-filter/lib/kalman-filter'
+
 export default function use2DKalmanFilter(config) {
   const [state, setState] = useState({
     mean: config.initialMean,

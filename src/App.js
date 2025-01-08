@@ -1,13 +1,27 @@
-import { useEffect } from 'react'
+//import { useEffect } from 'react'
 
 import useSensorData from './hooks/useSensorData'
 
-import use2DKalmanFilter from './hooks/use2DKalmanFilter'
+//import use2DKalmanFilter from './hooks/use2DKalmanFilter'
 
-import { kalmanFilterConfig } from './constants'
+//import { kalmanFilterConfig } from './constants'
 
 export default function App() {
   const { data, errors, isListening, startListening } = useSensorData({ enableHighAccuracy: true })
+
+  //const { state, update, reset } = use2DKalmanFilter(kalmanFilterConfig)
+
+  /*
+  useEffect(() => {
+    // Simulate real-time observations for 2D (x, y, velocity, curvature, etc.)
+    const observations = [
+      // Example observation structure for 2D: [x, vx, ax, jx, y, vy, ay, jy, k_x, k_y]
+    ];
+    observations.forEach((obs, index) => {
+      setTimeout(() => update(obs), index * 1000);
+    });
+  }, [update]);
+  */
 
   return (
     <div>
@@ -29,9 +43,9 @@ export default function App() {
       <h3>Data</h3>
       {isListening ? <pre>{JSON.stringify(data, null, 2)}</pre> : <p>Click button to start.</p>}
 
-      <h2>Filtered Data</h2>
-
       {/*
+      <h2>Filtered Data</h2>
+      
       <pre>Current State Mean: {JSON.stringify(state.mean)}</pre>
       <pre>Current State Covariance: {JSON.stringify(state.covariance)}</pre>
       */}
