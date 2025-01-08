@@ -1,18 +1,19 @@
 import { useEffect, useState, useRef } from 'react'
 
-export default function useClock(updateFrequency = 10) {
+export default function useClock(updateFrequency = 100) {
   const startTime = useRef(null)
-  const [globalTimestamp, setGlobalTimestamp] = useState(0)
+  const [timestamps, setTimestamps] = useState([0, 0])
 
   useEffect(() => {
     startTime.current = performance.now()
 
     const intervalId = setInterval(() => {
-      setGlobalTimestamp(performance.now() - startTime.current)
+      const newTimestamp = performance.now() - startTime.current
+      setTimestamps(([oldTimestamp]) => [newTimestamp, oldTimestamp])
     }, updateFrequency)
 
     return () => clearInterval(intervalId)
   }, [])
 
-  return globalTimestamp
+  return timestamps
 }

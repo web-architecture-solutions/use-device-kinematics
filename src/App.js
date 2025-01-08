@@ -38,9 +38,11 @@ export default function App() {
       <h2>Raw Data</h2>
 
       <h3>Errors</h3>
+
       {errors && Object.keys(errors).length > 0 ? <pre>{JSON.stringify(errors, null, 2)}</pre> : null}
 
       <h3>Data</h3>
+
       {isListening ? <pre>{JSON.stringify(data, null, 2)}</pre> : <p>Click button to start.</p>}
 
       {/*

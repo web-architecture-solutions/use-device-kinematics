@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import useDeviceMotion from './useDeviceMotion'
 import useDeviceOrienation from './useDeviceOrientation'
@@ -8,6 +8,7 @@ import useTotalAngularVelocity from './useTotalAngularVelocity'
 import useTotalAccleration from './useTotalAcceleration'
 import useClock from './useClock'
 import useHeading from './useHeading'
+import useVelocityFromPosition from './useVelocityFromPosition'
 
 function transformSensorData({
   motionData,
@@ -16,7 +17,8 @@ function transformSensorData({
   timestamp,
   totalAngularVelocity,
   totalAcceleration,
-  heading
+  heading,
+  velocity
 }) {
   const data = {
     linearAcceleration: motionData?.acceleration,
@@ -53,7 +55,8 @@ function transformSensorData({
   data.debug = {
     totalAngularVelocity,
     totalAcceleration,
-    heading
+    heading,
+    velocity
   }
 
   return data
@@ -70,7 +73,13 @@ export default function useSensorData(config = {}) {
     gamma: motion.data?.rotationRate.gamma
   })
 
-  const timestamp = useClock()
+  const [timestamp, previousTimestamp] = useClock()
+
+  const velocity = useVelocityFromPosition({
+    latitude: geolocation.data?.latitude,
+    longitude: geolocation.data?.longitude,
+    timeInterval: timestamp - previousTimestamp
+  })
 
   const totalAcceleration = useTotalAccleration({
     x: motion.data?.acceleration.x,
@@ -101,7 +110,8 @@ export default function useSensorData(config = {}) {
       timestamp,
       totalAngularVelocity,
       totalAcceleration,
-      heading
+      heading,
+      velocity
     }),
     errors,
     isListening,
