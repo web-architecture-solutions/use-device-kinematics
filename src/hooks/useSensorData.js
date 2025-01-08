@@ -24,7 +24,7 @@ function transformSensorData({
   heading,
   totalVelocity,
   totalJerk,
-  curvaturefromAcceleration,
+  curvatureFromAcceleration,
   curvatureFromAngularVelocity
 }) {
   const data = {
@@ -65,7 +65,7 @@ function transformSensorData({
     heading,
     totalVelocity,
     totalJerk,
-    curvaturefromAcceleration,
+    curvatureFromAcceleration,
     curvatureFromAngularVelocity
   }
 
@@ -99,7 +99,7 @@ export default function useSensorData(config = {}) {
 
   const totalJerk = useTotalJerk({ totalAcceleration, timeInterval: timestamp - previousTimestamp })
 
-  const curvaturefromAcceleration = useTotalCurvatureFromAcceleration({ totalAcceleration, totalVelocity })
+  const curvatureFromAcceleration = useTotalCurvatureFromAcceleration({ totalAcceleration, totalVelocity })
   const curvatureFromAngularVelocity = useTotalCurvatureFromAngularVelocity({ totalAngularVelocity, totalVelocity })
 
   const heading = useHeading({ alpha: orientation.data?.alpha, beta: orientation.data?.beta, gamma: orientation.data?.gamma })
@@ -128,7 +128,7 @@ export default function useSensorData(config = {}) {
       heading,
       totalVelocity,
       totalJerk,
-      curvaturefromAcceleration,
+      curvatureFromAcceleration,
       curvatureFromAngularVelocity
     }),
     errors,
