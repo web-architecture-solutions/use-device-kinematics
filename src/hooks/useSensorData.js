@@ -4,11 +4,12 @@ import useDeviceMotion from './useDeviceMotion'
 import useDeviceOrienation from './useDeviceOrientation'
 import useGeolocation from './useGeolocation'
 
-import useTotalAngularVelocity from './useTotalAngularVelocity'
-import useTotalAccleration from './useTotalAcceleration'
 import useClock from './useClock'
 import useHeading from './useHeading'
-import useTotalVelocityFromPosition from './useTotalVelocityFromPosition'
+
+import useTotalAngularVelocity from './useTotalAngularVelocity'
+import useTotalAccleration from './useTotalAcceleration'
+import useTotalVelocity from './useTotalVelocity'
 import useTotalJerk from './useTotalJerk'
 import useTotalCurvatureFromAcceleration from './useTotalCurvatureFromAcceleration'
 import useTotalCurvatureFromAngularVelocity from './useTotalCurvatureFromAngularVelocity'
@@ -84,7 +85,7 @@ export default function useSensorData(config = {}) {
 
   const [timestamp, previousTimestamp] = useClock()
 
-  const totalVelocity = useTotalVelocityFromPosition({
+  const totalVelocity = useTotalVelocity({
     latitude: geolocation.data?.latitude,
     longitude: geolocation.data?.longitude,
     timeInterval: timestamp - previousTimestamp

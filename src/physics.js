@@ -17,7 +17,7 @@ export function calculateHaversineDistance(p1, p2) {
   return R * c
 }
 
-export function calculateTotalVelocityFromPosition(p1, p2, timeInterval) {
+export function calculateTotalVelocity(p1, p2, timeInterval) {
   const distance = calculateHaversineDistance(p1, p2)
   return distance / timeInterval
 }
