@@ -1,6 +1,8 @@
-export const useKalmanFilter2D = (config) => {
+import { useState, useCallback } from 'react'
+
+export function useKalmanFilter2D(config) {
   const [state, setState] = useState({
-    mean: config.initialMean, // Initial state mean: [x, v_x, a_x, j_x, y, v_y, a_y, j_y, k_x, k_y]
+    mean: config.initialMean,
     covariance: config.initialCovariance
   })
 
@@ -10,11 +12,11 @@ export const useKalmanFilter2D = (config) => {
         mean: config.initialMean,
         covariance: config.initialCovariance
       },
-      transition: config.transition, // Updated for 2D
+      transition: config.transition,
       covariance: config.processNoise
     },
     observation: {
-      stateProjection: config.observation, // Updated for 2D
+      stateProjection: config.observation,
       covariance: config.observationNoise
     }
   })
