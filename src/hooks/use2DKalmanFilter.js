@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 
-export function useKalmanFilter2D(config) {
+export default function use2DKalmanFilter(config) {
   const [state, setState] = useState({
     mean: config.initialMean,
     covariance: config.initialCovariance
