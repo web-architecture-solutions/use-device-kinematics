@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import useDeviceMotion from './useDeviceMotion'
 import useDeviceOrienation from './useDeviceOrientation'
@@ -8,9 +8,10 @@ import useTotalAngularVelocity from './useTotalAngularVelocity'
 import useTotalAccleration from './useTotalAcceleration'
 import useClock from './useClock'
 import useHeading from './useHeading'
-import useVelocityFromPosition from './useVelocityFromPosition'
-import useJerk from './useJerk'
+import useTotalVelocityFromPosition from './useTotalVelocityFromPosition'
+import useTotalJerk from './useTotalJerk'
 import useCurvatureFromAcceleration from './useCurvatureFromAcceleration'
+import useCurvatureFromAngularVelocity from './useCurvatureFromAngularVelocity'
 
 function transformSensorData({
   motionData,
@@ -20,9 +21,10 @@ function transformSensorData({
   totalAngularVelocity,
   totalAcceleration,
   heading,
-  velocity,
-  jerk,
-  curvaturefromAcceleration
+  totalVelocity,
+  totalJerk,
+  curvaturefromAcceleration,
+  curvatureFromAngularVelocity
 }) {
   const data = {
     linearAcceleration: motionData?.acceleration,
@@ -60,9 +62,10 @@ function transformSensorData({
     totalAngularVelocity,
     totalAcceleration,
     heading,
-    velocity,
-    jerk,
-    curvaturefromAcceleration
+    totalVelocity,
+    totalJerk,
+    curvaturefromAcceleration,
+    curvatureFromAngularVelocity
   }
 
   return data
@@ -81,7 +84,7 @@ export default function useSensorData(config = {}) {
 
   const [timestamp, previousTimestamp] = useClock()
 
-  const velocity = useVelocityFromPosition({
+  const totalVelocity = useTotalVelocityFromPosition({
     latitude: geolocation.data?.latitude,
     longitude: geolocation.data?.longitude,
     timeInterval: timestamp - previousTimestamp
@@ -93,9 +96,10 @@ export default function useSensorData(config = {}) {
     z: motion.data?.acceleration.z
   })
 
-  const jerk = useJerk({ totalAcceleration, timeInterval: timestamp - previousTimestamp })
+  const totalJerk = useTotalJerk({ totalAcceleration, timeInterval: timestamp - previousTimestamp })
 
-  const curvaturefromAcceleration = useCurvatureFromAcceleration({ totalAcceleration, velocity })
+  const curvaturefromAcceleration = useCurvatureFromAcceleration({ totalAcceleration, totalVelocity })
+  const curvatureFromAngularVelocity = useCurvatureFromAngularVelocity({ totalAngularVelocity, totalVelocity })
 
   const heading = useHeading({ alpha: orientation.data?.alpha, beta: orientation.data?.beta, gamma: orientation.data?.gamma })
 
@@ -121,9 +125,10 @@ export default function useSensorData(config = {}) {
       totalAngularVelocity,
       totalAcceleration,
       heading,
-      velocity,
-      jerk,
-      curvaturefromAcceleration
+      totalVelocity,
+      totalJerk,
+      curvaturefromAcceleration,
+      curvatureFromAngularVelocity
     }),
     errors,
     isListening,

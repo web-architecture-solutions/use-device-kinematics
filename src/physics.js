@@ -17,7 +17,7 @@ export function calculateHaversineDistance(p1, p2) {
   return R * c
 }
 
-export function calculateVelocityFromPosition(p1, p2, timeInterval) {
+export function calculateTotalVelocityFromPosition(p1, p2, timeInterval) {
   const distance = calculateHaversineDistance(p1, p2)
   return distance / timeInterval
 }
@@ -26,18 +26,18 @@ export function calculateTotalAcceleration(x, y) {
   return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
 }
 
-export function calculateJerk(acceleration1, acceleration2, timeInterval) {
-  return (acceleration2 - acceleration1) / timeInterval
+export function calculateTotalJerk(totalAcceleration1, totalAcceleration2, timeInterval) {
+  return (totalAcceleration1 - totalAcceleration2) / timeInterval
 }
 
 export function calculateTotalAngularVelocity(alpha, beta) {
   return Math.sqrt(Math.pow(alpha * (Math.PI / 180), 2) + Math.pow(beta * (Math.PI / 180), 2))
 }
 
-export function calculateCurvatureFromAcceleration(acceleration, velocity) {
-  return acceleration / Math.pow(velocity, 2)
+export function calculateCurvatureFromAcceleration(totalAcceleration, totalVelocity) {
+  return totalAcceleration / Math.pow(totalVelocity, 2)
 }
 
-export function calculateCurvatureFromAngularVelocity(angularVelocity, velocity) {
-  return angularVelocity / velocity
+export function calculateCurvatureFromAngularVelocity(totalAngularVelocity, totalVelocity) {
+  return totalAngularVelocity / totalVelocity
 }

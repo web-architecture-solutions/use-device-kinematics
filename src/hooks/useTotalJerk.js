@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react'
 
-import { calculateJerk } from '../physics'
+import { calculateTotalJerk } from '../physics'
 
-export default function useJerk({ totalAcceleration, timeInterval }) {
+export default function useTotalJerk({ totalAcceleration, timeInterval }) {
   const [accelerations, setAcclerations] = useState([])
-  const [jerk, setJerk] = useState(0)
+  const [totalJerk, setTotalJerk] = useState(0)
   useEffect(() => {
     setAcclerations(([oldAcceleration]) => [totalAcceleration, oldAcceleration])
     if (accelerations[0] && accelerations[1]) {
-      setJerk(calculateJerk(accelerations[0], accelerations[1], timeInterval))
+      setTotalJerk(calculateTotalJerk(accelerations[0], accelerations[1], timeInterval))
     }
   }, [totalAcceleration])
   useEffect(() => {}, [])
-  return jerk
+  return totalJerk
 }

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 
-import { calculateVelocityFromPosition } from '../physics'
+import { calculateTotalVelocityFromPosition } from '../physics'
 
-export default function useVelocityFromPosition({ latitude, longitude, timeInterval }) {
+export default function useTotalVelocityFromPosition({ latitude, longitude, timeInterval }) {
   const [points, setPoints] = useState([null, null])
-  const [velocity, setVelocity] = useState(0)
+  const [totalVelocity, setTotalVelocity] = useState(0)
 
   const [p1, p2] = points
 
@@ -15,8 +15,8 @@ export default function useVelocityFromPosition({ latitude, longitude, timeInter
   }, [latitude, longitude])
 
   useEffect(() => {
-    setVelocity(calculateVelocityFromPosition(p1, p2, timeInterval))
+    setTotalVelocity(calculateTotalVelocityFromPosition(p1, p2, timeInterval))
   }, [p1?.latitude, p1?.longitude, p2?.latitude, p2?.longitude])
 
-  return velocity
+  return totalVelocity
 }
