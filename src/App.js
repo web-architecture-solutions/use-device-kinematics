@@ -2,14 +2,14 @@
 
 import useSensorData from './hooks/useSensorData'
 
-//import use2DKalmanFilter from './hooks/use2DKalmanFilter'
+import use2DKalmanFilter from './hooks/use2DKalmanFilter'
 
-//import { kalmanFilterConfig } from './constants'
+import { kalmanFilterConfig } from './constants'
 
 export default function App() {
   const { data, errors, isListening, startListening } = useSensorData({ enableHighAccuracy: true })
 
-  //const { state, update, reset } = use2DKalmanFilter(kalmanFilterConfig)
+  const { state, update, reset } = use2DKalmanFilter(kalmanFilterConfig)
 
   /*
   useEffect(() => {
