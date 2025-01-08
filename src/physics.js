@@ -18,17 +18,16 @@ export function calculateVelocityFromPosition(p1, p2, timeInterval) {
   return distance / timeInterval
 }
 
-export function calculateTotalAcceleration(x, y, z) {
-  return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2))
+export function calculateTotalAcceleration(x, y) {
+  return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
 }
 
 export function calculateJerk(acceleration1, acceleration2, timeInterval) {
   return (acceleration2 - acceleration1) / timeInterval
 }
 
-export function calculateTotalAngularVelocity(latitude1, latitude2, timeInterval) {
-  const deltaLat = toRadians(latitude2 - latitude1)
-  return deltaLat / timeInterval
+export function calculateTotalAngularVelocity(alpha, beta) {
+  return Math.sqrt(Math.pow(alpha * (Math.PI / 180), 2) + Math.pow(beta * (Math.PI / 180), 2))
 }
 
 export function calculateCurvatureFromAngularVelocity(angularVelocity, velocity) {
