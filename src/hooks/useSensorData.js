@@ -7,6 +7,7 @@ import useGeolocation from './useGeolocation'
 import useClock from './useClock'
 import useHeading from './useHeading'
 
+// TODO: migrate these to use component physics helpers instead of total
 import useTotalAngularVelocity from './useTotalAngularVelocity'
 import useTotalAccleration from './useTotalAcceleration'
 import useTotalVelocity from './useTotalVelocity'
