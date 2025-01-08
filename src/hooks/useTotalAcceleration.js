@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { calculateTotalAcceleration } from '../lib/physics'
+import { calculateTotalAcceleration } from '../physics'
 
 export default function useTotalAccleration({ x, y, z }) {
   const [totalAcceleration, setTotalAcceleration] = useState(null)

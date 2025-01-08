@@ -7,14 +7,11 @@ import useGeolocation from './useGeolocation'
 import useCurvature from './useCurvature'
 import useTotalAngularVelocity from './useTotalAngularVelocity'
 import useTotalAccleration from './useTotalAcceleration'
-
 import useClock from './useClock'
-
+import useIntegratedVelocity from './useIntegratedVelocity'
 import useHeading from './useHeading'
 
-import { calculateVelocity } from '../lib/physics'
-
-import useIntegratedVelocity from './useIntegratedVelocity'
+import { calculateVelocity } from '../physics'
 
 function transformSensorData({
   motionData,

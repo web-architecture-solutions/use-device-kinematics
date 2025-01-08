@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { calculateTotalAngularVelocity } from '../lib/physics'
+import { calculateTotalAngularVelocity } from '../physics'
 
 export default function useTotalAngularVelocity({ alpha, beta, gamma }) {
   const [totalAngularVelocity, setTotalAngularVelocity] = useState(null)

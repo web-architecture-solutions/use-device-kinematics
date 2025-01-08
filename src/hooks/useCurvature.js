@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { calculateHaversineDistance } from '../lib/physics'
+import { calculateHaversineDistance } from '../physics'
 
 function leastSquaresCircle(points) {
   if (points.length < 3) return null

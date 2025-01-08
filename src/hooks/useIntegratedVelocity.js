@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { integrateAccelerationSimpson } from '../lib/physics'
+import { integrateAccelerationSimpson } from '../physics'
 
 export default function useIntegratedVelocity({ totalAcceleration, timestamp }) {
   const [accelerationSamples, setAccelerationSamples] = useState(Array.from({ length: 10 }, () => null))
