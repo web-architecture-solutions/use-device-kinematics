@@ -30,14 +30,14 @@ const H = [
   [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0] // angular_velocity_gamma
 ]
 
-const Q = Array.from({ length: 11 }, (_, i) => Array.from({ length: 15 }, (_, j) => (i === j ? _Q : 0)))
+const Q = Array.from({ length: 15 }, (_, i) => Array.from({ length: 15 }, (_, j) => (i === j ? _Q : 0)))
 
-const R = Array.from({ length: 9 }, (_, i) => Array.from({ length: 7 }, (_, j) => (i === j ? _R : 0)))
+const R = Array.from({ length: 7 }, (_, i) => Array.from({ length: 7 }, (_, j) => (i === j ? _R : 0)))
 
-const initialCovariance = Array.from({ length: 11 }, (_, i) => Array.from({ length: 11 }, (_, j) => (i === j ? 1000 : 0)))
+const initialCovariance = Array.from({ length: 15 }, (_, i) => Array.from({ length: 15 }, (_, j) => (i === j ? 1000 : 0)))
 
 export const kalmanFilterConfig = {
-  initialMean: Array(11).fill(0),
+  initialMean: Array(15).fill(0),
   initialCovariance,
   transition: F,
   observation: H,
