@@ -1,30 +1,21 @@
-import { useCallback, useMemo, useEffect, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import useDeviceMotion from './useDeviceMotion'
 import useDeviceOrienation from './useDeviceOrientation'
 import useGeolocation from './useGeolocation'
 
-import useCurvature from './useCurvature'
 import useTotalAngularVelocity from './useTotalAngularVelocity'
 import useTotalAccleration from './useTotalAcceleration'
 import useClock from './useClock'
-import useIntegratedVelocity from './useIntegratedVelocity'
 import useHeading from './useHeading'
-
-import { calculateVelocityFromAngularVelocityAndCurvature } from '../physics'
 
 function transformSensorData({
   motionData,
   orientationData,
   geolocationData,
   timestamp,
-  points,
-  curvature,
   totalAngularVelocity,
-  velocity,
   totalAcceleration,
-  accelerationSamples,
-  velocity2,
   heading
 }) {
   const data = {
@@ -60,13 +51,8 @@ function transformSensorData({
   }
 
   data.debug = {
-    points,
-    curvature,
     totalAngularVelocity,
-    velocity,
     totalAcceleration,
-    accelerationSamples,
-    velocity2,
     heading
   }
 
@@ -77,10 +63,6 @@ export default function useSensorData(config = {}) {
   const motion = useDeviceMotion(config)
   const orientation = useDeviceOrienation(config)
   const geolocation = useGeolocation(config)
-
-  const [velocity, setVelocity] = useState(null)
-
-  const { curvature, points } = useCurvature({ latitude: geolocation.data?.latitude, longitude: geolocation.data?.longitude })
 
   const totalAngularVelocity = useTotalAngularVelocity({
     alpha: motion.data?.rotationRate.alpha,
@@ -95,13 +77,6 @@ export default function useSensorData(config = {}) {
     y: motion.data?.acceleration.y,
     z: motion.data?.acceleration.z
   })
-
-  useEffect(() => {
-    const _velocity = curvature ? calculateVelocityFromAngularVelocityAndCurvature(totalAngularVelocity, curvature) : null
-    setVelocity(_velocity)
-  }, [totalAngularVelocity, curvature])
-
-  const { velocity: velocity2, accelerationSamples } = useIntegratedVelocity({ totalAcceleration, timestamp })
 
   const heading = useHeading({ alpha: orientation.data?.alpha, beta: orientation.data?.beta, gamma: orientation.data?.gamma })
 
@@ -124,13 +99,8 @@ export default function useSensorData(config = {}) {
       orientationData: orientation.data,
       geolocationData: geolocation.data,
       timestamp,
-      points,
-      curvature,
       totalAngularVelocity,
-      velocity,
       totalAcceleration,
-      accelerationSamples,
-      velocity2,
       heading
     }),
     errors,
