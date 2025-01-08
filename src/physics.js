@@ -34,10 +34,10 @@ export function calculateTotalAngularVelocity(alpha, beta) {
   return Math.sqrt(Math.pow(alpha * (Math.PI / 180), 2) + Math.pow(beta * (Math.PI / 180), 2))
 }
 
-export function calculateCurvatureFromAcceleration(totalAcceleration, totalVelocity) {
+export function calculateTotalCurvatureFromAcceleration(totalAcceleration, totalVelocity) {
   return totalAcceleration / Math.pow(totalVelocity, 2)
 }
 
-export function calculateCurvatureFromAngularVelocity(totalAngularVelocity, totalVelocity) {
+export function calculateTotalCurvatureFromAngularVelocity(totalAngularVelocity, totalVelocity) {
   return totalAngularVelocity / totalVelocity
 }
