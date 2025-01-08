@@ -14,7 +14,7 @@ export default function App() {
       <h1>Sensor Data</h1>
 
       <button onClick={startListening} disabled={isListening}>
-        {isListening ? 'Start Listening' : 'Listening...'}
+        {isListening ? 'Listening...' : 'Start Listening'}
       </button>
 
       {/*
