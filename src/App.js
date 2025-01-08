@@ -11,10 +11,6 @@ export default function App() {
 
   const { state, update, reset } = use2DKalmanFilter(kalmanFilterConfig)
 
-  const { longitude, latitude } = data.position
-
-  const { linearAcceleration, angularVelocity } = data
-
   /*
   useEffect(() => {
     // Simulate real-time observations for 2D (x, y, velocity, curvature, etc.)
