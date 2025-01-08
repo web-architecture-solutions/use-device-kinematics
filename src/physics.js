@@ -22,7 +22,7 @@ export function calculateHaversineDistance(p1, p2) {
 }
 
 export function calculateTotalVelocity(p1, p2, timeInterval) {
-  const distance = calculateHaversineDistance(p1, p2)
+  const { distance } = calculateHaversineDistance(p1, p2)
   return distance / timeInterval
 }
 
