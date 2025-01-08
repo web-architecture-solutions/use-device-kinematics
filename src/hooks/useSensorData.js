@@ -11,7 +11,7 @@ import useClock from './useClock'
 import useIntegratedVelocity from './useIntegratedVelocity'
 import useHeading from './useHeading'
 
-import { calculateVelocity } from '../physics'
+import { calculateVelocityFromAngularVelocityAndCurvature } from '../physics'
 
 function transformSensorData({
   motionData,
@@ -97,7 +97,7 @@ export default function useSensorData(config = {}) {
   })
 
   useEffect(() => {
-    const _velocity = curvature ? calculateVelocity(totalAngularVelocity, curvature) : null
+    const _velocity = curvature ? calculateVelocityFromAngularVelocityAndCurvature(totalAngularVelocity, curvature) : null
     setVelocity(_velocity)
   }, [totalAngularVelocity, curvature])
 

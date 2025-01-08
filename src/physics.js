@@ -44,7 +44,7 @@ export function calculateTotalAcceleration(x, y, z) {
   return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2))
 }
 
-export function calculateVelocity(angularVelocity, curvature) {
+export function calculateVelocityFromAngularVelocityAndCurvature(angularVelocity, curvature) {
   return angularVelocity / curvature
 }
 
@@ -90,4 +90,26 @@ export function integrateAccelerationSimpson(data) {
   }
 
   return { velocity, displacement }
+}
+
+export function calculateVelocityFromPosition(p1, p2, timeInterval) {
+  const distance = calculateHaversineDistance(p1, p2)
+  return distance / timeInterval
+}
+
+export function calculateJerk(acceleration1, acceleration2, timeInterval) {
+  return (acceleration2 - acceleration1) / timeInterval
+}
+
+export function calculateAngularVelocity(latitude1, latitude2, timeInterval) {
+  const deltaLat = toRadians(latitude2 - latitude1)
+  return deltaLat / timeInterval
+}
+
+export function calculateCurvatureFromAngularVelocity(angularVelocity, velocity) {
+  return angularVelocity / velocity
+}
+
+export function calculateCurvatureFromAcceleration(acceleration, velocity) {
+  return acceleration / Math.pow(velocity, 2)
 }
