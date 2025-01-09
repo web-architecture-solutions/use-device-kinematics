@@ -20,32 +20,6 @@ import useTotalCurvatureFromAcceleration from './useTotalCurvatureFromAccelerati
 import useTotalCurvatureFromAngularVelocity from './useTotalCurvatureFromAngularVelocity'
 */
 
-const transformSensorData = (
-  { acceleration, accelerationIncludingGravity, rotationRate, interval },
-  { alpha, beta, gamma },
-  { latitude, longitude, altitude, accuracy, altitudeAccuracy, speed, heading, timestamp: geolocationTimestamp },
-  timestamp,
-  totalVelocity
-) => ({
-  latitude,
-  longitude,
-  altitude,
-  geolocationAccuracy: accuracy,
-  altitudeAccuracy,
-  speed,
-  heading,
-  linearAcceleration: acceleration,
-  linearAccelerationIncludingGravity: accelerationIncludingGravity,
-  angularVelocity: rotationRate,
-  yaw: alpha,
-  pitch: beta,
-  roll: gamma,
-  geolocationTimestamp,
-  motionInterval: interval,
-  timestamp,
-  totalVelocity
-})
-
 export default function useSensorData(config = {}) {
   const [timestamp, previousTimestamp] = useClock()
 
@@ -53,11 +27,11 @@ export default function useSensorData(config = {}) {
   const orientation = useDeviceOrienation(config)
   const geolocation = useGeolocation(config)
 
-  const { totalVelocity } = useVelocityFromPosition({
-    latitude: geolocation.data?.latitude,
-    longitude: geolocation.data?.longitude,
-    timeInterval: timestamp - previousTimestamp
-  })
+  const { xVelocityFromPosition, yVelocityFromPosition, totalVelocityFromPosition } = useVelocityFromPosition(
+    geolocation.data?.latitude ?? null,
+    geolocation.data?.longitude ?? null,
+    timestamp - previousTimestamp
+  )
 
   /*
   const totalAngularVelocity = useTotalAngularVelocity({
@@ -80,11 +54,25 @@ export default function useSensorData(config = {}) {
   const heading = useHeading({ alpha: orientation.data?.alpha, beta: orientation.data?.beta, gamma: orientation.data?.gamma })
   */
 
-  const data = useMemo(() => {
-    return motion.data && orientation.data && geolocation.data
-      ? transformSensorData(motion.data, orientation.data, geolocation.data, timestamp, totalVelocity)
-      : {}
-  }, [motion.data, orientation.data, geolocation.data])
+  const calculatedData = useMemo(
+    () => ({
+      xVelocityFromPosition,
+      yVelocityFromPosition,
+      totalVelocityFromPosition,
+      timestamp
+    }),
+    [xVelocityFromPosition, yVelocityFromPosition, totalVelocityFromPosition, timestamp]
+  )
+
+  const data = useMemo(
+    () => ({
+      ...motion?.data,
+      ...orientation?.data,
+      ...geolocation?.data,
+      ...calculatedData
+    }),
+    [motion.data, orientation.data, geolocation.data, calculatedData]
+  )
 
   const errors = useMemo(
     () => ({ ...motion.errors, ...orientation.errors, ...geolocation.errors }),

@@ -25,11 +25,11 @@ export function calculateHaversineDistance({ latitude: latitude1, longitude: lon
 export function calculateVelocityFromPosition(p1, p2, timeInterval) {
   const { distance, deltaLat, deltaLon } = calculateHaversineDistance(p1, p2)
 
-  const xVelocity = deltaLon / timeInterval
-  const yVelocity = deltaLat / timeInterval
-  const totalVelocity = distance / timeInterval
+  const xVelocityFromPosition = deltaLon / timeInterval
+  const yVelocityFromPosition = deltaLat / timeInterval
+  const totalVelocityFromPosition = distance / timeInterval
 
-  return { xVelocity, yVelocity, totalVelocity }
+  return { xVelocityFromPosition, yVelocityFromPosition, totalVelocityFromPosition }
 }
 
 /*
