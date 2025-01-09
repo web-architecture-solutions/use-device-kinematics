@@ -5,91 +5,65 @@ import useDeviceOrienation from './useDeviceOrientation'
 import useGeolocation from './useGeolocation'
 
 import useClock from './useClock'
+
+import useVelocityFromPosition from './useVelocityFromPosition'
+
+/*
 import useHeading from './useHeading'
 
 // TODO: migrate these to use component physics helpers instead of total
 import useTotalAngularVelocity from './useTotalAngularVelocity'
 import useTotalAccleration from './useTotalAcceleration'
-import useTotalVelocity from './useTotalVelocity'
+
 import useTotalJerk from './useTotalJerk'
 import useTotalCurvatureFromAcceleration from './useTotalCurvatureFromAcceleration'
 import useTotalCurvatureFromAngularVelocity from './useTotalCurvatureFromAngularVelocity'
+*/
 
-function transformSensorData({
-  motionData,
-  orientationData,
-  geolocationData,
+const transformSensorData = (
+  { acceleration, accelerationIncludingGravity, rotationRate, interval },
+  { alpha, beta, gamma },
+  { latitude, longitude, altitude, accuracy, altitudeAccuracy, speed, heading, timestamp: geolocationTimestamp },
   timestamp,
-  totalAngularVelocity,
-  totalAcceleration,
+  totalVelocity
+) => ({
+  latitude,
+  longitude,
+  altitude,
+  geolocationAccuracy: accuracy,
+  altitudeAccuracy,
+  speed,
   heading,
-  totalVelocity,
-  totalJerk,
-  curvatureFromAcceleration,
-  curvatureFromAngularVelocity
-}) {
-  const data = {
-    linearAcceleration: motionData?.acceleration,
-    linearAccelerationIncludingGravity: motionData?.accelerationIncludingGravity,
-    angularVelocity: motionData?.rotationRate,
-    motionInterval: motionData?.interval,
-    geolocationTimestamp: geolocationData?.timestamp,
-    timestamp
-  }
-
-  if (geolocationData) {
-    data.position = {
-      latitude: geolocationData?.latitude,
-      longitude: geolocationData?.longitude,
-      altitude: geolocationData?.altitude,
-      accuracy: geolocationData?.accuracy,
-      altitudeAccuracy: geolocationData?.altitudeAccuracy
-    }
-
-    data.velocity = {
-      heading: geolocationData?.heading,
-      speed: geolocationData?.speed
-    }
-  }
-
-  if (orientationData) {
-    data.orientation = {
-      yaw: orientationData.alpha,
-      pitch: orientationData.beta,
-      roll: orientationData.gamma
-    }
-  }
-
-  data.debug = {
-    totalAngularVelocity,
-    totalAcceleration,
-    heading,
-    totalVelocity,
-    totalJerk,
-    curvatureFromAcceleration,
-    curvatureFromAngularVelocity
-  }
-
-  return data
-}
+  linearAcceleration: acceleration,
+  linearAccelerationIncludingGravity: accelerationIncludingGravity,
+  angularVelocity: rotationRate,
+  yaw: alpha,
+  pitch: beta,
+  roll: gamma,
+  geolocationTimestamp,
+  motionInterval: interval,
+  timestamp,
+  totalVelocity
+})
 
 export default function useSensorData(config = {}) {
+  const [timestamp, previousTimestamp] = useClock()
+
   const motion = useDeviceMotion(config)
   const orientation = useDeviceOrienation(config)
   const geolocation = useGeolocation(config)
 
+  const { totalVelocity } = useVelocityFromPosition({
+    latitude: geolocation.data?.latitude,
+    longitude: geolocation.data?.longitude,
+    timeInterval: timestamp - previousTimestamp
+  })
+
+  /*
   const totalAngularVelocity = useTotalAngularVelocity({
     alpha: motion.data?.rotationRate.alpha,
     beta: motion.data?.rotationRate.beta,
     gamma: motion.data?.rotationRate.gamma
-  })
-
-  const [timestamp, previousTimestamp] = useClock()
-
-  const totalVelocity = useTotalVelocity({
-    latitude: geolocation.data?.latitude,
-    longitude: geolocation.data?.longitude,
-    timeInterval: timestamp - previousTimestamp
   })
 
   const totalAcceleration = useTotalAccleration({
@@ -104,11 +78,19 @@ export default function useSensorData(config = {}) {
   const curvatureFromAngularVelocity = useTotalCurvatureFromAngularVelocity({ totalAngularVelocity, totalVelocity })
 
   const heading = useHeading({ alpha: orientation.data?.alpha, beta: orientation.data?.beta, gamma: orientation.data?.gamma })
+  */
+
+  const data = useMemo(() => {
+    return motion.data && orientation.data && geolocation.data
+      ? transformSensorData(motion.data, orientation.data, geolocation.data, timestamp, totalVelocity)
+      : {}
+  }, [motion.data, orientation.data, geolocation.data])
 
   const errors = useMemo(
     () => ({ ...motion.errors, ...orientation.errors, ...geolocation.errors }),
     [motion.errors, orientation.errors, geolocation.errors]
   )
+
   const isListening = useMemo(
     () => motion.isListening || orientation.isListening || geolocation.isListening,
     [motion.isListening, orientation.isListening, geolocation.isListening]
@@ -119,19 +101,7 @@ export default function useSensorData(config = {}) {
   }, [motion.startListening, orientation.startListening, geolocation.startListening])
 
   return {
-    data: transformSensorData({
-      motionData: motion.data,
-      orientationData: orientation.data,
-      geolocationData: geolocation.data,
-      timestamp,
-      totalAngularVelocity,
-      totalAcceleration,
-      heading,
-      totalVelocity,
-      totalJerk,
-      curvatureFromAcceleration,
-      curvatureFromAngularVelocity
-    }),
+    data,
     errors,
     isListening,
     startListening

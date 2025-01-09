@@ -7,7 +7,12 @@ export default function useTotalAngularVelocity({ alpha, beta, gamma }) {
 
   useEffect(() => {
     if (alpha && beta && gamma) {
-      const _totalAngularVelocity = calculateTotalAngularVelocity(alpha, beta, gamma)
+      // TODO: implement components
+      const {
+        xAngularVelocity,
+        yAngularVelocity,
+        totalAngularVelocity: _totalAngularVelocity
+      } = calculateTotalAngularVelocity(alpha, beta, gamma)
       setTotalAngularVelocity(_totalAngularVelocity)
     }
   }, [alpha, beta, gamma])

@@ -1,14 +1,15 @@
 const toRadians = (degrees) => degrees * (Math.PI / 180)
 
-export function calculateHaversineDistance(p1, p2) {
+export function calculateHaversineDistance({ latitude: latitude1, longitude: longitude1 }, { latitude: latitude2, longitude: longitude2 }) {
   const R = 6371000
-  if (!p1 || !p2) return null
+  if (latitude1 === null || latitude2 === null || longitude1 === null || longitude2 === null)
+    return { distance: null, deltaLat: null, deltaLon: null }
 
-  const deltaLat = toRadians(p2.latitude - p1.latitude)
-  const deltaLon = toRadians(p2.longitude - p1.longitude)
+  const deltaLat = toRadians(latitude2 - latitude1)
+  const deltaLon = toRadians(longitude2 - longitude1)
 
-  const lat1 = toRadians(p1.latitude)
-  const lat2 = toRadians(p2.latitude)
+  const lat1 = toRadians(latitude1)
+  const lat2 = toRadians(latitude2)
 
   const a =
     Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) + Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2)
@@ -21,21 +22,38 @@ export function calculateHaversineDistance(p1, p2) {
   }
 }
 
-export function calculateTotalVelocity(p1, p2, timeInterval) {
-  const { distance } = calculateHaversineDistance(p1, p2)
-  return distance / timeInterval
+export function calculateVelocityFromPosition(p1, p2, timeInterval) {
+  const { distance, deltaLat, deltaLon } = calculateHaversineDistance(p1, p2)
+
+  const xVelocity = deltaLon / timeInterval
+  const yVelocity = deltaLat / timeInterval
+  const totalVelocity = distance / timeInterval
+
+  return { xVelocity, yVelocity, totalVelocity }
 }
 
-export function calculateTotalAcceleration(x, y) {
-  return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
+/*
+export function calculateTotalAcceleration(xAcceleration, yAcceleration) {
+  const totalAcceleration = Math.sqrt(Math.pow(xAcceleration, 2) + Math.pow(yAcceleration, 2))
+  return totalAcceleration
 }
 
-export function calculateTotalJerk(totalAcceleration1, totalAcceleration2, timeInterval) {
-  return (totalAcceleration1 - totalAcceleration2) / timeInterval
+export function calculateJerkFromAcceleration(
+  { totalAcceleration: totalAcceleration1, xAcceleration: xAcceleration1, yAcceleration: yAcceleration1 },
+  { totalAcceleration: totalAcceleration2, yAcceleration: xAcceleration2, yAcceleration: yAcceleration2 },
+  timeInterval
+) {
+  const xJerk = (xAcceleration2 - xAcceleration1) / timeInterval
+  const yJerk = (yAcceleration2 - yAcceleration1) / timeInterval
+  const totalJerk = (totalAcceleration1 - totalAcceleration2) / timeInterval
+  return { xJerk, yJerk, totalJerk }
 }
 
-export function calculateTotalAngularVelocity(alpha, beta) {
-  return Math.sqrt(Math.pow(alpha * (Math.PI / 180), 2) + Math.pow(beta * (Math.PI / 180), 2))
+export function calculateJerkComponents(acceleration1, acceleration2, timeInterval) {
+  const xJerk = (acceleration2.xAcceleration - acceleration1.xAcceleration) / timeInterval
+  const yJerk = (acceleration2.yAcceleration - acceleration1.yAcceleration) / timeInterval
+
+  return { xJerk, yJerk }
 }
 
 export function calculateTotalCurvatureFromAcceleration(totalAcceleration, totalVelocity) {
@@ -46,27 +64,12 @@ export function calculateTotalCurvatureFromAngularVelocity(totalAngularVelocity,
   return totalAngularVelocity / totalVelocity
 }
 
-export function calculateVelocityComponents(p1, p2, timeInterval) {
-  const { deltaLat, deltaLon } = calculateHaversineDistance(p1, p2)
+export function calculateTotalAngularVelocity(alpha, beta) {
+  const xAngularVelocity = alpha * (Math.PI / 180) // Convert to radians
+  const yAngularVelocity = beta * (Math.PI / 180) // Convert to radians
+  const totalAngularVelocity = Math.sqrt(Math.pow(alpha * (Math.PI / 180), 2) + Math.pow(beta * (Math.PI / 180), 2))
 
-  const xVelocity = deltaLon / timeInterval
-  const yVelocity = deltaLat / timeInterval
-
-  return { xVelocity, yVelocity }
-}
-
-export function calculateAccelerationComponents(velocity1, velocity2, timeInterval) {
-  const xAcceleration = (velocity2.xVelocity - velocity1.xVelocity) / timeInterval
-  const yAcceleration = (velocity2.yVelocity - velocity1.yVelocity) / timeInterval
-
-  return { xAcceleration, yAcceleration }
-}
-
-export function calculateJerkComponents(acceleration1, acceleration2, timeInterval) {
-  const xJerk = (acceleration2.xAcceleration - acceleration1.xAcceleration) / timeInterval
-  const yJerk = (acceleration2.yAcceleration - acceleration1.yAcceleration) / timeInterval
-
-  return { xJerk, yJerk }
+  return { xAngularVelocity, yAngularVelocity, totalAngularVelocity }
 }
 
 export function calculateAngularVelocityComponents(alpha, beta) {
@@ -89,3 +92,4 @@ export function calculateCurvatureComponentsFromAngularVelocity(angularVelocity,
 
   return { xCurvature, yCurvature }
 }
+*/
