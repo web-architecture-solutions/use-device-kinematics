@@ -7,13 +7,14 @@ import useGeolocation from './useGeolocation'
 import useClock from './useClock'
 
 import useVelocityFromPosition from './useVelocityFromPosition'
+import useTotalAccelerationFromComponents from './useTotalAccelerationFromComponents'
+import useTotalAngularVelocityFromComponents from './useTotalAngularVelocityFromComponents'
 
 /*
 import useHeading from './useHeading'
 
 // TODO: migrate these to use component physics helpers instead of total
-import useTotalAngularVelocity from './useTotalAngularVelocity'
-import useTotalAccleration from './useTotalAcceleration'
+
 
 import useTotalJerk from './useTotalJerk'
 import useTotalCurvatureFromAcceleration from './useTotalCurvatureFromAcceleration'
@@ -33,13 +34,19 @@ export default function useSensorData(config = {}) {
     timestamp - previousTimestamp
   )
 
-  /*
-  const totalAngularVelocity = useTotalAngularVelocity({
-    alpha: motion.data?.rotationRate.alpha,
-    beta: motion.data?.rotationRate.beta,
-    gamma: motion.data?.rotationRate.gamma
-  })
+  const totalAcceleration = useTotalAccelerationFromComponents(
+    motion.data?.acceleration?.x ?? null,
+    motion.data?.acceleration?.y ?? null,
+    motion.data?.acceleration?.z ?? null
+  )
 
+  const totalAngularVelocity = useTotalAngularVelocityFromComponents(
+    motion.data?.rotationRate?.alpha ?? null,
+    motion.data?.rotationRate?.beta ?? null,
+    motion.data?.rotationRate?.gamma ?? null
+  )
+
+  /*
   const totalAcceleration = useTotalAccleration({
     x: motion.data?.acceleration.x,
     y: motion.data?.acceleration.y,
@@ -59,9 +66,11 @@ export default function useSensorData(config = {}) {
       xVelocityFromPosition,
       yVelocityFromPosition,
       totalVelocityFromPosition,
+      totalAcceleration,
+      totalAngularVelocity,
       timestamp
     }),
-    [xVelocityFromPosition, yVelocityFromPosition, totalVelocityFromPosition, timestamp]
+    [xVelocityFromPosition, yVelocityFromPosition, totalVelocityFromPosition, totalAcceleration, totalAngularVelocity, timestamp]
   )
 
   const data = useMemo(

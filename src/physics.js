@@ -1,5 +1,9 @@
 const toRadians = (degrees) => degrees * (Math.PI / 180)
 
+const sumSquares = (accumulator, component) => accumulator + Math.pow(component, 2)
+
+const euclideanNorm = (...components) => Math.sqrt(components.reduce(sumSquares, 0))
+
 export function calculateHaversineDistance({ latitude: latitude1, longitude: longitude1 }, { latitude: latitude2, longitude: longitude2 }) {
   const R = 6371000
   if (latitude1 === null || latitude2 === null || longitude1 === null || longitude2 === null)
@@ -32,12 +36,15 @@ export function calculateVelocityFromPosition(p1, p2, timeInterval) {
   return { xVelocityFromPosition, yVelocityFromPosition, totalVelocityFromPosition }
 }
 
-/*
-export function calculateTotalAcceleration(xAcceleration, yAcceleration) {
-  const totalAcceleration = Math.sqrt(Math.pow(xAcceleration, 2) + Math.pow(yAcceleration, 2))
-  return totalAcceleration
+export function calculateTotalAccelerationFromComponents(xAcceleration, yAcceleration, zAcceleration) {
+  return euclideanNorm(xAcceleration, yAcceleration, zAcceleration)
 }
 
+export function calculateTotalAngularVelocityFromComponents(alpha, beta, gamma) {
+  return euclideanNorm(alpha * (Math.PI / 180), beta * (Math.PI / 180), gamma * (Math.PI / 180))
+}
+
+/*
 export function calculateJerkFromAcceleration(
   { totalAcceleration: totalAcceleration1, xAcceleration: xAcceleration1, yAcceleration: yAcceleration1 },
   { totalAcceleration: totalAcceleration2, yAcceleration: xAcceleration2, yAcceleration: yAcceleration2 },
@@ -64,13 +71,7 @@ export function calculateTotalCurvatureFromAngularVelocity(totalAngularVelocity,
   return totalAngularVelocity / totalVelocity
 }
 
-export function calculateTotalAngularVelocity(alpha, beta) {
-  const xAngularVelocity = alpha * (Math.PI / 180) // Convert to radians
-  const yAngularVelocity = beta * (Math.PI / 180) // Convert to radians
-  const totalAngularVelocity = Math.sqrt(Math.pow(alpha * (Math.PI / 180), 2) + Math.pow(beta * (Math.PI / 180), 2))
 
-  return { xAngularVelocity, yAngularVelocity, totalAngularVelocity }
-}
 
 export function calculateAngularVelocityComponents(alpha, beta) {
   const xAngularVelocity = alpha * (Math.PI / 180) // Convert to radians
