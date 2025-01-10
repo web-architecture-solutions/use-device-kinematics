@@ -40,29 +40,23 @@ export function calculateTotalAccelerationFromComponents(xAcceleration, yAcceler
   return euclideanNorm(xAcceleration, yAcceleration, zAcceleration)
 }
 
+export function calculateJerkFromAcceleration(
+  { totalAcceleration: totalAcceleration1, xAcceleration: xAcceleration1, yAcceleration: yAcceleration1, zAcceleration: zAcceleration1 },
+  { totalAcceleration: totalAcceleration2, yAcceleration: xAcceleration2, yAcceleration: yAcceleration2, zAcceleration: zAcceleration2 },
+  timeInterval
+) {
+  const xJerk = (xAcceleration2 - xAcceleration1) / timeInterval
+  const yJerk = (yAcceleration2 - yAcceleration1) / timeInterval
+  const zJerk = (zAcceleration2 - zAcceleration1) / timeInterval
+  const totalJerk = (totalAcceleration1 - totalAcceleration2) / timeInterval
+  return { xJerk, yJerk, zJerk, totalJerk }
+}
+
 export function calculateTotalAngularVelocityFromComponents(alpha, beta, gamma) {
   return euclideanNorm(alpha * (Math.PI / 180), beta * (Math.PI / 180), gamma * (Math.PI / 180))
 }
 
 /*
-export function calculateJerkFromAcceleration(
-  { totalAcceleration: totalAcceleration1, xAcceleration: xAcceleration1, yAcceleration: yAcceleration1 },
-  { totalAcceleration: totalAcceleration2, yAcceleration: xAcceleration2, yAcceleration: yAcceleration2 },
-  timeInterval
-) {
-  const xJerk = (xAcceleration2 - xAcceleration1) / timeInterval
-  const yJerk = (yAcceleration2 - yAcceleration1) / timeInterval
-  const totalJerk = (totalAcceleration1 - totalAcceleration2) / timeInterval
-  return { xJerk, yJerk, totalJerk }
-}
-
-export function calculateJerkComponents(acceleration1, acceleration2, timeInterval) {
-  const xJerk = (acceleration2.xAcceleration - acceleration1.xAcceleration) / timeInterval
-  const yJerk = (acceleration2.yAcceleration - acceleration1.yAcceleration) / timeInterval
-
-  return { xJerk, yJerk }
-}
-
 export function calculateTotalCurvatureFromAcceleration(totalAcceleration, totalVelocity) {
   return totalAcceleration / Math.pow(totalVelocity, 2)
 }
@@ -70,8 +64,6 @@ export function calculateTotalCurvatureFromAcceleration(totalAcceleration, total
 export function calculateTotalCurvatureFromAngularVelocity(totalAngularVelocity, totalVelocity) {
   return totalAngularVelocity / totalVelocity
 }
-
-
 
 export function calculateAngularVelocityComponents(alpha, beta) {
   const xAngularVelocity = alpha * (Math.PI / 180) // Convert to radians

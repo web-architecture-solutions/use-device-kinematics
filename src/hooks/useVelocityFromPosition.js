@@ -11,7 +11,7 @@ export default function useVelocityFromPosition(latitude = null, longitude = nul
   useEffect(() => {
     setPoints(([oldPoint]) => [{ latitude, longitude }, oldPoint])
     setData(calculateVelocityFromPosition(p1, p2, timeInterval))
-  }, [latitude, longitude])
+  }, [latitude, longitude, timeInterval])
 
   return data
 }

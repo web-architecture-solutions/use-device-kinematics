@@ -8,6 +8,7 @@ import useClock from './useClock'
 
 import useVelocityFromPosition from './useVelocityFromPosition'
 import useTotalAccelerationFromComponents from './useTotalAccelerationFromComponents'
+import useJerkFromAcceleration from './useJerkFromAcceleration'
 import useTotalAngularVelocityFromComponents from './useTotalAngularVelocityFromComponents'
 
 /*
@@ -16,7 +17,7 @@ import useHeading from './useHeading'
 // TODO: migrate these to use component physics helpers instead of total
 
 
-import useTotalJerk from './useTotalJerk'
+
 import useTotalCurvatureFromAcceleration from './useTotalCurvatureFromAcceleration'
 import useTotalCurvatureFromAngularVelocity from './useTotalCurvatureFromAngularVelocity'
 */
@@ -40,6 +41,14 @@ export default function useSensorData(config = {}) {
     motion.data?.acceleration?.z ?? null
   )
 
+  const { xJerk, yJerk, totalJerk } = useJerkFromAcceleration(
+    motion.data?.acceleration?.x ?? null,
+    motion.data?.acceleration?.y ?? null,
+    motion.data?.acceleration?.z ?? null,
+    totalAcceleration ?? null,
+    timestamp - previousTimestamp
+  )
+
   const totalAngularVelocity = useTotalAngularVelocityFromComponents(
     motion.data?.rotationRate?.alpha ?? null,
     motion.data?.rotationRate?.beta ?? null,
@@ -47,14 +56,6 @@ export default function useSensorData(config = {}) {
   )
 
   /*
-  const totalAcceleration = useTotalAccleration({
-    x: motion.data?.acceleration.x,
-    y: motion.data?.acceleration.y,
-    z: motion.data?.acceleration.z
-  })
-
-  const totalJerk = useTotalJerk({ totalAcceleration, timeInterval: timestamp - previousTimestamp })
-
   const curvatureFromAcceleration = useTotalCurvatureFromAcceleration({ totalAcceleration, totalVelocity })
   const curvatureFromAngularVelocity = useTotalCurvatureFromAngularVelocity({ totalAngularVelocity, totalVelocity })
 
@@ -67,10 +68,23 @@ export default function useSensorData(config = {}) {
       yVelocityFromPosition,
       totalVelocityFromPosition,
       totalAcceleration,
+      xJerk,
+      yJerk,
+      totalJerk,
       totalAngularVelocity,
       timestamp
     }),
-    [xVelocityFromPosition, yVelocityFromPosition, totalVelocityFromPosition, totalAcceleration, totalAngularVelocity, timestamp]
+    [
+      xVelocityFromPosition,
+      yVelocityFromPosition,
+      totalVelocityFromPosition,
+      totalAcceleration,
+      xJerk,
+      yJerk,
+      totalJerk,
+      totalAngularVelocity,
+      timestamp
+    ]
   )
 
   const data = useMemo(
