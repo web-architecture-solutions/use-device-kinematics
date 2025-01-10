@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-export default function useHeading({ alpha }) {
+export default function useHeading(alpha) {
   const [heading, setHeading] = useState(null)
 
   const angle = window.screen.orientation.angle

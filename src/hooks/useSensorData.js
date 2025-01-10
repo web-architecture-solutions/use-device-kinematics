@@ -7,17 +7,12 @@ import useGeolocation from './useGeolocation'
 import useClock from './useClock'
 
 import useVelocityFromPosition from './useVelocityFromPosition'
+import useHeading from './useHeading'
 import useTotalAccelerationFromComponents from './useTotalAccelerationFromComponents'
 import useJerkFromAcceleration from './useJerkFromAcceleration'
 import useTotalAngularVelocityFromComponents from './useTotalAngularVelocityFromComponents'
 
 /*
-import useHeading from './useHeading'
-
-// TODO: migrate these to use component physics helpers instead of total
-
-
-
 import useTotalCurvatureFromAcceleration from './useTotalCurvatureFromAcceleration'
 import useTotalCurvatureFromAngularVelocity from './useTotalCurvatureFromAngularVelocity'
 */
@@ -34,6 +29,8 @@ export default function useSensorData(config = {}) {
     geolocation.data?.longitude ?? null,
     timestamp - previousTimestamp
   )
+
+  const heading = useHeading(orientation.data?.alpha)
 
   const totalAcceleration = useTotalAccelerationFromComponents(
     motion.data?.acceleration?.x ?? null,
@@ -59,7 +56,7 @@ export default function useSensorData(config = {}) {
   const curvatureFromAcceleration = useTotalCurvatureFromAcceleration({ totalAcceleration, totalVelocity })
   const curvatureFromAngularVelocity = useTotalCurvatureFromAngularVelocity({ totalAngularVelocity, totalVelocity })
 
-  const heading = useHeading({ alpha: orientation.data?.alpha, beta: orientation.data?.beta, gamma: orientation.data?.gamma })
+  
   */
 
   const calculatedData = useMemo(
@@ -67,6 +64,7 @@ export default function useSensorData(config = {}) {
       xVelocityFromPosition,
       yVelocityFromPosition,
       totalVelocityFromPosition,
+      heading,
       totalAcceleration,
       xJerk,
       yJerk,
@@ -78,6 +76,7 @@ export default function useSensorData(config = {}) {
       xVelocityFromPosition,
       yVelocityFromPosition,
       totalVelocityFromPosition,
+      heading,
       totalAcceleration,
       xJerk,
       yJerk,
