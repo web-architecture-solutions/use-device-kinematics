@@ -32,6 +32,10 @@ export class Matrix extends Array {
     return Matrix.diagonal(dimension, 1)
   }
 
+  static block(m) {
+    return new Matrix(m.flatMap((row) => row))
+  }
+
   add(matrix) {
     return this.map((row, i) => row.map((value, j) => value + matrix[i][j]))
   }
