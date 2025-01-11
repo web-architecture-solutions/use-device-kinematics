@@ -82,12 +82,20 @@ export class Vector3 {
   }
 }
 
-function createIdentityMatrix(dimension) {
-  return Array.from({ length: dimension }, (_, i) => Array.from({ length: dimension }, (_, j) => (i === j ? 1 : 0)))
+function createConstantMatrix(dimension, value) {
+  return Array.from({ length: dimension }, () => Array(dimension).fill(value))
+}
+
+function createDiagonalMatrix(dimension, value) {
+  return Array.from({ length: dimension }, (_, i) => Array.from({ length: dimension }, (_, j) => (i === j ? value : 0)))
 }
 
 function createZeroMatrix(dimension) {
-  return Array.from({ length: dimension }, () => Array(dimension).fill(0))
+  return createConstantMatrix(dimension, 0)
+}
+
+function createIdentityMatrix(dimension) {
+  return createDiagonalMatrix(dimension, 1)
 }
 
 function createDtMatrix(dimension, deltaTime) {
@@ -98,25 +106,12 @@ function createDt2Matrix(dimension, deltaTime) {
   return createDiagonalMatrix(dimension, 0.5 * deltaTime * deltaTime)
 }
 
-function createDiagonalMatrix(dimension, value) {
-  return Array.from({ length: dimension }, (_, i) => Array.from({ length: dimension }, (_, j) => (i === j ? value : 0)))
-}
-
-function createKinematicBlock(dimension, deltaTime) {
-  const subDimension = dimension / 4
-  if (dimension % 4 !== 0) {
-    throw new Error('Dimension must be divisible by 4.')
-  }
-
-  const I = createIdentityMatrix(subDimension)
-  const Dt = createDtMatrix(subDimension, deltaTime)
-  const Dt2 = createDt2Matrix(subDimension, deltaTime)
-  const Z = createZeroMatrix(subDimension)
-
-  const createRow = (I_part, Dt_part, Dt2_part, Z_part) => I_part.map((row, i) => [...row, ...Dt_part[i], ...Dt2_part[i], ...Z_part[i]])
-
-  return [...createRow(I, Dt, Dt2, Z), ...createRow(Z, I, Dt, Z), ...createRow(Z, Z, I, Dt), ...createRow(Z, Z, Z, I)]
-}
+const kinematicBlock = [
+  [createIdentityMatrix(3), createDtMatrix(3, 0), createDt2Matrix(3, 0), createZeroMatrix(3)],
+  [createZeroMatrix(3), createIdentityMatrix(3), createDtMatrix(3, 0), createZeroMatrix(3)],
+  [createZeroMatrix(3), createZeroMatrix(3), createIdentityMatrix(3), createDtMatrix(3, 0)],
+  [createZeroMatrix(3), createZeroMatrix(3), createZeroMatrix(3), createIdentityMatrix(3)]
+]
 
 function jacobianLeverArmOmega(omega, r) {
   return [
@@ -134,21 +129,6 @@ function jacobianLeverArmAlpha(r) {
   ]
 }
 
-function createLeverArmBlock(dimension, omega, positionOffset) {
-  const JomegaL = jacobianLeverArmOmega(omega, positionOffset)
-  const JalphaL = jacobianLeverArmAlpha(positionOffset)
-  return Array.from({ length: dimension }, (_, i) =>
-    Array.from({ length: dimension }, (_, j) => {
-      if (i < 3 && j >= 6 && j < 9) {
-        return JomegaL[i][j - 6]
-      } else if (i < 3 && j >= 9 && j < 12) {
-        return JalphaL[i][j - 9]
-      }
-      return 0
-    })
-  )
-}
-
 function jacobianCoriolisV(omega) {
   return [
     [0, -2 * omega.z, 2 * omega.y],
@@ -164,26 +144,42 @@ function jacobianCoriolisOmega(velocity) {
     [0, 2 * velocity.x, -2 * velocity.y]
   ]
 }
-
-function createCoriolisBlock(dimension, omega, velocity) {
-  const Jv = jacobianCoriolisV(omega)
-  const Jomega = jacobianCoriolisOmega(velocity)
-  return Array.from({ length: dimension }, (_, i) =>
-    Array.from({ length: dimension }, (_, j) => {
-      if (i < 3 && j >= 3 && j < 6) {
-        return Jv[i][j - 3]
-      } else if (i < 3 && j >= 6 && j < 9) {
-        return Jomega[i][j - 6]
-      }
-      return 0
+function padMatrix(sourceMatrix, padding) {
+  const sourceRows = sourceMatrix.length
+  const sourceCols = sourceMatrix[0].length
+  const topPad = padding.top || 0
+  const bottomPad = padding.bottom || 0
+  const leftPad = padding.left || 0
+  const rightPad = padding.right || 0
+  const targetRows = sourceRows + topPad + bottomPad
+  const targetCols = sourceCols + leftPad + rightPad
+  const paddedMatrix = Array.from({ length: targetRows }, (_, i) =>
+    Array.from({ length: targetCols }, (_, j) => {
+      return i >= topPad && i < topPad + sourceRows && j >= leftPad && j < leftPad + sourceCols ? sourceMatrix[i - topPad][j - leftPad] : 0
     })
   )
+  return paddedMatrix
 }
 
-export function constructF(dimension, omega, velocity, deltaTime, positionOffset) {
-  const kinematicBlock = createKinematicBlock(dimension, deltaTime)
-  const leverArmBlock = createLeverArmBlock(dimension, omega, positionOffset)
-  const coriolisBlock = createCoriolisBlock(dimension, omega, velocity)
+function createLeverArmBlock(omega, positionOffset) {
+  const JomegaL = jacobianLeverArmOmega(omega, positionOffset)
+  const JalphaL = jacobianLeverArmAlpha(positionOffset)
+  let block = padMatrix(JomegaL, { top: 0, left: 6 })
+  block = block.map((row, i) => row.map((value, j) => value + padMatrix(JalphaL, { top: 0, left: 9 })[i][j]))
+  return block
+}
+
+function createCoriolisBlock(omega, velocity) {
+  const Jv = jacobianCoriolisV(omega)
+  const Jomega = jacobianCoriolisOmega(velocity)
+  let block = padMatrix(Jv, { top: 0, left: 3 })
+  block = block.map((row, i) => row.map((value, j) => value + padMatrix(Jomega, { top: 0, left: 6 })[i][j]))
+  return block
+}
+
+export function constructF(omega, velocity, positionOffset) {
+  const leverArmBlock = createLeverArmBlock(omega, positionOffset)
+  const coriolisBlock = createCoriolisBlock(omega, velocity)
   const F = [
     [...kinematicBlock, ...leverArmBlock],
     [...coriolisBlock, ...kinematicBlock]
