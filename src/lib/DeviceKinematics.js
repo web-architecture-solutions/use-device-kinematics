@@ -11,20 +11,10 @@ export class DeviceKinematics {
     this.deltaT = deltaT
   }
 
-  derivative({ previous, ...rest }) {
-    return Object.fromEntries(
-      Object.entries(rest).map(([component, value]) => {
-        return [component, (value - previous.component) / this.deltaT]
-      })
-    )
-  }
-
-  get haversineDistance() {
-    const latitude = this.latitude
-    const longitude = this.longitude
-    const previousLatitude = this.latitude.previous
-    const previousLongitude = this.longitude.previous
-
+  static haversineDistance(
+    { latitude, longitude, altitude },
+    { latitude: previousLatitude, longitude: previousLongitude, altitude: previousAltitude }
+  ) {
     const coordinates2D = [latitude, previousLatitude, longitude, previousLongitude]
     if (coordinates2D.some((coordinate) => coordinate === null)) {
       return { distance2D: null, distance3D: null, deltaLat: null, deltaLon: null, deltaAlt: null }
@@ -32,36 +22,46 @@ export class DeviceKinematics {
 
     const R = 6371000
 
-    const deltaLat = toRadians(latitude - previousLatitude)
-    const deltaLon = toRadians(longitude - previousLongitude)
-    const deltaAlt = this.position.altitude - this.position.previous.altitude
+    const y = toRadians(latitude - previousLatitude)
+    const x = toRadians(longitude - previousLongitude)
+    const z = altitude - previousAltitude
 
     const lat1 = toRadians(previousLatitude)
     const lat2 = toRadians(latitude)
 
-    const a = Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2)
-    const b = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) + a
+    const a = Math.cos(lat1) * Math.cos(lat2) * Math.sin(x / 2) * Math.sin(x / 2)
+    const b = Math.sin(y / 2) * Math.sin(y / 2) + a
     const c = 2 * Math.atan2(Math.sqrt(b), Math.sqrt(1 - b))
 
+    const xy = c * R
+
     return {
-      distance2D: c * R,
-      distance3D: Math.sqrt(distance2D * distance2D + deltaAlt * deltaAlt),
-      deltaLat: deltaLat * R,
-      deltaLon: deltaLon * R * Math.cos((lat1 + lat2) / 2),
-      deltaAlt: deltaAlt
+      x: x * R * Math.cos((lat1 + lat2) / 2),
+      y: y * R,
+      z,
+      xy: c * R,
+      xyz: Math.sqrt(xy * xy + deltaAlt * deltaAlt)
     }
   }
 
-  get velocityFromPosition() {
-    const { distance2D, distance3D, deltaLat, deltaLon, deltaAlt } = this.haversineDistance
-
-    return {
-      x: deltaLon / this.deltaT,
-      y: deltaLat / this.deltaT,
-      z: deltaAlt / this.deltaT,
-      xy: distance2D / this.deltaT,
-      xyz: distance3D / this.deltaT
+  derivative(variable) {
+    const { previous, ...current } = variable
+    let entries
+    if (variable === this.position) {
+      const displacement = this.haversineDistance(current, previous)
+      displacementToVelocity = ([component, value]) => [component, value / this.deltaT]
+      entries = Object.entries(displacement).map(displacementToVelocity)
+    } else {
+      entries = Object.entries(current).map(([component, value]) => {
+        const delta = value - previous.component
+        return [component, delta / this.deltaT]
+      })
     }
+    return Object.fromEntries(entries)
+  }
+
+  get velocityFromPosition() {
+    return this.derivative(this.position)
   }
 
   get linearAcceleration() {
@@ -86,6 +86,10 @@ export class DeviceKinematics {
 
   get angularAcceleration() {
     return this.derivative(this.angularVelocity)
+  }
+
+  get angularJerk() {
+    return this.derivative(this.angularAcceleration)
   }
 
   get leverArmEffectJacobian() {
