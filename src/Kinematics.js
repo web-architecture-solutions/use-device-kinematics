@@ -84,24 +84,21 @@ export class Kinematics {
   }
 
   get leverArmMatrix() {
-    const omegaBlock = this.leverArmJacobian.wrtOmega.pad({ top: 0, left: 6 })
-    const alphaBlock = this.leverArmJacobian.wrtAlpha.pad({ top: 0, left: 9 })
-    const leverArmBlock = omegaBlock.add(alphaBlock)
-    return leverArmBlock
+    const paddedJacobianWrtAlpha = this.leverArmJacobian.wrtAlpha.pad({ top: 0, left: 9 })
+    const paddedJacobianWrtOmega = this.leverArmJacobian.wrtOmega.pad({ top: 0, left: 6 })
+    return paddedJacobianWrtAlpha.add(paddedJacobianWrtOmega)
   }
 
   get coriolisMatrix() {
-    const vBlock = this.coriolisJacobian.wrtV.pad({ top: 0, left: 3 })
-    const omegaBlock = this.coriolisJacobian.wrtOmega.pad({ top: 0, left: 6 })
-    const coriolisBlock = vBlock.add(omegaBlock)
-    return coriolisBlock
+    const paddedJacobianWrtV = this.coriolisJacobian.wrtV.pad({ top: 0, left: 3 })
+    const paddedJacobianWrtOmega = this.coriolisJacobian.wrtOmega.pad({ top: 0, left: 6 })
+    return paddedJacobianWrtV.add(paddedJacobianWrtOmega)
   }
 
   get stateTransitionMatrix() {
-    const F = new Matrix([
+    return new Matrix([
       [...this.kinematicsMatrix, ...this.leverArmMatrix],
       [...this.coriolisMatrix, ...this.kinematicsMatrix]
     ])
-    return F
   }
 }
