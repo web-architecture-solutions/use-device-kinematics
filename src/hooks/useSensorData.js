@@ -6,16 +6,7 @@ import useGeolocation from './useGeolocation'
 
 import useClock from './useClock'
 
-import useVelocityFromPosition from './useVelocityFromPosition'
-import useHeading from './useHeading'
-import useTotalAccelerationFromComponents from './useTotalAccelerationFromComponents'
-import useJerkFromAcceleration from './useJerkFromAcceleration'
-import useTotalAngularVelocityFromComponents from './useTotalAngularVelocityFromComponents'
-
-/*
-import useTotalCurvatureFromAcceleration from './useTotalCurvatureFromAcceleration'
-import useTotalCurvatureFromAngularVelocity from './useTotalCurvatureFromAngularVelocity'
-*/
+//import useHeading from './useHeading'
 
 export default function useSensorData(config = {}) {
   // TODO: Start clock once data's loaded
@@ -25,67 +16,9 @@ export default function useSensorData(config = {}) {
   const orientation = useDeviceOrienation(config)
   const geolocation = useGeolocation(config)
 
-  const { xVelocityFromPosition, yVelocityFromPosition, totalVelocityFromPosition } = useVelocityFromPosition(
-    geolocation.data?.latitude ?? null,
-    geolocation.data?.longitude ?? null,
-    timestamp - previousTimestamp
-  )
+  //const heading = useHeading(orientation.data?.alpha)
 
-  const heading = useHeading(orientation.data?.alpha)
-
-  const totalAcceleration = useTotalAccelerationFromComponents(
-    motion.data?.acceleration?.x ?? null,
-    motion.data?.acceleration?.y ?? null,
-    motion.data?.acceleration?.z ?? null
-  )
-
-  const { xJerk, yJerk, totalJerk } = useJerkFromAcceleration(
-    motion.data?.acceleration?.x ?? null,
-    motion.data?.acceleration?.y ?? null,
-    motion.data?.acceleration?.z ?? null,
-    totalAcceleration ?? null,
-    timestamp - previousTimestamp
-  )
-
-  const totalAngularVelocity = useTotalAngularVelocityFromComponents(
-    motion.data?.rotationRate?.alpha ?? null,
-    motion.data?.rotationRate?.beta ?? null,
-    motion.data?.rotationRate?.gamma ?? null
-  )
-
-  /*
-  const curvatureFromAcceleration = useTotalCurvatureFromAcceleration({ totalAcceleration, totalVelocity })
-  const curvatureFromAngularVelocity = useTotalCurvatureFromAngularVelocity({ totalAngularVelocity, totalVelocity })
-
-  
-  */
-
-  const calculatedData = useMemo(
-    () => ({
-      xVelocityFromPosition,
-      yVelocityFromPosition,
-      totalVelocityFromPosition,
-      heading,
-      totalAcceleration,
-      xJerk,
-      yJerk,
-      totalJerk,
-      totalAngularVelocity,
-      timestamp
-    }),
-    [
-      xVelocityFromPosition,
-      yVelocityFromPosition,
-      totalVelocityFromPosition,
-      heading,
-      totalAcceleration,
-      xJerk,
-      yJerk,
-      totalJerk,
-      totalAngularVelocity,
-      timestamp
-    ]
-  )
+  const calculatedData = useMemo(() => ({}), [])
 
   const data = useMemo(
     () => ({
