@@ -82,106 +82,145 @@ export class Vector3 {
   }
 }
 
-function createConstantMatrix(dimension, value) {
-  return Array.from({ length: dimension }, () => Array(dimension).fill(value))
+export class Matrix extends Array {
+  constructor(m) {
+    if (Matrix.isMatrix(m)) {
+      super()
+      for (let i = 0; i < m.length; i++) {
+        this.push([...m[i]])
+      }
+    } else {
+      throw new Error('Data provided is not a valid matrix')
+    }
+  }
+
+  static isMatrix(m) {
+    if (!Array.isArray(m) || m.length === 0) return false
+    const numCols = m[0].length
+    return m.every((row) => Array.isArray(row) && row.length === numCols)
+  }
+
+  static constant(dimension, value) {
+    return Array.from({ length: dimension }, () => Array(dimension).fill(value))
+  }
+
+  static diagonal(dimension, value) {
+    return Array.from({ length: dimension }, (_, i) => Array.from({ length: dimension }, (_, j) => (i === j ? value : 0)))
+  }
+
+  static zero(dimension) {
+    return Matrix.constant(dimension, 0)
+  }
+
+  static identity(dimension) {
+    return Matrix.diagonal(dimension, 1)
+  }
+
+  add(matrix) {
+    return this.map((row, i) => row.map((value, j) => value + matrix[i][j]))
+  }
+
+  pad(padding) {
+    const sourceRows = this.length
+    const sourceCols = this[0].length
+    const topPad = padding.top || 0
+    const bottomPad = padding.bottom || 0
+    const leftPad = padding.left || 0
+    const rightPad = padding.right || 0
+    const targetRows = sourceRows + topPad + bottomPad
+    const targetCols = sourceCols + leftPad + rightPad
+    const paddedMatrix = Array.from({ length: targetRows }, (_, i) =>
+      Array.from({ length: targetCols }, (_, j) => {
+        return i >= topPad && i < topPad + sourceRows && j >= leftPad && j < leftPad + sourceCols ? this[i - topPad][j - leftPad] : 0
+      })
+    )
+    return paddedMatrix
+  }
 }
 
-function createDiagonalMatrix(dimension, value) {
-  return Array.from({ length: dimension }, (_, i) => Array.from({ length: dimension }, (_, j) => (i === j ? value : 0)))
-}
+export class Kinematics {
+  static calculateCoriolisJacobian = (
+    { xAngularAcceleration, yAngularAcceleration, zAngularAcceleration },
+    { xVelocity, yVelocity, zVelocity }
+  ) => ({
+    wrtV: new Matrix([
+      [0, -2 * zAngularAcceleration, 2 * yAngularAcceleration],
+      [2 * zAngularAcceleration, 0, -2 * xAngularAcceleration],
+      [-2 * yAngularAcceleration, 2 * xAngularAcceleration, 0]
+    ]),
+    wrtOmega: new Matrix([
+      [-2 * zVelocity, 2 * yVelocity, 0],
+      [2 * zVelocity, -2 * xVelocity, 0],
+      [0, 2 * xVelocity, -2 * yVelocity]
+    ])
+  })
 
-function createZeroMatrix(dimension) {
-  return createConstantMatrix(dimension, 0)
-}
+  static calculateLeverArmJacobian = (
+    { xAngularAcceleration, yAngularAcceleration, zAngularAcceleration },
+    { xPositionOffset, yPositionOffset, zPositionOffset }
+  ) => ({
+    wrtOmega: new Matrix([
+      [
+        0,
+        -2 * zAngularAcceleration * yPositionOffset,
+        2 * yAngularAcceleration * yPositionOffset + yAngularAcceleration * zPositionOffset - zAngularAcceleration * xPositionOffset
+      ],
+      [2 * zAngularAcceleration * xPositionOffset - xAngularAcceleration * zPositionOffset, 0, -2 * xAngularAcceleration * xPositionOffset],
+      [
+        -2 * yAngularAcceleration * xPositionOffset - yAngularAcceleration * zPositionOffset + zAngularAcceleration * xPositionOffset,
+        2 * xAngularAcceleration * yPositionOffset,
+        0
+      ]
+    ]),
+    wrtAlpha: new Matrix([
+      [0, -zPositionOffset, yPositionOffset],
+      [zPositionOffset, 0, -xPositionOffset],
+      [-yPositionOffset, xPositionOffset, 0]
+    ])
+  })
 
-function createIdentityMatrix(dimension) {
-  return createDiagonalMatrix(dimension, 1)
-}
+  static dtMatrix(dimension, deltaTime) {
+    return Matrix.diagonal(dimension, deltaTime)
+  }
 
-function createDtMatrix(dimension, deltaTime) {
-  return createDiagonalMatrix(dimension, deltaTime)
-}
+  static dt2Matrix(dimension, deltaTime) {
+    return Matrix.diagonal(dimension, 0.5 * deltaTime * deltaTime)
+  }
 
-function createDt2Matrix(dimension, deltaTime) {
-  return createDiagonalMatrix(dimension, 0.5 * deltaTime * deltaTime)
-}
+  static get effect() {
+    return {
+      coriolis: { calculateJacobian: Matrix.calculateCoriolisJacobian },
+      leverArm: { calculateJacobian: Matrix.calculateLeverArmJacobian }
+    }
+  }
 
-const kinematicBlock = [
-  [createIdentityMatrix(3), createDtMatrix(3, 0), createDt2Matrix(3, 0), createZeroMatrix(3)],
-  [createZeroMatrix(3), createIdentityMatrix(3), createDtMatrix(3, 0), createZeroMatrix(3)],
-  [createZeroMatrix(3), createZeroMatrix(3), createIdentityMatrix(3), createDtMatrix(3, 0)],
-  [createZeroMatrix(3), createZeroMatrix(3), createZeroMatrix(3), createIdentityMatrix(3)]
-]
-
-function jacobianLeverArmOmega(omega, r) {
-  return [
-    [0, -2 * omega.z * r.y, 2 * omega.y * r.y + omega.y * r.z - omega.z * r.x],
-    [2 * omega.z * r.x - omega.x * r.z, 0, -2 * omega.x * r.x],
-    [-2 * omega.y * r.x - omega.y * r.z + omega.z * r.x, 2 * omega.x * r.y, 0]
-  ]
-}
-
-function jacobianLeverArmAlpha(r) {
-  return [
-    [0, -r.z, r.y],
-    [r.z, 0, -r.x],
-    [-r.y, r.x, 0]
-  ]
-}
-
-function jacobianCoriolisV(omega) {
-  return [
-    [0, -2 * omega.z, 2 * omega.y],
-    [2 * omega.z, 0, -2 * omega.x],
-    [-2 * omega.y, 2 * omega.x, 0]
-  ]
-}
-
-function jacobianCoriolisOmega(velocity) {
-  return [
-    [-2 * velocity.z, 2 * velocity.y, 0],
-    [2 * velocity.z, -2 * velocity.x, 0],
-    [0, 2 * velocity.x, -2 * velocity.y]
-  ]
-}
-function padMatrix(sourceMatrix, padding) {
-  const sourceRows = sourceMatrix.length
-  const sourceCols = sourceMatrix[0].length
-  const topPad = padding.top || 0
-  const bottomPad = padding.bottom || 0
-  const leftPad = padding.left || 0
-  const rightPad = padding.right || 0
-  const targetRows = sourceRows + topPad + bottomPad
-  const targetCols = sourceCols + leftPad + rightPad
-  const paddedMatrix = Array.from({ length: targetRows }, (_, i) =>
-    Array.from({ length: targetCols }, (_, j) => {
-      return i >= topPad && i < topPad + sourceRows && j >= leftPad && j < leftPad + sourceCols ? sourceMatrix[i - topPad][j - leftPad] : 0
-    })
-  )
-  return paddedMatrix
-}
-
-function addMatrices(matrix1, matrix2) {
-  return matrix1.map((row, i) => row.map((value, j) => value + matrix2[i][j]))
+  static get matrix() {
+    return { dt: Kinematics.dtMatrix, dt2: Kinematics.dt2Matrix }
+  }
 }
 
 function createLeverArmBlock(omega, positionOffset) {
-  const JomegaL = jacobianLeverArmOmega(omega, positionOffset)
-  const JalphaL = jacobianLeverArmAlpha(positionOffset)
-  const JomegaLBlock = padMatrix(JomegaL, { top: 0, left: 6 }, 12, 12)
-  const JalphaLBlock = padMatrix(JalphaL, { top: 0, left: 9 }, 12, 12)
-  const leverArmBlock = addMatrices(JomegaLBlock, JalphaLBlock)
+  const jacobian = Kinematics.effect.leverArm.calculateJacobian(omega, positionOffset)
+  const JomegaLBlock = jacobian.wrtOmega.pad({ top: 0, left: 6 })
+  const JalphaLBlock = jacobian.wrtAlpha.pad({ top: 0, left: 9 })
+  const leverArmBlock = JomegaLBlock.add(JalphaLBlock)
   return leverArmBlock
 }
 
 function createCoriolisBlock(omega, velocity) {
-  const Jv = jacobianCoriolisV(omega)
-  const Jomega = jacobianCoriolisOmega(velocity)
-  const JvBlock = padMatrix(Jv, { top: 0, left: 3 }, 12, 12)
-  const JomegaBlock = padMatrix(Jomega, { top: 0, left: 6 }, 12, 12)
-  const coriolisBlock = addMatrices(JvBlock, JomegaBlock)
+  const jacobian = Kinematics.effect.coriolis.calculateJacobian(omega, velocity)
+  const JvBlock = jacobian.wrtV.pad({ top: 0, left: 3 })
+  const JomegaBlock = jacobian.wrtOmega.pad({ top: 0, left: 6 })
+  const coriolisBlock = JvBlock.add(JomegaBlock)
   return coriolisBlock
 }
+
+const kinematicBlock = [
+  [Matrix.identity(3), createDtMatrix(3, 0), createDt2Matrix(3, 0), Matrix.zero(3)],
+  [Matrix.zero(3), Matrix.identity(3), createDtMatrix(3, 0), Matrix.zero(3)],
+  [Matrix.zero(3), Matrix.zero(3), Matrix.identity(3), createDtMatrix(3, 0)],
+  [Matrix.zero(3), Matrix.zero(3), Matrix.zero(3), Matrix.identity(3)]
+]
 
 export function constructF(omega, velocity, positionOffset) {
   const leverArmBlock = createLeverArmBlock(omega, positionOffset)
