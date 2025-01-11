@@ -1,12 +1,15 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 
 import useDeviceMotion from './useDeviceMotion'
 import useDeviceOrienation from './useDeviceOrientation'
 import useGeolocation from './useGeolocation'
 
+import usePrevious from './usePrevious'
 import useClock from './useClock'
 
 //import useHeading from './useHeading'
+
+import DeviceKinematics from '../lib/DeviceKinematics'
 
 export default function useSensorData(config = {}) {
   // TODO: Start clock once data's loaded
@@ -18,17 +21,51 @@ export default function useSensorData(config = {}) {
 
   //const heading = useHeading(orientation.data?.alpha)
 
-  const calculatedData = useMemo(() => ({}), [])
+  const { current, previous, update } = usePrevious({
+    ...motion?.data,
+    ...orientation?.data,
+    ...geolocation?.data
+  })
 
-  const data = useMemo(
-    () => ({
-      ...motion?.data,
-      ...orientation?.data,
-      ...geolocation?.data,
-      ...calculatedData
-    }),
-    [motion.data, orientation.data, geolocation.data, calculatedData]
-  )
+  useEffect(() => {
+    update({
+      position: {
+        x: geolocation.data?.longitude,
+        y: geolocation.data?.latitude,
+        z: geolocation.data?.altitude
+      },
+      acceleration: { ...motion.data?.acceleration },
+      orientation: {
+        yaw: orientation.data?.alpha,
+        pitch: orientation.data?.beta,
+        roll: orientation.data?.gamma
+      },
+      angularVelocity: { ...motion.data?.rotationRate }
+    })
+  }, [motion.data, orientation.data, geolocation.data])
+
+  const calculatedData = useMemo(() => {
+    return new DeviceKinematics(
+      {
+        position: {
+          latitude: current.latitude,
+          longitude: current.longitude,
+          altitude: current.altitude,
+          previous: previous.position
+        },
+        acceleration: {
+          ...current.acceleration,
+          previous: previous.acceleration
+        },
+        angularVelocity: {
+          ...current.rotationRate,
+          previous: previous.angularVelocity
+        },
+        orientation: orientation.data ?? {}
+      },
+      timestamp - previousTimestamp
+    ).derivedData
+  }, [motion.data, orientation.data, geolocation.data])
 
   const errors = useMemo(
     () => ({ ...motion.errors, ...orientation.errors, ...geolocation.errors }),
@@ -45,7 +82,7 @@ export default function useSensorData(config = {}) {
   }, [motion.startListening, orientation.startListening, geolocation.startListening])
 
   return {
-    data,
+    data: current,
     errors,
     isListening,
     startListening

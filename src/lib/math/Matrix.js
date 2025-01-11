@@ -1,4 +1,4 @@
-export class Matrix extends Array {
+export default class Matrix extends Array {
   constructor(m) {
     if (Matrix.isMatrix(m)) {
       super()

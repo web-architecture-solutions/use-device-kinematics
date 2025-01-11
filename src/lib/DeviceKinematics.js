@@ -1,17 +1,17 @@
 import { toRadians, euclideanNorm, Matrix } from './math'
 
-export class DeviceKinematics {
+export default class DeviceKinematics {
   constructor(sensorData, deltaT) {
     this.dimension = 3
     this.sensorData = sensorData
     this.position = sensorData.position
-    this.linearAccelerationSensorData = sensorData.linearAcceleration
+    this.accelerationSensorData = sensorData.acceleration
     this.angularVelocitySensorData = sensorData.angularVelocity
     this.orientationSensorData = sensorData.orientation
     this.deltaT = deltaT
   }
 
-  static haversineDistance(
+  haversineDistance(
     { latitude, longitude, altitude },
     { latitude: previousLatitude, longitude: previousLongitude, altitude: previousAltitude }
   ) {
@@ -40,16 +40,17 @@ export class DeviceKinematics {
       y: y * R,
       z,
       xy: c * R,
-      xyz: Math.sqrt(xy * xy + deltaAlt * deltaAlt)
+      xyz: Math.sqrt(xy * xy + z * z)
     }
   }
 
   derivative(variable) {
+    /*
     const { previous, ...current } = variable
     let entries
     if (variable === this.position) {
       const displacement = this.haversineDistance(current, previous)
-      displacementToVelocity = ([component, value]) => [component, value / this.deltaT]
+      const displacementToVelocity = ([component, value]) => [component, value / this.deltaT]
       entries = Object.entries(displacement).map(displacementToVelocity)
     } else {
       entries = Object.entries(current).map(([component, value]) => {
@@ -58,38 +59,62 @@ export class DeviceKinematics {
       })
     }
     return Object.fromEntries(entries)
+    */
   }
 
   get velocityFromPosition() {
     return this.derivative(this.position)
   }
 
-  get linearAcceleration() {
+  get acceleration() {
+    /*
     return {
-      ...this.linearAccelerationSensorData,
-      xy: euclideanNorm(this.linearAcceleration.x, this.linearAcceleration.y),
-      xyz: euclideanNorm(this.linearAcceleration.x, this.linearAcceleration.y, this.linearAcceleration.z)
+      ...this.accelerationSensorData,
+      xy: euclideanNorm(this.acceleration.x, this.acceleration.y),
+      xyz: euclideanNorm(this.acceleration.x, this.acceleration.y, this.acceleration.z)
     }
+    */
   }
 
   get jerkFromAcceleration() {
-    return this.derivative(this.linearAcceleration)
+    return this.derivative(this.acceleration)
   }
 
-  get angularVelocity() {
+  get orientation() {
     return {
-      ...this.angularVelocitySensorData,
-      xy: euclideanNorm(toRadians(this.angularVelocity.beta), toRadians(this.angularVelocity.gamma)),
-      xyz: euclideanNorm(toRadians(this.angularVelocity.alpha), toRadians(this.angularVelocity.beta), toRadians(this.angularVelocity.gamma))
+      yaw: this.orientationSensorData.alpha,
+      pitch: this.orientationSensorData.beta,
+      roll: this.orientationSensorData.gamma
     }
   }
 
-  get angularAcceleration() {
+  get angularVelocity() {
+    /*
+    return {
+      x: this.angularVelocitySensorData.beta,
+      y: this.angularVelocitySensorData.gamma,
+      z: this.angularVelocitySensorData.alpha,
+      xy: euclideanNorm(toRadians(this.angularVelocity.beta), toRadians(this.angularVelocity.gamma)),
+      xyz: euclideanNorm(toRadians(this.angularVelocity.alpha), toRadians(this.angularVelocity.beta), toRadians(this.angularVelocity.gamma))
+    }
+    */
+  }
+
+  get angularAccelerationFromVelocity() {
     return this.derivative(this.angularVelocity)
   }
 
-  get angularJerk() {
+  get angularJerkFromAcceleration() {
     return this.derivative(this.angularAcceleration)
+  }
+
+  get derivedData() {
+    return {
+      ...this.velocityFromPosition,
+      ...this.jerkFromAcceleration,
+      ...this.angularAccelerationFromVelocity,
+      ...this.angularJerkFromAcceleration
+    }
   }
 
   get leverArmEffectJacobian() {
