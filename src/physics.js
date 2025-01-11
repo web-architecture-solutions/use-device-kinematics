@@ -139,11 +139,15 @@ export class Matrix extends Array {
 }
 
 export class Kinematics {
-  constructor(currentState, previousState) {
+  constructor(currentState, previousState, deltaT) {
+    this.dimension = 3
     this.current = currentState
     this.previous = previousState
+    this.deltaT = deltaT
   }
 
+  // TODO: Double-check for missing effects like angular jerk when linearizing
+  // TODO: Double-check that this shouldn't use angular velocity instead of angular acceleration
   get leverArmJacobian() {
     return {
       wrtAlpha: new Matrix([
@@ -176,6 +180,8 @@ export class Kinematics {
     }
   }
 
+  // TODO: Double check for missing effects like angular jerk
+  // TODO: Double-check that this shouldn't use angular velocity instead of angular acceleration
   get coriolisJacobian() {
     return {
       wrtV: new Matrix([
@@ -191,63 +197,50 @@ export class Kinematics {
     }
   }
 
-  static dtMatrix(dimension, deltaTime) {
-    return Matrix.diagonal(dimension, deltaTime)
+  get zeroMatrix() {
+    return Matrix.zero(this.dimension)
   }
 
-  static dt2Matrix(dimension, deltaTime) {
-    return Matrix.diagonal(dimension, 0.5 * deltaTime * deltaTime)
+  get identityMatrix() {
+    return Matrix.identity(this.dimension)
   }
 
-  static kinematicsMatrix(deltaTime) {
+  get dtMatrix() {
+    return Matrix.diagonal(this.dimension, this.deltaT)
+  }
+
+  get dt2Matrix() {
+    return Matrix.diagonal(this.dimension, 0.5 * Math.pow(this.deltaT, 2))
+  }
+
+  // TODO: Double check that we haven't lost refinement in our core kinematics model per loss of more sophisticated coefficients
+  get kinematicsMatrix() {
     return [
-      [Matrix.identity(3), Kinematics.matrix.dt(3, deltaTime), Kinematics.matrix.dt2(3, deltaTime), Matrix.zero(3)],
-      [Matrix.zero(3), Matrix.identity(3), Kinematics.matrix.dt(3, deltaTime), Matrix.zero(3)],
-      [Matrix.zero(3), Matrix.zero(3), Matrix.identity(3), Kinematics.matrix.dt(3, 0)],
-      [Matrix.zero(3), Matrix.zero(3), Matrix.zero(3), Matrix.identity(3)]
+      [this.identityMatrix, this.dtMatrix, this.dt2Matrix, this.zeroMatrix],
+      [this.zeroMatrix, this.identityMatrix, this.dtMatrix, this.zeroMatrix],
+      [this.zeroMatrix, this.zeroMatrix, this.identityMatrix, this.dtMatrix],
+      [this.zeroMatrix, this.zeroMatrix, this.zeroMatrix, this.identityMatrix]
     ]
   }
 
-  static leverArmMatrix(omega, positionOffset) {
-    const jacobian = Kinematics.effect.leverArm.calculateJacobian(omega, positionOffset)
-    const JomegaLBlock = jacobian.wrtOmega.pad({ top: 0, left: 6 })
-    const JalphaLBlock = jacobian.wrtAlpha.pad({ top: 0, left: 9 })
-    const leverArmBlock = JomegaLBlock.add(JalphaLBlock)
+  get leverArmMatrix() {
+    const omegaBlock = this.leverArmJacobian.wrtOmega.pad({ top: 0, left: 6 })
+    const alphaBlock = this.leverArmJacobian.wrtAlpha.pad({ top: 0, left: 9 })
+    const leverArmBlock = omegaBlock.add(alphaBlock)
     return leverArmBlock
   }
 
-  static coriolisMatrix(omega, velocity) {
-    const jacobian = Kinematics.effect.coriolis.calculateJacobian(omega, velocity)
-    const JvBlock = jacobian.wrtV.pad({ top: 0, left: 3 })
-    const JomegaBlock = jacobian.wrtOmega.pad({ top: 0, left: 6 })
+  get coriolisMatrix() {
+    const JvBlock = this.coriolisJacobian.wrtV.pad({ top: 0, left: 3 })
+    const JomegaBlock = this.coriolisJacobian.wrtOmega.pad({ top: 0, left: 6 })
     const coriolisBlock = JvBlock.add(JomegaBlock)
     return coriolisBlock
   }
 
-  static get effect() {
-    return {
-      coriolis: { calculateJacobian: Matrix.calculateCoriolisJacobian },
-      leverArm: { calculateJacobian: Matrix.calculateLeverArmJacobian }
-    }
-  }
-
-  static get matrix() {
-    return {
-      dt: Kinematics.dtMatrix,
-      dt2: Kinematics.dt2Matrix,
-      kinematics: Kinematics.kinematicsMatrix,
-      leverArm: Kinematics.leverArmMatrix,
-      coriolis: Kinematics.coriolisMatrix
-    }
-  }
-
-  static stateTransitionMatrix(omega, velocity, positionOffset, deltaTime) {
-    const kinematicMatrix = Kinematics.matrix.kinematics(deltaTime)
-    const leverArmMatrix = Kinematics.matrix.leverArm(omega, positionOffset)
-    const coriolisMatrix = Kinematics.matrix.coriolis(omega, velocity)
+  get stateTransitionMatrix() {
     const F = new Matrix([
-      [...kinematicMatrix, ...leverArmMatrix],
-      [...coriolisMatrix, ...kinematicMatrix]
+      [...this.kinematicsMatrix, ...this.leverArmMatrix],
+      [...this.coriolisMatrix, ...this.kinematicsMatrix]
     ])
     return F
   }
