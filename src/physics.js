@@ -161,20 +161,26 @@ function padMatrix(sourceMatrix, padding) {
   return paddedMatrix
 }
 
+function addMatrices(matrix1, matrix2) {
+  return matrix1.map((row, i) => row.map((value, j) => value + matrix2[i][j]))
+}
+
 function createLeverArmBlock(omega, positionOffset) {
   const JomegaL = jacobianLeverArmOmega(omega, positionOffset)
   const JalphaL = jacobianLeverArmAlpha(positionOffset)
-  let block = padMatrix(JomegaL, { top: 0, left: 6 })
-  block = block.map((row, i) => row.map((value, j) => value + padMatrix(JalphaL, { top: 0, left: 9 })[i][j]))
-  return block
+  const JomegaLBlock = padMatrix(JomegaL, { top: 0, left: 6 }, 12, 12)
+  const JalphaLBlock = padMatrix(JalphaL, { top: 0, left: 9 }, 12, 12)
+  const leverArmBlock = addMatrices(JomegaLBlock, JalphaLBlock)
+  return leverArmBlock
 }
 
 function createCoriolisBlock(omega, velocity) {
   const Jv = jacobianCoriolisV(omega)
   const Jomega = jacobianCoriolisOmega(velocity)
-  let block = padMatrix(Jv, { top: 0, left: 3 })
-  block = block.map((row, i) => row.map((value, j) => value + padMatrix(Jomega, { top: 0, left: 6 })[i][j]))
-  return block
+  const JvBlock = padMatrix(Jv, { top: 0, left: 3 }, 12, 12)
+  const JomegaBlock = padMatrix(Jomega, { top: 0, left: 6 }, 12, 12)
+  const coriolisBlock = addMatrices(JvBlock, JomegaBlock)
+  return coriolisBlock
 }
 
 export function constructF(omega, velocity, positionOffset) {
