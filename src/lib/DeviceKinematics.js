@@ -1,47 +1,44 @@
-import Matrix from './Matrix'
-
-const toRadians = (degrees) => degrees * (Math.PI / 180)
+import { toRadians, euclideanNorm, Matrix } from './math'
 
 export class DeviceKinematics {
-  constructor({ position, linearAcceleration, angularVelocity, orientation }, previousState, deltaT) {
+  constructor(sensorData, previousState, deltaT) {
     this.dimension = 3
-    this.position = position
-    this.linearAcceleration = linearAcceleration
-    this.angularVelocity = angularVelocity
-    this.orientation = orientation
+    this.sensorData = sensorData
+    this.position = sensorData.position
+    this.linearAcceleration = sensorData.linearAcceleration
+    this.angularVelocity = sensorData.angularVelocity
+    this.orientation = sensorData.orientation
     this.previous = previousState
     this.deltaT = deltaT
   }
 
   get haversineDistance() {
-    if (
-      this.position.latitude === null ||
-      this.previous.position.latitude === null ||
-      this.position.longitude === null ||
-      this.previous.position.longitude === null
-    ) {
-      return { distance2D: null, distance3D, deltaLat: null, deltaLon: null, deltaAlt: null }
+    const latitude = this.latitude
+    const longitude = this.longitude
+    const previousLatitude = this.previous.latitude
+    const previousLongitude = this.previous.longitude
+
+    const coordinates2D = [latitude, previousLatitude, longitude, previousLongitude]
+    if (coordinates2D.some((coordinate) => coordinate === null)) {
+      return { distance2D: null, distance3D: null, deltaLat: null, deltaLon: null, deltaAlt: null }
     }
 
     const R = 6371000
 
-    const deltaLat = toRadians(this.position.latitude - this.previous.position.latitude)
-    const deltaLon = toRadians(this.position.longitude - this.previous.position.longitude)
+    const deltaLat = toRadians(latitude - previousLatitude)
+    const deltaLon = toRadians(longitude - previousLongitude)
     const deltaAlt = this.position.altitude - this.previous.position.altitude
 
-    const lat1 = toRadians(this.previous.position.latitude)
-    const lat2 = toRadians(this.position.latitude)
+    const lat1 = toRadians(previousLatitude)
+    const lat2 = toRadians(latitude)
 
-    const a =
-      Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) + Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2)
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-
-    const distance2D = c * R
-    const distance3D = Math.sqrt(distance2D * distance2D + deltaAlt * deltaAlt)
+    const a = Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2)
+    const b = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) + a
+    const c = 2 * Math.atan2(Math.sqrt(b), Math.sqrt(1 - b))
 
     return {
-      distance2D,
-      distance3D,
+      distance2D: c * R,
+      distance3D: Math.sqrt(distance2D * distance2D + deltaAlt * deltaAlt),
       deltaLat: deltaLat * R,
       deltaLon: deltaLon * R * Math.cos((lat1 + lat2) / 2),
       deltaAlt: deltaAlt
@@ -51,14 +48,30 @@ export class DeviceKinematics {
   get velocityFromPosition() {
     const { distance2D, distance3D, deltaLat, deltaLon, deltaAlt } = this.haversineDistance
 
-    const xVelocityFromPosition = deltaLon / this.deltaT
-    const yVelocityFromPosition = deltaLat / this.deltaT
-    const zVelocityFromPosition = deltaAlt / this.deltaT
+    return {
+      x: deltaLon / this.deltaT,
+      y: deltaLat / this.deltaT,
+      z: deltaAlt / this.deltaT,
+      total2D: distance2D / this.deltaT,
+      total3D: distance3D / this.deltaT
+    }
+  }
 
-    const totalVelocity2D = distance2D / this.deltaT
-    const totalVelocity3D = distance3D / this.deltaT
+  get totalAccleration() {
+    return euclideanNorm(this.linearAcceleration.x, this.linearAcceleration.y, this.linearAcceleration.x)
+  }
 
-    return { xVelocityFromPosition, yVelocityFromPosition, zVelocityFromPosition, totalVelocity2D, totalVelocity3D }
+  get jerkFromAcceleration() {
+    return {
+      xJerk: (this.linearAcceleration.x - this.previous.linearAcceleration.x) / this.deltaT,
+      yJerk: (this.linearAcceleration.y - this.previous.linearAcceleration.y) / this.deltaT,
+      zJerk: (this.linearAcceleration.z - this.previous.linearAcceleration.z) / this.deltaT,
+      totalJerk: (totalAcceleration1 - totalAcceleration2) / this.deltaT
+    }
+  }
+
+  get totalAngularVelocity() {
+    return euclideanNorm(toRadians(this.angularVelocity.alpha), toRadians(this.angularVelocity.beta), toRadians(this.angularVelocity.gamma))
   }
 
   get leverArmJacobian() {
