@@ -18,6 +18,7 @@ import useTotalCurvatureFromAngularVelocity from './useTotalCurvatureFromAngular
 */
 
 export default function useSensorData(config = {}) {
+  // TODO: Start clock once data's loaded
   const [timestamp, previousTimestamp] = useClock()
 
   const motion = useDeviceMotion(config)
