@@ -1,22 +1,29 @@
 import { toRadians, euclideanNorm, Matrix } from './math'
 
 export class DeviceKinematics {
-  constructor(sensorData, previousState, deltaT) {
+  constructor(sensorData, deltaT) {
     this.dimension = 3
     this.sensorData = sensorData
     this.position = sensorData.position
-    this.linearAcceleration = sensorData.linearAcceleration
-    this.angularVelocity = sensorData.angularVelocity
-    this.orientation = sensorData.orientation
-    this.previous = previousState
+    this.linearAccelerationSensorData = sensorData.linearAcceleration
+    this.angularVelocitySensorData = sensorData.angularVelocity
+    this.orientationSensorData = sensorData.orientation
     this.deltaT = deltaT
+  }
+
+  derivative({ previous, ...rest }) {
+    return Object.fromEntries(
+      Object.entries(rest).map(([component, value]) => {
+        return [component, (value - previous.component) / this.deltaT]
+      })
+    )
   }
 
   get haversineDistance() {
     const latitude = this.latitude
     const longitude = this.longitude
-    const previousLatitude = this.previous.latitude
-    const previousLongitude = this.previous.longitude
+    const previousLatitude = this.latitude.previous
+    const previousLongitude = this.longitude.previous
 
     const coordinates2D = [latitude, previousLatitude, longitude, previousLongitude]
     if (coordinates2D.some((coordinate) => coordinate === null)) {
@@ -27,7 +34,7 @@ export class DeviceKinematics {
 
     const deltaLat = toRadians(latitude - previousLatitude)
     const deltaLon = toRadians(longitude - previousLongitude)
-    const deltaAlt = this.position.altitude - this.previous.position.altitude
+    const deltaAlt = this.position.altitude - this.position.previous.altitude
 
     const lat1 = toRadians(previousLatitude)
     const lat2 = toRadians(latitude)
@@ -52,29 +59,36 @@ export class DeviceKinematics {
       x: deltaLon / this.deltaT,
       y: deltaLat / this.deltaT,
       z: deltaAlt / this.deltaT,
-      total2D: distance2D / this.deltaT,
-      total3D: distance3D / this.deltaT
+      xy: distance2D / this.deltaT,
+      xyz: distance3D / this.deltaT
     }
   }
 
-  get totalAccleration() {
-    return euclideanNorm(this.linearAcceleration.x, this.linearAcceleration.y, this.linearAcceleration.x)
+  get linearAcceleration() {
+    return {
+      ...this.linearAccelerationSensorData,
+      xy: euclideanNorm(this.linearAcceleration.x, this.linearAcceleration.y),
+      xyz: euclideanNorm(this.linearAcceleration.x, this.linearAcceleration.y, this.linearAcceleration.z)
+    }
   }
 
   get jerkFromAcceleration() {
+    return this.derivative(this.linearAcceleration)
+  }
+
+  get angularVelocity() {
     return {
-      xJerk: (this.linearAcceleration.x - this.previous.linearAcceleration.x) / this.deltaT,
-      yJerk: (this.linearAcceleration.y - this.previous.linearAcceleration.y) / this.deltaT,
-      zJerk: (this.linearAcceleration.z - this.previous.linearAcceleration.z) / this.deltaT,
-      totalJerk: (totalAcceleration1 - totalAcceleration2) / this.deltaT
+      ...this.angularVelocitySensorData,
+      xy: euclideanNorm(toRadians(this.angularVelocity.beta), toRadians(this.angularVelocity.gamma)),
+      xyz: euclideanNorm(toRadians(this.angularVelocity.alpha), toRadians(this.angularVelocity.beta), toRadians(this.angularVelocity.gamma))
     }
   }
 
-  get totalAngularVelocity() {
-    return euclideanNorm(toRadians(this.angularVelocity.alpha), toRadians(this.angularVelocity.beta), toRadians(this.angularVelocity.gamma))
+  get angularAcceleration() {
+    return this.derivative(this.angularVelocity)
   }
 
-  get leverArmJacobian() {
+  get leverArmEffectJacobian() {
     return {
       wrtAlpha: new Matrix([
         [0, -this.position.offset.z, this.position.offset.y],
@@ -105,7 +119,7 @@ export class DeviceKinematics {
     }
   }
 
-  get coriolisJacobian() {
+  get coriolisEffectJacobian() {
     return {
       wrtV: new Matrix([
         [0, -2 * this.angularVelocity.z, 2 * this.angularVelocity.y],
@@ -147,14 +161,14 @@ export class DeviceKinematics {
   }
 
   get leverArmMatrix() {
-    const paddedJacobianWrtAlpha = this.leverArmJacobian.wrtAlpha.pad({ top: 0, left: 9 })
-    const paddedJacobianWrtOmega = this.leverArmJacobian.wrtOmega.pad({ top: 0, left: 6 })
+    const paddedJacobianWrtAlpha = this.leverArmEffectJacobian.wrtAlpha.pad({ top: 0, left: 9 })
+    const paddedJacobianWrtOmega = this.leverArmEffectJacobian.wrtOmega.pad({ top: 0, left: 6 })
     return paddedJacobianWrtAlpha.add(paddedJacobianWrtOmega)
   }
 
   get coriolisMatrix() {
-    const paddedJacobianWrtV = this.coriolisJacobian.wrtV.pad({ top: 0, left: 3 })
-    const paddedJacobianWrtOmega = this.coriolisJacobian.wrtOmega.pad({ top: 0, left: 6 })
+    const paddedJacobianWrtV = this.coriolisEffectJacobian.wrtV.pad({ top: 0, left: 3 })
+    const paddedJacobianWrtOmega = this.coriolisEffectJacobian.wrtOmega.pad({ top: 0, left: 6 })
     return paddedJacobianWrtV.add(paddedJacobianWrtOmega)
   }
 
