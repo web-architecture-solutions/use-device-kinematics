@@ -139,45 +139,57 @@ export class Matrix extends Array {
 }
 
 export class Kinematics {
-  static calculateCoriolisJacobian = (
-    { xAngularAcceleration, yAngularAcceleration, zAngularAcceleration },
-    { xVelocity, yVelocity, zVelocity }
-  ) => ({
-    wrtV: new Matrix([
-      [0, -2 * zAngularAcceleration, 2 * yAngularAcceleration],
-      [2 * zAngularAcceleration, 0, -2 * xAngularAcceleration],
-      [-2 * yAngularAcceleration, 2 * xAngularAcceleration, 0]
-    ]),
-    wrtOmega: new Matrix([
-      [-2 * zVelocity, 2 * yVelocity, 0],
-      [2 * zVelocity, -2 * xVelocity, 0],
-      [0, 2 * xVelocity, -2 * yVelocity]
-    ])
-  })
+  constructor(currentState, previousState) {
+    this.current = currentState
+    this.previous = previousState
+  }
 
-  static calculateLeverArmJacobian = (
-    { xAngularAcceleration, yAngularAcceleration, zAngularAcceleration },
-    { xPositionOffset, yPositionOffset, zPositionOffset }
-  ) => ({
-    wrtOmega: new Matrix([
-      [
-        0,
-        -2 * zAngularAcceleration * yPositionOffset,
-        2 * yAngularAcceleration * yPositionOffset + yAngularAcceleration * zPositionOffset - zAngularAcceleration * xPositionOffset
-      ],
-      [2 * zAngularAcceleration * xPositionOffset - xAngularAcceleration * zPositionOffset, 0, -2 * xAngularAcceleration * xPositionOffset],
-      [
-        -2 * yAngularAcceleration * xPositionOffset - yAngularAcceleration * zPositionOffset + zAngularAcceleration * xPositionOffset,
-        2 * xAngularAcceleration * yPositionOffset,
-        0
-      ]
-    ]),
-    wrtAlpha: new Matrix([
-      [0, -zPositionOffset, yPositionOffset],
-      [zPositionOffset, 0, -xPositionOffset],
-      [-yPositionOffset, xPositionOffset, 0]
-    ])
-  })
+  get leverArmJacobian() {
+    return {
+      wrtAlpha: new Matrix([
+        [0, -this.current.position.offset.z, this.current.position.offset.y],
+        [this.current.position.offset.z, 0, -this.current.position.offset.x],
+        [-this.current.position.offset.y, this.current.position.offset.x, 0]
+      ]),
+      wrtOmega: new Matrix([
+        [
+          0,
+          -2 * cangularAcceleration.z * this.current.position.offset,
+          2 * this.current.angularAcceleration.y * this.current.position.offset.y +
+            this.current.angularAcceleration.y * this.current.position.offset.z -
+            this.current.angularAcceleration.z * this.current.position.offset.x
+        ],
+        [
+          2 * this.current.angularAcceleration.z * this.current.position.offset.x -
+            this.current.angularAcceleration.x * this.current.position.offset.z,
+          0,
+          -2 * this.current.angularAcceleration.x * this.current.position.offset.x
+        ],
+        [
+          -2 * this.current.angularAcceleration.y * this.current.position.offset.x -
+            this.current.angularAcceleration.y * this.current.position.offset.z +
+            this.current.angularAcceleration.z * this.current.position.offset.x,
+          2 * this.current.angularAcceleration.x * this.current.position.offset.y,
+          0
+        ]
+      ])
+    }
+  }
+
+  get coriolisJacobian() {
+    return {
+      wrtV: new Matrix([
+        [0, -2 * this.current.angularAcceleration.z, 2 * this.current.angularAcceleration.y],
+        [2 * this.current.angularAcceleration.z, 0, -2 * this.current.angularAcceleration.x],
+        [-2 * this.current.angularAcceleration.y, 2 * this.current.angularAcceleration.x, 0]
+      ]),
+      wrtOmega: new Matrix([
+        [-2 * this.current.velocity.z, 2 * this.current.velocity.y, 0],
+        [2 * this.current.velocity.z, -2 * this.current.velocity.x, 0],
+        [0, 2 * this.current.velocity.x, -2 * this.current.velocity.y]
+      ])
+    }
+  }
 
   static dtMatrix(dimension, deltaTime) {
     return Matrix.diagonal(dimension, deltaTime)
@@ -185,6 +197,31 @@ export class Kinematics {
 
   static dt2Matrix(dimension, deltaTime) {
     return Matrix.diagonal(dimension, 0.5 * deltaTime * deltaTime)
+  }
+
+  static kinematicsMatrix(deltaTime) {
+    return [
+      [Matrix.identity(3), Kinematics.matrix.dt(3, deltaTime), Kinematics.matrix.dt2(3, deltaTime), Matrix.zero(3)],
+      [Matrix.zero(3), Matrix.identity(3), Kinematics.matrix.dt(3, deltaTime), Matrix.zero(3)],
+      [Matrix.zero(3), Matrix.zero(3), Matrix.identity(3), Kinematics.matrix.dt(3, 0)],
+      [Matrix.zero(3), Matrix.zero(3), Matrix.zero(3), Matrix.identity(3)]
+    ]
+  }
+
+  static leverArmMatrix(omega, positionOffset) {
+    const jacobian = Kinematics.effect.leverArm.calculateJacobian(omega, positionOffset)
+    const JomegaLBlock = jacobian.wrtOmega.pad({ top: 0, left: 6 })
+    const JalphaLBlock = jacobian.wrtAlpha.pad({ top: 0, left: 9 })
+    const leverArmBlock = JomegaLBlock.add(JalphaLBlock)
+    return leverArmBlock
+  }
+
+  static coriolisMatrix(omega, velocity) {
+    const jacobian = Kinematics.effect.coriolis.calculateJacobian(omega, velocity)
+    const JvBlock = jacobian.wrtV.pad({ top: 0, left: 3 })
+    const JomegaBlock = jacobian.wrtOmega.pad({ top: 0, left: 6 })
+    const coriolisBlock = JvBlock.add(JomegaBlock)
+    return coriolisBlock
   }
 
   static get effect() {
@@ -195,39 +232,23 @@ export class Kinematics {
   }
 
   static get matrix() {
-    return { dt: Kinematics.dtMatrix, dt2: Kinematics.dt2Matrix }
+    return {
+      dt: Kinematics.dtMatrix,
+      dt2: Kinematics.dt2Matrix,
+      kinematics: Kinematics.kinematicsMatrix,
+      leverArm: Kinematics.leverArmMatrix,
+      coriolis: Kinematics.coriolisMatrix
+    }
   }
-}
 
-function createLeverArmBlock(omega, positionOffset) {
-  const jacobian = Kinematics.effect.leverArm.calculateJacobian(omega, positionOffset)
-  const JomegaLBlock = jacobian.wrtOmega.pad({ top: 0, left: 6 })
-  const JalphaLBlock = jacobian.wrtAlpha.pad({ top: 0, left: 9 })
-  const leverArmBlock = JomegaLBlock.add(JalphaLBlock)
-  return leverArmBlock
-}
-
-function createCoriolisBlock(omega, velocity) {
-  const jacobian = Kinematics.effect.coriolis.calculateJacobian(omega, velocity)
-  const JvBlock = jacobian.wrtV.pad({ top: 0, left: 3 })
-  const JomegaBlock = jacobian.wrtOmega.pad({ top: 0, left: 6 })
-  const coriolisBlock = JvBlock.add(JomegaBlock)
-  return coriolisBlock
-}
-
-const kinematicBlock = [
-  [Matrix.identity(3), createDtMatrix(3, 0), createDt2Matrix(3, 0), Matrix.zero(3)],
-  [Matrix.zero(3), Matrix.identity(3), createDtMatrix(3, 0), Matrix.zero(3)],
-  [Matrix.zero(3), Matrix.zero(3), Matrix.identity(3), createDtMatrix(3, 0)],
-  [Matrix.zero(3), Matrix.zero(3), Matrix.zero(3), Matrix.identity(3)]
-]
-
-export function constructF(omega, velocity, positionOffset) {
-  const leverArmBlock = createLeverArmBlock(omega, positionOffset)
-  const coriolisBlock = createCoriolisBlock(omega, velocity)
-  const F = [
-    [...kinematicBlock, ...leverArmBlock],
-    [...coriolisBlock, ...kinematicBlock]
-  ]
-  return F
+  static stateTransitionMatrix(omega, velocity, positionOffset, deltaTime) {
+    const kinematicMatrix = Kinematics.matrix.kinematics(deltaTime)
+    const leverArmMatrix = Kinematics.matrix.leverArm(omega, positionOffset)
+    const coriolisMatrix = Kinematics.matrix.coriolis(omega, velocity)
+    const F = new Matrix([
+      [...kinematicMatrix, ...leverArmMatrix],
+      [...coriolisMatrix, ...kinematicMatrix]
+    ])
+    return F
+  }
 }
