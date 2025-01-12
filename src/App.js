@@ -1,27 +1,24 @@
-//import { useEffect } from 'react'
+import { useMemo } from 'react'
 
 import useSensorData from './hooks/useSensorData'
+import useClock from './hooks/useClock'
 
-import use2DKalmanFilter from './hooks/use2DKalmanFilter'
+import DeviceKinematics from './lib/DeviceKinematics'
 
-import { kalmanFilterConfig } from './constants'
+const renameMap = {
+  position: { latitude: 'y', longitude: 'x', altitude: 'z' },
+  orientation: { alpha: 'yaw', beta: 'pitch', gamma: 'roll' },
+  angularVelocity: { alpha: 'z', beta: 'x', gamma: 'y' }
+}
 
 export default function App() {
-  const { data, errors, isListening, startListening } = useSensorData({ enableHighAccuracy: true })
+  const { sensorData, errors, isListening, startListening } = useSensorData({ enableHighAccuracy: true, renameMap })
 
-  const { state, update, reset } = use2DKalmanFilter(kalmanFilterConfig)
+  const { timestamp, previousTimestamp } = useClock(true)
 
-  /*
-  useEffect(() => {
-    // Simulate real-time observations for 2D (x, y, velocity, curvature, etc.)
-    const observations = [
-      // Example observation structure for 2D: [x, vx, ax, jx, y, vy, ay, jy, k_x, k_y]
-    ];
-    observations.forEach((obs, index) => {
-      setTimeout(() => update(obs), index * 1000);
-    });
-  }, [update]);
-  */
+  const stateVector = useMemo(() => {
+    return new DeviceKinematics(sensorData, timestamp - previousTimestamp).stateVector
+  }, [sensorData, timestamp, previousTimestamp])
 
   return (
     <div>
@@ -31,11 +28,7 @@ export default function App() {
         {isListening ? 'Listening...' : 'Start Listening'}
       </button>
 
-      {/*
-      <button onClick={reset}>Reset Filter</button>
-      */}
-
-      <h2>Raw Data</h2>
+      <h2>Data</h2>
 
       <h3>Errors</h3>
 
@@ -43,14 +36,7 @@ export default function App() {
 
       <h3>Data</h3>
 
-      {isListening ? <pre>{JSON.stringify(data, null, 2)}</pre> : <p>Click button to start.</p>}
-
-      {/*
-      <h2>Filtered Data</h2>
-      
-      <pre>Current State Mean: {JSON.stringify(state.mean)}</pre>
-      <pre>Current State Covariance: {JSON.stringify(state.covariance)}</pre>
-      */}
+      {isListening ? <pre>{JSON.stringify(stateVector, null, 2)}</pre> : <p>Click button to start.</p>}
     </div>
   )
 }

@@ -1,15 +1,9 @@
 import { toRadians, euclideanNorm, Matrix } from './math'
 
-import SensorData from './SensorData'
+import { haversineDistance } from './physics'
 
 export default class DeviceKinematics {
-  constructor(rawSensorData, previousRawSensorData, deltaT) {
-    const sensorData = new SensorData(rawSensorData, previousRawSensorData, {
-      position: { latitude: 'y', longitude: 'x', altitude: 'z' },
-      orientation: { alpha: 'yaw', beta: 'pitch', gamma: 'roll' },
-      angularVelocity: { alpha: 'z', beta: 'x', gamma: 'y' }
-    })
-
+  constructor(sensorData, deltaT) {
     this.dimension = 3
     this.sensorData = sensorData
     this.position = sensorData.position
@@ -19,42 +13,12 @@ export default class DeviceKinematics {
     this.deltaT = deltaT
   }
 
-  haversineDistance({ x, y, z }, { x: previousX, y: previousY, z: previousZ }) {
-    const coordinates2D = [x, previousX, y, previousY]
-    if (coordinates2D.some((coordinate) => coordinate === null)) {
-      return { x: null, y: null, z: null, xy: null, xyz: null }
-    }
-
-    const R = 6371000
-
-    const deltaX = toRadians(x - previousX)
-    const deltaY = toRadians(y - previousY)
-    const deltaZ = z - previousZ
-
-    const lat1 = toRadians(previousY)
-    const lat2 = toRadians(y)
-
-    const a = Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaX / 2) * Math.sin(deltaX / 2)
-    const b = Math.sin(deltaY / 2) * Math.sin(deltaY / 2) + a
-    const c = 2 * Math.atan2(Math.sqrt(b), Math.sqrt(1 - b))
-
-    const xy = c * R
-
-    return {
-      x: deltaX * R * Math.cos((lat1 + lat2) / 2),
-      y: deltaY * R,
-      z: deltaZ,
-      xy: c * R,
-      xyz: Math.sqrt(xy * xy + z * z)
-    }
-  }
-
   derivativeWrtT(delta) {
     return delta / this.deltaT
   }
 
   deriveVelocityFromPosition(current, previous) {
-    const displacement = this.haversineDistance(current, previous)
+    const displacement = haversineDistance(current, previous)
     const displacementToVelocity = ([component, delta]) => [component, this.derivativeWrtT(delta)]
     return Object.fromEntries(Object.entries(displacement).map(displacementToVelocity))
   }
@@ -69,9 +33,10 @@ export default class DeviceKinematics {
   }
 
   derivativesWrtT(variable) {
-    const { previous, ...current } = variable
-    if (current && previous) {
-      return variable === this.position ? this.deriveVelocityFromPosition(current, previous) : this._derivativesWrtT(current, previous)
+    if (variable.current && variable.previous) {
+      return variable === this.position
+        ? this.deriveVelocityFromPosition(variable.current, variable.previous)
+        : this._derivativesWrtT(variable.current, variable.previous)
     }
     return {}
   }
@@ -113,7 +78,7 @@ export default class DeviceKinematics {
   }
 
   get stateVector() {
-    return [this.position, this.acceleration, this.orientation, this.angularVelocity, this.velocityFromPosition]
+    return [this.position, this.velocityFromPosition, this.acceleration, this.orientation, this.angularVelocity]
   }
 
   get leverArmEffectJacobian() {

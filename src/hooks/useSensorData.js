@@ -5,18 +5,15 @@ import useDeviceOrienation from './useDeviceOrientation'
 import useGeolocation from './useGeolocation'
 
 import usePrevious from './usePrevious'
-import useClock from './useClock'
 
-import DeviceKinematics from '../lib/DeviceKinematics'
+import SensorData from '../lib/SensorData'
 
 export default function useSensorData(config = {}) {
   const motion = useDeviceMotion(config)
   const orientation = useDeviceOrienation(config)
   const geolocation = useGeolocation(config)
 
-  const { timestamp, previousTimestamp } = useClock(motion.data && orientation.data && geolocation.data)
-
-  const sensorData = useMemo(
+  const rawSensorData = useMemo(
     () => ({
       position: {
         latitude: geolocation.data?.latitude ?? null,
@@ -42,15 +39,11 @@ export default function useSensorData(config = {}) {
     [motion.data, orientation.data, geolocation.data]
   )
 
-  const previousSensorData = usePrevious(sensorData, (current, value) => {
+  const previousRawSensorData = usePrevious(rawSensorData, (current, value) => {
     return Object.entries(current).every(([variableName, variableValue]) => {
       return value[variableName] === variableValue
     })
   })
-
-  const stateVector = useMemo(() => {
-    return new DeviceKinematics(sensorData, previousSensorData, timestamp - previousTimestamp).stateVector
-  }, [sensorData])
 
   const errors = useMemo(
     () => ({ ...motion.errors, ...orientation.errors, ...geolocation.errors }),
@@ -67,7 +60,7 @@ export default function useSensorData(config = {}) {
   }, [motion.startListening, orientation.startListening, geolocation.startListening])
 
   return {
-    data: stateVector,
+    sensorData: new SensorData(rawSensorData, previousRawSensorData, config.renameMap),
     errors,
     isListening,
     startListening
