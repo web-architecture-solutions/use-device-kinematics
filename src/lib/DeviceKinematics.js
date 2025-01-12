@@ -1,15 +1,15 @@
+import Variable from './Variable'
 import { toRadians, euclideanNorm, Matrix } from './math'
 
 import { haversineDistance } from './physics'
 
 export default class DeviceKinematics {
-  constructor(sensorData, deltaT) {
+  constructor({ position, acceleration, angularVelocity, orientation }, deltaT) {
     this.dimension = 3
-    this.sensorData = sensorData
-    this.position = sensorData.position
-    this.accelerationSensorData = sensorData.acceleration
-    this.angularVelocitySensorData = sensorData.angularVelocity
-    this.orientation = sensorData.orientation
+    this.position = position
+    this.accelerationSensorData = acceleration
+    this.angularVelocitySensorData = angularVelocity
+    this.orientation = orientation
     this.deltaT = deltaT
   }
 
@@ -20,15 +20,17 @@ export default class DeviceKinematics {
   deriveVelocityFromPosition(current, previous) {
     const displacement = haversineDistance(current, previous)
     const displacementToVelocity = ([component, delta]) => [component, this.derivativeWrtT(delta)]
-    return Object.fromEntries(Object.entries(displacement).map(displacementToVelocity))
+    return new Variable(Object.fromEntries(Object.entries(displacement).map(displacementToVelocity)))
   }
 
   _derivativesWrtT(current, previous) {
-    return Object.fromEntries(
-      Object.entries(current).map(([component, value]) => {
-        const delta = value - previous[component]
-        return [component, this.derivativeWrtT(delta)]
-      })
+    return new Variable(
+      Object.fromEntries(
+        Object.entries(current).map(([component, value]) => {
+          const delta = value - previous[component]
+          return [component, this.derivativeWrtT(delta)]
+        })
+      )
     )
   }
 
@@ -46,11 +48,11 @@ export default class DeviceKinematics {
   }
 
   get acceleration() {
-    return {
+    return new Variable({
       ...this.accelerationSensorData,
       xy: euclideanNorm(this.accelerationSensorData.x, this.accelerationSensorData.y),
       xyz: euclideanNorm(this.accelerationSensorData.x, this.accelerationSensorData.y, this.accelerationSensorData.z)
-    }
+    })
   }
 
   get jerkFromAcceleration() {
@@ -58,7 +60,7 @@ export default class DeviceKinematics {
   }
 
   get angularVelocity() {
-    return {
+    return new Variable({
       ...this.angularVelocitySensorData,
       xy: euclideanNorm(toRadians(this.angularVelocitySensorData.x), toRadians(this.angularVelocitySensorData.y)),
       xyz: euclideanNorm(
@@ -66,7 +68,7 @@ export default class DeviceKinematics {
         toRadians(this.angularVelocitySensorData.x),
         toRadians(this.angularVelocitySensorData.y)
       )
-    }
+    })
   }
 
   get angularAccelerationFromVelocity() {
@@ -78,7 +80,16 @@ export default class DeviceKinematics {
   }
 
   get stateVector() {
-    return [this.position, this.velocityFromPosition, this.acceleration, this.orientation, this.angularVelocity]
+    return [
+      this.position,
+      this.velocityFromPosition,
+      this.acceleration,
+      this.jerkFromAcceleration,
+      this.orientation,
+      this.angularVelocity,
+      this.angularAccelerationFromVelocity,
+      this.angularJerkFromAcceleration
+    ]
   }
 
   get leverArmEffectJacobian() {
@@ -127,39 +138,26 @@ export default class DeviceKinematics {
     }
   }
 
-  get zeroMatrix() {
-    return Matrix.zero(this.dimension)
-  }
-
-  get identityMatrix() {
-    return Matrix.identity(this.dimension)
-  }
-
-  get dtMatrix() {
-    return Matrix.diagonal(this.dimension, this.deltaT)
-  }
-
-  get dt2Matrix() {
-    return Matrix.diagonal(this.dimension, 0.5 * Math.pow(this.deltaT, 2))
-  }
-
   // TODO: Double check that we haven't lost refinement in our core kinematics model per loss of more sophisticated coefficients
   get kinematicsMatrix() {
-    return Matrix.block([
-      [this.identityMatrix, this.dtMatrix, this.dt2Matrix, this.zeroMatrix],
-      [this.zeroMatrix, this.identityMatrix, this.dtMatrix, this.zeroMatrix],
-      [this.zeroMatrix, this.zeroMatrix, this.identityMatrix, this.dtMatrix],
-      [this.zeroMatrix, this.zeroMatrix, this.zeroMatrix, this.identityMatrix]
-    ])
+    return Matrix.blockDiagonal(
+      [
+        [1, this.deltaT, 0.5 * Math.pow(this.deltaT, 2), 0],
+        [0, 1, this.deltaT, 0],
+        [0, 0, 1, this.deltaT],
+        [0, 0, 0, 1]
+      ],
+      this.dimension
+    )
   }
 
-  get leverArmMatrix() {
+  get leverArmEffectMatrix() {
     const paddedJacobianWrtAlpha = this.leverArmEffectJacobian.wrtAlpha.pad({ top: 0, left: 9 })
     const paddedJacobianWrtOmega = this.leverArmEffectJacobian.wrtOmega.pad({ top: 0, left: 6 })
     return paddedJacobianWrtAlpha.add(paddedJacobianWrtOmega)
   }
 
-  get coriolisMatrix() {
+  get coriolisEffectMatrix() {
     const paddedJacobianWrtV = this.coriolisEffectJacobian.wrtV.pad({ top: 0, left: 3 })
     const paddedJacobianWrtOmega = this.coriolisEffectJacobian.wrtOmega.pad({ top: 0, left: 6 })
     return paddedJacobianWrtV.add(paddedJacobianWrtOmega)
@@ -167,8 +165,8 @@ export default class DeviceKinematics {
 
   get stateTransitionMatrix() {
     return Matrix.block([
-      [this.kinematicsMatrix, this.leverArmMatrix],
-      [this.coriolisMatrix, this.kinematicsMatrix]
+      [this.kinematicsMatrix, this.leverArmEffectMatrix],
+      [this.coriolisEffectMatrix, this.kinematicsMatrix]
     ])
   }
 }

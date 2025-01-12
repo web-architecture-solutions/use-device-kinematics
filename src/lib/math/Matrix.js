@@ -32,8 +32,13 @@ export default class Matrix extends Array {
     return Matrix.diagonal(dimension, 1)
   }
 
-  static block(m) {
-    return new Matrix(m.flatMap((row) => row))
+  static block(m, rowMapper = null) {
+    return new Matrix(m.flatMap((row) => (rowMapper ? row.map(rowMapper) : row)))
+  }
+
+  static blockDiagonal(m, dimension) {
+    const elementToDiagonalMatrix = (element) => Matrix.diagonal(element, dimension)
+    return Matrix.block(m, elementToDiagonalMatrix)
   }
 
   add(matrix) {
