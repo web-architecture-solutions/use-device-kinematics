@@ -1,8 +1,26 @@
 import { toRadians, euclideanNorm, Matrix } from './math'
 
+function initializeSensorData(_sensorData, _previousSensorData) {
+  const variableNameToVariableWithPrevious = (variableName) => [
+    variableName,
+    { ..._sensorData[variableName], previous: _previousSensorData?.[variableName] }
+  ]
+  return Object.fromEntries(Object.keys(_sensorData).map(variableNameToVariableWithPrevious))
+}
+
+function remap(variable, _remap) {
+  const { previous, ...current } = variable
+  if (current && previous) {
+    const toNewComponentName = ([componentName, componentValue]) => [_remap[componentName], componentValue]
+    const remapComponents = (components) => Object.fromEntries(Object.entries(components).map(toNewComponentName))
+    return { ...remapComponents(current), previous: remapComponents(previous) }
+  }
+  return {}
+}
+
 export default class DeviceKinematics {
   constructor(_sensorData, _previousSensorData, deltaT) {
-    const sensorData = DeviceKinematics.initializeSensorData(_sensorData, _previousSensorData)
+    const sensorData = initializeSensorData(_sensorData, _previousSensorData)
 
     this.dimension = 3
     this.sensorData = sensorData
@@ -11,15 +29,6 @@ export default class DeviceKinematics {
     this.angularVelocitySensorData = sensorData.angularVelocity
     this.orientationSensorData = sensorData.orientation
     this.deltaT = deltaT
-  }
-
-  static initializeSensorData(_sensorData, _previousSensorData) {
-    return Object.fromEntries(
-      Object.keys(_sensorData).map((variableName) => [
-        variableName,
-        { ..._sensorData[variableName], previous: _previousSensorData?.[variableName] }
-      ])
-    )
   }
 
   haversineDistance(
@@ -56,44 +65,39 @@ export default class DeviceKinematics {
     }
   }
 
-  velocityFromPosition(current, previous) {
-    const displacementToVelocity = ([component, value]) => [component, value / this.deltaT]
-    const displacement = this.haversineDistance(current, previous)
-    return Object.fromEntries(Object.entries(displacement).map(displacementToVelocity))
+  derivative(delta) {
+    return delta / this.deltaT
   }
 
-  _derivativeWrtT(current, previous) {
+  velocityFromPosition(current, previous) {
+    const displacement = this.haversineDistance(current, previous)
+    const toVelocity = ([component, delta]) => [component, this.derivative(delta)]
+    return Object.fromEntries(Object.entries(displacement).map(toVelocity))
+  }
+
+  _derivativesWrtT(current, previous) {
     return Object.fromEntries(
       Object.entries(current).map(([component, value]) => {
         const delta = value - previous[component]
-        return [component, delta / this.deltaT]
+        return [component, this.derivative(delta)]
       })
     )
   }
 
-  derivativeWrtT(variable) {
+  derivativesWrtT(variable) {
     const { previous, ...current } = variable
     if (current && previous) {
-      return variable === this.position ? this.velocityFromPosition(current, previous) : this._derivativeWrtT(current, previous)
+      return variable === this.position ? this.velocityFromPosition(current, previous) : this._derivativesWrtT(current, previous)
     }
     return null
   }
 
   get position() {
-    return {
-      x: this.positionSensorData.longitude, // x === longitude
-      y: this.positionSensorData.latitude, // y === latitude
-      z: this.positionSensorData.altitude, // z === altitude
-      previous: {
-        x: this.positionSensorData.previous?.longitude, // x === longitude
-        y: this.positionSensorData.previous?.latitude, // y === latitude
-        z: this.positionSensorData.previous?.altitude // z === altitude
-      }
-    }
+    return remap(this.positionSensorData, { latitude: 'y', longitude: 'x', altitude: 'z' })
   }
 
   get velocityFromPosition() {
-    return this.derivativeWrtT(this.position)
+    return this.derivativesWrtT(this.position)
   }
 
   get acceleration() {
@@ -105,15 +109,11 @@ export default class DeviceKinematics {
   }
 
   get jerkFromAcceleration() {
-    return this.derivativeWrtT(this.acceleration)
+    return this.derivativesWrtT(this.acceleration)
   }
 
   get orientation() {
-    return {
-      roll: this.orientationSensorData.gamma, // y === gamma === roll
-      pitch: this.orientationSensorData.beta, // x === beta === pitch
-      yaw: this.orientationSensorData.alpha // z === alpha === yaw
-    }
+    return remap(this.orientationSensorData, { alpha: 'yaw', beta: 'pitch', gamma: 'roll' })
   }
 
   get angularVelocity() {
@@ -131,11 +131,11 @@ export default class DeviceKinematics {
   }
 
   get angularAccelerationFromVelocity() {
-    return this.derivativeWrtT(this.angularVelocity)
+    return this.derivativesWrtT(this.angularVelocity)
   }
 
   get angularJerkFromAcceleration() {
-    return this.derivativeWrtT(this.angularAccelerationFromVelocity)
+    return this.derivativesWrtT(this.angularAccelerationFromVelocity)
   }
 
   get stateVector() {
