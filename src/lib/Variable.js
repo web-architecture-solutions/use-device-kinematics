@@ -24,6 +24,6 @@ export default class Variable {
       return component.rename(component.name in renameMap ? renameMap[component.name] : component.name)
     }
     const _renameComponents = (components) => Object.fromEntries(components.map(componentToRenamedComponent))
-    return { ..._renameComponents(this.currentRecord), previous: _renameComponents(this.previousRecord) }
+    return new Variable({ ..._renameComponents(this.currentRecord), previous: _renameComponents(this.previousRecord) })
   }
 }

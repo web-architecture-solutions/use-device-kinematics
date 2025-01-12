@@ -19,35 +19,31 @@ export default class DeviceKinematics {
     this.deltaT = deltaT
   }
 
-  haversineDistance(
-    { latitude, longitude, altitude },
-    { latitude: previousLatitude, longitude: previousLongitude, altitude: previousAltitude }
-  ) {
-    const coordinates2D = [latitude, previousLatitude, longitude, previousLongitude]
-
+  haversineDistance({ x, y, z }, { x: previousX, y: previousY, z: previousZ }) {
+    const coordinates2D = [x, previousX, y, previousY]
     if (coordinates2D.some((coordinate) => coordinate === null)) {
       return { x: null, y: null, z: null, xy: null, xyz: null }
     }
 
     const R = 6371000
 
-    const y = toRadians(latitude - previousLatitude) // x === longitude
-    const x = toRadians(longitude - previousLongitude) // y === latitude
-    const z = altitude - previousAltitude // z === altitude
+    const deltaX = toRadians(x - previousX)
+    const deltaY = toRadians(y - previousY)
+    const deltaZ = z - previousZ
 
-    const lat1 = toRadians(previousLatitude)
-    const lat2 = toRadians(latitude)
+    const lat1 = toRadians(previousY)
+    const lat2 = toRadians(y)
 
-    const a = Math.cos(lat1) * Math.cos(lat2) * Math.sin(x / 2) * Math.sin(x / 2)
-    const b = Math.sin(y / 2) * Math.sin(y / 2) + a
+    const a = Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaX / 2) * Math.sin(deltaX / 2)
+    const b = Math.sin(deltaY / 2) * Math.sin(deltaY / 2) + a
     const c = 2 * Math.atan2(Math.sqrt(b), Math.sqrt(1 - b))
 
     const xy = c * R
 
     return {
-      x: x * R * Math.cos((lat1 + lat2) / 2),
-      y: y * R,
-      z,
+      x: deltaX * R * Math.cos((lat1 + lat2) / 2),
+      y: deltaY * R,
+      z: deltaZ,
       xy: c * R,
       xyz: Math.sqrt(xy * xy + z * z)
     }
@@ -73,7 +69,6 @@ export default class DeviceKinematics {
   }
 
   derivativesWrtT(variable) {
-    return variable === this.position
     const { previous, ...current } = variable
     if (current && previous) {
       return variable === this.position ? this.velocityFromPosition(current, previous) : this._derivativesWrtT(current, previous)
@@ -100,11 +95,11 @@ export default class DeviceKinematics {
   get angularVelocity() {
     return {
       ...this.angularVelocitySensorData,
-      xy: euclideanNorm(toRadians(this.angularVelocitySensorData.beta), toRadians(this.angularVelocitySensorData.gamma)),
+      xy: euclideanNorm(toRadians(this.angularVelocitySensorData.x), toRadians(this.angularVelocitySensorData.y)),
       xyz: euclideanNorm(
-        toRadians(this.angularVelocitySensorData.alpha),
-        toRadians(this.angularVelocitySensorData.beta),
-        toRadians(this.angularVelocitySensorData.gamma)
+        toRadians(this.angularVelocitySensorData.z),
+        toRadians(this.angularVelocitySensorData.x),
+        toRadians(this.angularVelocitySensorData.y)
       )
     }
   }
