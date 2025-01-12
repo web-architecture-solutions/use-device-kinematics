@@ -49,21 +49,21 @@ export default class DeviceKinematics {
     }
   }
 
-  derivative(delta) {
+  derivativeWrtT(delta) {
     return delta / this.deltaT
   }
 
-  velocityFromPosition(current, previous) {
+  deriveVelocityFromPosition(current, previous) {
     const displacement = this.haversineDistance(current, previous)
-    const toVelocity = ([component, delta]) => [component, this.derivative(delta)]
-    return Object.fromEntries(Object.entries(displacement).map(toVelocity))
+    const displacementToVelocity = ([component, delta]) => [component, this.derivativeWrtT(delta)]
+    return Object.fromEntries(Object.entries(displacement).map(displacementToVelocity))
   }
 
   _derivativesWrtT(current, previous) {
     return Object.fromEntries(
       Object.entries(current).map(([component, value]) => {
         const delta = value - previous[component]
-        return [component, this.derivative(delta)]
+        return [component, this.derivativeWrtT(delta)]
       })
     )
   }
@@ -71,9 +71,9 @@ export default class DeviceKinematics {
   derivativesWrtT(variable) {
     const { previous, ...current } = variable
     if (current && previous) {
-      return variable === this.position ? this.velocityFromPosition(current, previous) : this._derivativesWrtT(current, previous)
+      return variable === this.position ? this.deriveVelocityFromPosition(current, previous) : this._derivativesWrtT(current, previous)
     }
-    return null
+    return {}
   }
 
   get velocityFromPosition() {
@@ -113,13 +113,7 @@ export default class DeviceKinematics {
   }
 
   get stateVector() {
-    return [
-      this.position,
-      this.acceleration,
-      this.orientation,
-      this.angularVelocity
-      //this.velocityFromPosition
-    ]
+    return [this.position, this.acceleration, this.orientation, this.angularVelocity, this.velocityFromPosition]
   }
 
   get leverArmEffectJacobian() {
