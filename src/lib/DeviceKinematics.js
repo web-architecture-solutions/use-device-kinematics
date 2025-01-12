@@ -1,42 +1,14 @@
 import { toRadians, euclideanNorm, Matrix } from './math'
 
-const positionRemap = { latitude: 'y', longitude: 'x', altitude: 'z' }
-const orientationRemap = { alpha: 'yaw', beta: 'pitch', gamma: 'roll' }
-const angularVelocityRemap = { alpha: 'z', beta: 'x', gamma: 'y' }
-
-const renameMap = {
-  position: { latitude: 'y', longitude: 'x', altitude: 'z' },
-  orientation: { alpha: 'yaw', beta: 'pitch', gamma: 'roll' },
-  angularVelocity: { alpha: 'z', beta: 'x', gamma: 'y' }
-}
-
-function renameVariableComponents(variable, renameMap) {
-  const { previous, ...current } = variable
-  if (current && previous) {
-    const componentToRenamedComponent = ([componentName, componentValue]) => {
-      const newComponentName = componentName in renameMap ? renameMap[componentName] : componentName
-      return [newComponentName, componentValue]
-    }
-    const _renameVariableComponents = (components) => Object.fromEntries(Object.entries(components).map(componentToRenamedComponent))
-    return { ..._renameVariableComponents(current), previous: _renameVariableComponents(previous) }
-  }
-  return {}
-}
-
-function initializeSensorData(_sensorData, _previousSensorData) {
-  const variableNameToVariableWithPrevious = (variableName) => {
-    const current = _sensorData[variableName]
-    const previous = _previousSensorData?.[variableName] ?? null
-    const variable = { ...current, previous }
-    const renamedVariable = renameMap[variableName] ? renameVariableComponents(variable, renameMap[variableName]) : variable
-    return [variableName, renamedVariable]
-  }
-  return Object.fromEntries(Object.keys(_sensorData).map(variableNameToVariableWithPrevious))
-}
+import SensorData from './SensorData'
 
 export default class DeviceKinematics {
-  constructor(_sensorData, _previousSensorData, deltaT) {
-    const sensorData = initializeSensorData(_sensorData, _previousSensorData)
+  constructor(rawSensorData, previousRawSensorData, deltaT) {
+    const sensorData = new SensorData(rawSensorData, previousRawSensorData, {
+      position: { latitude: 'y', longitude: 'x', altitude: 'z' },
+      orientation: { alpha: 'yaw', beta: 'pitch', gamma: 'roll' },
+      angularVelocity: { alpha: 'z', beta: 'x', gamma: 'y' }
+    })
 
     this.dimension = 3
     this.sensorData = sensorData
