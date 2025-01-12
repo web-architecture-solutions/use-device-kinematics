@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useRef } from 'react'
 
-export default function usePrevious(initialData) {
-  const [[current, previous], setData] = useState([initialData, initialData])
-  const update = (newData) => setData(([oldData]) => [newData, oldData])
-  return { current, previous, update }
+export default function usePrevious(initialValue, current) {
+  const previousRef = useRef(initialValue)
+  useEffect(() => {
+    previousRef.current = current
+  }, [current])
+  return previousRef.current
 }

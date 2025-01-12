@@ -107,15 +107,15 @@ export default class DeviceKinematics {
   }
 
   get angularJerkFromAcceleration() {
-    return this.derivative(this.angularAcceleration)
+    return this.derivative(this.angularAccelerationFromVelocity)
   }
 
-  get derivedData() {
+  get stateVector() {
     return {
-      velocityFromPosition: this.velocityFromPosition,
-      jerkFromAcceleration: this.jerkFromAcceleration,
-      angularAccelerationFromVelocity: this.angularAccelerationFromVelocity,
-      angularJerkFromAcceleration: this.angularJerkFromAcceleration
+      position: this.position,
+      acceleration: this.acceleration,
+      orientation: this.orientation,
+      angularVelocity: this.angularVelocity
     }
   }
 
