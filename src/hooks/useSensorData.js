@@ -9,13 +9,6 @@ import useClock from './useClock'
 
 import DeviceKinematics from '../lib/DeviceKinematics'
 
-const initialSensorData = {
-  position: { x: null, y: null, z: null },
-  acceleration: { x: null, y: null, z: null },
-  orientation: { yaw: null, pitch: null, roll: null },
-  angularVelocity: { alpha: null, beta: null, gamma: null }
-}
-
 export default function useSensorData(config = {}) {
   const motion = useDeviceMotion(config)
   const orientation = useDeviceOrienation(config)
@@ -26,29 +19,37 @@ export default function useSensorData(config = {}) {
   const sensorData = useMemo(
     () => ({
       position: {
-        x: geolocation.data?.longitude,
-        y: geolocation.data?.latitude,
-        z: geolocation.data?.altitude
+        x: geolocation.data?.longitude ?? null,
+        y: geolocation.data?.latitude ?? null,
+        z: geolocation.data?.altitude ?? null
       },
-      acceleration: { ...motion.data?.acceleration },
+      acceleration: {
+        x: motion.data?.acceleration.x ?? null,
+        y: motion.data?.acceleration.y ?? null,
+        z: motion.data?.acceleration.z ?? null
+      },
       orientation: {
-        yaw: orientation.data?.alpha,
-        pitch: orientation.data?.beta,
-        roll: orientation.data?.gamma
+        yaw: orientation.data?.alpha ?? null,
+        pitch: orientation.data?.beta ?? null,
+        roll: orientation.data?.gamma ?? null
       },
-      angularVelocity: { ...motion.data?.rotationRate }
+      angularVelocity: {
+        alpha: motion.data?.rotationRate.alpha ?? null,
+        beta: motion.data?.rotationRate.beta ?? null,
+        gamma: motion.data?.rotationRate.gamma ?? null
+      }
     }),
     [motion.data, orientation.data, geolocation.data]
   )
 
-  const previousSensorData = usePrevious(initialSensorData, sensorData)
+  const previousSensorData = usePrevious(sensorData)
 
   const stateVector = useMemo(() => {
     return new DeviceKinematics(
       Object.fromEntries(
         Object.keys(sensorData).map((variableName) => [
           variableName,
-          { ...sensorData[variableName], previous: previousSensorData[variableName] }
+          { ...sensorData[variableName], previous: previousSensorData?.[variableName] }
         ])
       ),
       timestamp - previousTimestamp

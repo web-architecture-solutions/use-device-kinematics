@@ -85,6 +85,7 @@ export default class DeviceKinematics {
       x: this.angularVelocitySensorData.beta,
       y: this.angularVelocitySensorData.gamma,
       z: this.angularVelocitySensorData.alpha,
+      previous: this.angularVelocitySensorData.previous,
       xy: euclideanNorm(toRadians(this.angularVelocitySensorData.beta), toRadians(this.angularVelocitySensorData.gamma)),
       xyz: euclideanNorm(
         toRadians(this.angularVelocitySensorData.alpha),
