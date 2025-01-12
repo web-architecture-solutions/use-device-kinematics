@@ -7,7 +7,7 @@ export default class DeviceKinematics {
     this.position = sensorData.position
     this.accelerationSensorData = sensorData.acceleration
     this.angularVelocitySensorData = sensorData.angularVelocity
-    this.orientationSensorData = sensorData.orientation
+    this.orientation = sensorData.orientation
     this.deltaT = deltaT
   }
 
@@ -78,14 +78,6 @@ export default class DeviceKinematics {
 
   get jerkFromAcceleration() {
     return this.derivative(this.acceleration)
-  }
-
-  get orientation() {
-    return {
-      yaw: this.orientationSensorData.alpha,
-      pitch: this.orientationSensorData.beta,
-      roll: this.orientationSensorData.gamma
-    }
   }
 
   get angularVelocity() {

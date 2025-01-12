@@ -21,8 +21,7 @@ export default function useSensorData(config = {}) {
   const orientation = useDeviceOrienation(config)
   const geolocation = useGeolocation(config)
 
-  // TODO: Start clock once data's loaded
-  const [timestamp, previousTimestamp] = useClock()
+  const { timestamp, previousTimestamp } = useClock(motion.data && orientation.data && geolocation.data)
 
   const sensorData = useMemo(
     () => ({
@@ -54,7 +53,7 @@ export default function useSensorData(config = {}) {
       ),
       timestamp - previousTimestamp
     ).stateVector
-  }, [motion.data, orientation.data, geolocation.data])
+  }, [sensorData])
 
   const errors = useMemo(
     () => ({ ...motion.errors, ...orientation.errors, ...geolocation.errors }),
