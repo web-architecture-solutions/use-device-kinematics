@@ -5,7 +5,7 @@ import usePrevious from './usePrevious'
 export default function useClock(startCondition, updateFrequency = 100) {
   const startTime = useRef(null)
   const [timestamp, setTimestamp] = useState(null)
-  const previousTimestamp = usePrevious(null, timestamp)
+  const previousTimestamp = usePrevious(timestamp)
   useEffect(() => {
     if (startCondition) {
       startTime.current = performance.now()

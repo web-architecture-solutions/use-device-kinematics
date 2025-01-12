@@ -1,14 +1,25 @@
 import { toRadians, euclideanNorm, Matrix } from './math'
 
 export default class DeviceKinematics {
-  constructor(sensorData, deltaT) {
+  constructor(_sensorData, _previousSensorData, deltaT) {
+    const sensorData = DeviceKinematics.initializeSensorData(_sensorData, _previousSensorData)
+
     this.dimension = 3
     this.sensorData = sensorData
-    this.position = sensorData.position
+    this.positionSensorData = sensorData.position
     this.accelerationSensorData = sensorData.acceleration
     this.angularVelocitySensorData = sensorData.angularVelocity
-    this.orientation = sensorData.orientation
+    this.orientationSensorData = sensorData.orientation
     this.deltaT = deltaT
+  }
+
+  static initializeSensorData(_sensorData, _previousSensorData) {
+    return Object.fromEntries(
+      Object.keys(_sensorData).map((variableName) => [
+        variableName,
+        { ..._sensorData[variableName], previous: _previousSensorData?.[variableName] }
+      ])
+    )
   }
 
   haversineDistance(
@@ -16,15 +27,16 @@ export default class DeviceKinematics {
     { latitude: previousLatitude, longitude: previousLongitude, altitude: previousAltitude }
   ) {
     const coordinates2D = [latitude, previousLatitude, longitude, previousLongitude]
+
     if (coordinates2D.some((coordinate) => coordinate === null)) {
       return { x: null, y: null, z: null, xy: null, xyz: null }
     }
 
     const R = 6371000
 
-    const y = toRadians(latitude - previousLatitude)
-    const x = toRadians(longitude - previousLongitude)
-    const z = altitude - previousAltitude
+    const y = toRadians(latitude - previousLatitude) // x === longitude
+    const x = toRadians(longitude - previousLongitude) // y === latitude
+    const z = altitude - previousAltitude // z === altitude
 
     const lat1 = toRadians(previousLatitude)
     const lat2 = toRadians(latitude)
@@ -44,28 +56,44 @@ export default class DeviceKinematics {
     }
   }
 
-  derivative(variable) {
-    if (variable) {
-      const { previous, ...current } = variable
-      if (previous) {
-        let entries
-        if (variable === this.position) {
-          const displacement = this.haversineDistance(current, previous)
-          const displacementToVelocity = ([component, value]) => [component, value / this.deltaT]
-          entries = Object.entries(displacement).map(displacementToVelocity)
-        } else {
-          entries = Object.entries(current).map(([component, value]) => {
-            const delta = value - previous[component]
-            return [component, delta / this.deltaT]
-          })
-        }
-        return Object.fromEntries(entries)
+  velocityFromPosition(current, previous) {
+    const displacementToVelocity = ([component, value]) => [component, value / this.deltaT]
+    const displacement = this.haversineDistance(current, previous)
+    return Object.fromEntries(Object.entries(displacement).map(displacementToVelocity))
+  }
+
+  _derivativeWrtT(current, previous) {
+    return Object.fromEntries(
+      Object.entries(current).map(([component, value]) => {
+        const delta = value - previous[component]
+        return [component, delta / this.deltaT]
+      })
+    )
+  }
+
+  derivativeWrtT(variable) {
+    const { previous, ...current } = variable
+    if (current && previous) {
+      return variable === this.position ? this.velocityFromPosition(current, previous) : this._derivativeWrtT(current, previous)
+    }
+    return null
+  }
+
+  get position() {
+    return {
+      x: this.positionSensorData.longitude, // x === longitude
+      y: this.positionSensorData.latitude, // y === latitude
+      z: this.positionSensorData.altitude, // z === altitude
+      previous: {
+        x: this.positionSensorData.previous?.longitude, // x === longitude
+        y: this.positionSensorData.previous?.latitude, // y === latitude
+        z: this.positionSensorData.previous?.altitude // z === altitude
       }
     }
   }
 
   get velocityFromPosition() {
-    return this.derivative(this.position)
+    return this.derivativeWrtT(this.position)
   }
 
   get acceleration() {
@@ -77,15 +105,22 @@ export default class DeviceKinematics {
   }
 
   get jerkFromAcceleration() {
-    return this.derivative(this.acceleration)
+    return this.derivativeWrtT(this.acceleration)
+  }
+
+  get orientation() {
+    return {
+      roll: this.orientationSensorData.gamma, // y === gamma === roll
+      pitch: this.orientationSensorData.beta, // x === beta === pitch
+      yaw: this.orientationSensorData.alpha // z === alpha === yaw
+    }
   }
 
   get angularVelocity() {
     return {
-      x: this.angularVelocitySensorData.beta,
-      y: this.angularVelocitySensorData.gamma,
-      z: this.angularVelocitySensorData.alpha,
-      previous: this.angularVelocitySensorData.previous,
+      x: this.angularVelocitySensorData.beta, // x === beta === pitch
+      y: this.angularVelocitySensorData.gamma, // y === gamma === roll
+      z: this.angularVelocitySensorData.alpha, // z === alpha === yaw
       xy: euclideanNorm(toRadians(this.angularVelocitySensorData.beta), toRadians(this.angularVelocitySensorData.gamma)),
       xyz: euclideanNorm(
         toRadians(this.angularVelocitySensorData.alpha),
@@ -96,11 +131,11 @@ export default class DeviceKinematics {
   }
 
   get angularAccelerationFromVelocity() {
-    return this.derivative(this.angularVelocity)
+    return this.derivativeWrtT(this.angularVelocity)
   }
 
   get angularJerkFromAcceleration() {
-    return this.derivative(this.angularAccelerationFromVelocity)
+    return this.derivativeWrtT(this.angularAccelerationFromVelocity)
   }
 
   get stateVector() {
@@ -108,7 +143,8 @@ export default class DeviceKinematics {
       position: this.position,
       acceleration: this.acceleration,
       orientation: this.orientation,
-      angularVelocity: this.angularVelocity
+      angularVelocity: this.angularVelocity,
+      velocityFromPosition: this.velocityFromPosition
     }
   }
 

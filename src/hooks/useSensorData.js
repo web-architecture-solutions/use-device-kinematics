@@ -19,9 +19,9 @@ export default function useSensorData(config = {}) {
   const sensorData = useMemo(
     () => ({
       position: {
-        x: geolocation.data?.longitude ?? null,
-        y: geolocation.data?.latitude ?? null,
-        z: geolocation.data?.altitude ?? null
+        latitude: geolocation.data?.latitude ?? null,
+        longitude: geolocation.data?.longitude ?? null,
+        altitude: geolocation.data?.altitude ?? null
       },
       acceleration: {
         x: motion.data?.acceleration.x ?? null,
@@ -29,9 +29,9 @@ export default function useSensorData(config = {}) {
         z: motion.data?.acceleration.z ?? null
       },
       orientation: {
-        yaw: orientation.data?.alpha ?? null,
-        pitch: orientation.data?.beta ?? null,
-        roll: orientation.data?.gamma ?? null
+        alpha: orientation.data?.alpha ?? null,
+        beta: orientation.data?.beta ?? null,
+        gamma: orientation.data?.gamma ?? null
       },
       angularVelocity: {
         alpha: motion.data?.rotationRate.alpha ?? null,
@@ -49,15 +49,7 @@ export default function useSensorData(config = {}) {
   })
 
   const stateVector = useMemo(() => {
-    return new DeviceKinematics(
-      Object.fromEntries(
-        Object.keys(sensorData).map((variableName) => [
-          variableName,
-          { ...sensorData[variableName], previous: previousSensorData?.[variableName] }
-        ])
-      ),
-      timestamp - previousTimestamp
-    ).stateVector
+    return new DeviceKinematics(sensorData, previousSensorData, timestamp - previousTimestamp).stateVector
   }, [sensorData])
 
   const errors = useMemo(
