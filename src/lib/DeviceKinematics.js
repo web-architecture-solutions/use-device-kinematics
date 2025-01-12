@@ -1,21 +1,37 @@
 import { toRadians, euclideanNorm, Matrix } from './math'
 
-function initializeSensorData(_sensorData, _previousSensorData) {
-  const variableNameToVariableWithPrevious = (variableName) => [
-    variableName,
-    { ..._sensorData[variableName], previous: _previousSensorData?.[variableName] }
-  ]
-  return Object.fromEntries(Object.keys(_sensorData).map(variableNameToVariableWithPrevious))
+const positionRemap = { latitude: 'y', longitude: 'x', altitude: 'z' }
+const orientationRemap = { alpha: 'yaw', beta: 'pitch', gamma: 'roll' }
+const angularVelocityRemap = { alpha: 'z', beta: 'x', gamma: 'y' }
+
+const renameMap = {
+  position: { latitude: 'y', longitude: 'x', altitude: 'z' },
+  orientation: { alpha: 'yaw', beta: 'pitch', gamma: 'roll' },
+  angularVelocity: { alpha: 'z', beta: 'x', gamma: 'y' }
 }
 
-function remap(variable, _remap) {
+function renameVariableComponents(variable, renameMap) {
   const { previous, ...current } = variable
   if (current && previous) {
-    const toNewComponentName = ([componentName, componentValue]) => [_remap[componentName], componentValue]
-    const remapComponents = (components) => Object.fromEntries(Object.entries(components).map(toNewComponentName))
-    return { ...remapComponents(current), previous: remapComponents(previous) }
+    const componentToRenamedComponent = ([componentName, componentValue]) => {
+      const newComponentName = componentName in renameMap ? renameMap[componentName] : componentName
+      return [newComponentName, componentValue]
+    }
+    const _renameVariableComponents = (components) => Object.fromEntries(Object.entries(components).map(componentToRenamedComponent))
+    return { ..._renameVariableComponents(current), previous: _renameVariableComponents(previous) }
   }
   return {}
+}
+
+function initializeSensorData(_sensorData, _previousSensorData) {
+  const variableNameToVariableWithPrevious = (variableName) => {
+    const current = _sensorData[variableName]
+    const previous = _previousSensorData?.[variableName] ?? null
+    const variable = { ...current, previous }
+    const renamedVariable = renameMap[variableName] ? renameVariableComponents(variable, renameMap[variableName]) : variable
+    return [variableName, renamedVariable]
+  }
+  return Object.fromEntries(Object.keys(_sensorData).map(variableNameToVariableWithPrevious))
 }
 
 export default class DeviceKinematics {
@@ -24,10 +40,10 @@ export default class DeviceKinematics {
 
     this.dimension = 3
     this.sensorData = sensorData
-    this.positionSensorData = sensorData.position
+    this.position = sensorData.position
     this.accelerationSensorData = sensorData.acceleration
     this.angularVelocitySensorData = sensorData.angularVelocity
-    this.orientationSensorData = sensorData.orientation
+    this.orientation = sensorData.orientation
     this.deltaT = deltaT
   }
 
@@ -85,15 +101,12 @@ export default class DeviceKinematics {
   }
 
   derivativesWrtT(variable) {
+    return variable === this.position
     const { previous, ...current } = variable
     if (current && previous) {
       return variable === this.position ? this.velocityFromPosition(current, previous) : this._derivativesWrtT(current, previous)
     }
     return null
-  }
-
-  get position() {
-    return remap(this.positionSensorData, { latitude: 'y', longitude: 'x', altitude: 'z' })
   }
 
   get velocityFromPosition() {
@@ -112,15 +125,9 @@ export default class DeviceKinematics {
     return this.derivativesWrtT(this.acceleration)
   }
 
-  get orientation() {
-    return remap(this.orientationSensorData, { alpha: 'yaw', beta: 'pitch', gamma: 'roll' })
-  }
-
   get angularVelocity() {
     return {
-      x: this.angularVelocitySensorData.beta, // x === beta === pitch
-      y: this.angularVelocitySensorData.gamma, // y === gamma === roll
-      z: this.angularVelocitySensorData.alpha, // z === alpha === yaw
+      ...this.angularVelocitySensorData,
       xy: euclideanNorm(toRadians(this.angularVelocitySensorData.beta), toRadians(this.angularVelocitySensorData.gamma)),
       xyz: euclideanNorm(
         toRadians(this.angularVelocitySensorData.alpha),
@@ -139,13 +146,13 @@ export default class DeviceKinematics {
   }
 
   get stateVector() {
-    return {
-      position: this.position,
-      acceleration: this.acceleration,
-      orientation: this.orientation,
-      angularVelocity: this.angularVelocity,
-      velocityFromPosition: this.velocityFromPosition
-    }
+    return [
+      this.position,
+      this.acceleration,
+      this.orientation,
+      this.angularVelocity
+      //this.velocityFromPosition
+    ]
   }
 
   get leverArmEffectJacobian() {
