@@ -42,7 +42,11 @@ export default function useSensorData(config = {}) {
     [motion.data, orientation.data, geolocation.data]
   )
 
-  const previousSensorData = usePrevious(sensorData)
+  const previousSensorData = usePrevious(sensorData, (current, value) => {
+    return Object.entries(current).every(([variableName, variableValue]) => {
+      return value[variableName] === variableValue
+    })
+  })
 
   const stateVector = useMemo(() => {
     return new DeviceKinematics(
