@@ -17,7 +17,7 @@ export default class DeviceKinematics {
   ) {
     const coordinates2D = [latitude, previousLatitude, longitude, previousLongitude]
     if (coordinates2D.some((coordinate) => coordinate === null)) {
-      return { distance2D: null, distance3D: null, deltaLat: null, deltaLon: null, deltaAlt: null }
+      return { x: null, y: null, z: null, xy: null, xyz: null }
     }
 
     const R = 6371000
@@ -45,21 +45,23 @@ export default class DeviceKinematics {
   }
 
   derivative(variable) {
-    /*
-    const { previous, ...current } = variable
-    let entries
-    if (variable === this.position) {
-      const displacement = this.haversineDistance(current, previous)
-      const displacementToVelocity = ([component, value]) => [component, value / this.deltaT]
-      entries = Object.entries(displacement).map(displacementToVelocity)
-    } else {
-      entries = Object.entries(current).map(([component, value]) => {
-        const delta = value - previous.component
-        return [component, delta / this.deltaT]
-      })
+    if (variable) {
+      const { previous, ...current } = variable
+      if (previous) {
+        let entries
+        if (variable === this.position) {
+          const displacement = this.haversineDistance(current, previous)
+          const displacementToVelocity = ([component, value]) => [component, value / this.deltaT]
+          entries = Object.entries(displacement).map(displacementToVelocity)
+        } else {
+          entries = Object.entries(current).map(([component, value]) => {
+            const delta = value - previous[component]
+            return [component, delta / this.deltaT]
+          })
+        }
+        return Object.fromEntries(entries)
+      }
     }
-    return Object.fromEntries(entries)
-    */
   }
 
   get velocityFromPosition() {
@@ -67,13 +69,11 @@ export default class DeviceKinematics {
   }
 
   get acceleration() {
-    /*
     return {
       ...this.accelerationSensorData,
-      xy: euclideanNorm(this.acceleration.x, this.acceleration.y),
-      xyz: euclideanNorm(this.acceleration.x, this.acceleration.y, this.acceleration.z)
+      xy: euclideanNorm(this.accelerationSensorData.x, this.accelerationSensorData.y),
+      xyz: euclideanNorm(this.accelerationSensorData.x, this.accelerationSensorData.y, this.accelerationSensorData.z)
     }
-    */
   }
 
   get jerkFromAcceleration() {
@@ -89,15 +89,17 @@ export default class DeviceKinematics {
   }
 
   get angularVelocity() {
-    /*
     return {
       x: this.angularVelocitySensorData.beta,
       y: this.angularVelocitySensorData.gamma,
       z: this.angularVelocitySensorData.alpha,
-      xy: euclideanNorm(toRadians(this.angularVelocity.beta), toRadians(this.angularVelocity.gamma)),
-      xyz: euclideanNorm(toRadians(this.angularVelocity.alpha), toRadians(this.angularVelocity.beta), toRadians(this.angularVelocity.gamma))
+      xy: euclideanNorm(toRadians(this.angularVelocitySensorData.beta), toRadians(this.angularVelocitySensorData.gamma)),
+      xyz: euclideanNorm(
+        toRadians(this.angularVelocitySensorData.alpha),
+        toRadians(this.angularVelocitySensorData.beta),
+        toRadians(this.angularVelocitySensorData.gamma)
+      )
     }
-    */
   }
 
   get angularAccelerationFromVelocity() {
@@ -110,10 +112,10 @@ export default class DeviceKinematics {
 
   get derivedData() {
     return {
-      ...this.velocityFromPosition,
-      ...this.jerkFromAcceleration,
-      ...this.angularAccelerationFromVelocity,
-      ...this.angularJerkFromAcceleration
+      velocityFromPosition: this.velocityFromPosition,
+      jerkFromAcceleration: this.jerkFromAcceleration,
+      angularAccelerationFromVelocity: this.angularAccelerationFromVelocity,
+      angularJerkFromAcceleration: this.angularJerkFromAcceleration
     }
   }
 

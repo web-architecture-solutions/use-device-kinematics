@@ -22,9 +22,18 @@ export default function useSensorData(config = {}) {
   //const heading = useHeading(orientation.data?.alpha)
 
   const { current, previous, update } = usePrevious({
-    ...motion?.data,
-    ...orientation?.data,
-    ...geolocation?.data
+    position: {
+      x: null,
+      y: null,
+      z: null
+    },
+    acceleration: { x: null, y: null, z: null },
+    orientation: {
+      yaw: null,
+      pitch: null,
+      roll: null
+    },
+    angularVelocity: { alpha: null, beta: null, gamma: null }
   })
 
   useEffect(() => {
@@ -44,13 +53,11 @@ export default function useSensorData(config = {}) {
     })
   }, [motion.data, orientation.data, geolocation.data])
 
-  const calculatedData = useMemo(() => {
+  const derivedData = useMemo(() => {
     return new DeviceKinematics(
       {
         position: {
-          latitude: current.latitude,
-          longitude: current.longitude,
-          altitude: current.altitude,
+          ...current.position,
           previous: previous.position
         },
         acceleration: {
@@ -58,10 +65,13 @@ export default function useSensorData(config = {}) {
           previous: previous.acceleration
         },
         angularVelocity: {
-          ...current.rotationRate,
+          ...current.angularVelocity,
           previous: previous.angularVelocity
         },
-        orientation: orientation.data ?? {}
+        orientation: {
+          ...current.orientation,
+          previous: previous.orientation
+        }
       },
       timestamp - previousTimestamp
     ).derivedData
@@ -82,7 +92,7 @@ export default function useSensorData(config = {}) {
   }, [motion.startListening, orientation.startListening, geolocation.startListening])
 
   return {
-    data: current,
+    data: { ...current, ...derivedData },
     errors,
     isListening,
     startListening
