@@ -5,14 +5,8 @@ import useClock from './hooks/useClock'
 
 import DeviceKinematics from './lib/DeviceKinematics'
 
-const renameMap = {
-  position: { latitude: 'y', longitude: 'x', altitude: 'z' },
-  orientation: { alpha: 'yaw', beta: 'pitch', gamma: 'roll' },
-  angularVelocity: { alpha: 'z', beta: 'x', gamma: 'y' }
-}
-
 export default function App() {
-  const { sensorData, errors, isListening, startListening } = useSensorData({ enableHighAccuracy: true, renameMap })
+  const { sensorData, errors, isListening, startListening } = useSensorData({ enableHighAccuracy: true })
 
   const { timestamp, previousTimestamp } = useClock(true)
 

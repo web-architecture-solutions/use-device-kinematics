@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 
 import useDeviceMotion from './useDeviceMotion'
 import useDeviceOrienation from './useDeviceOrientation'
@@ -7,6 +7,14 @@ import useGeolocation from './useGeolocation'
 import usePrevious from './usePrevious'
 
 import SensorData from '../lib/SensorData'
+
+const renameMap = {
+  position: { latitude: 'y', longitude: 'x', altitude: 'z' },
+  orientation: { alpha: 'yaw', beta: 'pitch', gamma: 'roll' },
+  angularVelocity: { alpha: 'z', beta: 'x', gamma: 'y' }
+}
+
+const sensorData = new SensorData(SensorData.initial, SensorData.initial, renameMap)
 
 export default function useSensorData(config = {}) {
   const motion = useDeviceMotion(config)
@@ -43,6 +51,8 @@ export default function useSensorData(config = {}) {
 
   const previousRawSensorData = usePrevious(rawSensorData, SensorData.initial, SensorData.isEqual)
 
+  useEffect(() => sensorData.update(rawSensorData, previousRawSensorData, renameMap), [rawSensorData, previousRawSensorData])
+
   const errors = useMemo(
     () => ({ ...motion.errors, ...orientation.errors, ...geolocation.errors }),
     [motion.errors, orientation.errors, geolocation.errors]
@@ -58,7 +68,7 @@ export default function useSensorData(config = {}) {
   }, [motion.startListening, orientation.startListening, geolocation.startListening])
 
   return {
-    sensorData: new SensorData(rawSensorData, previousRawSensorData, config.renameMap),
+    sensorData,
     errors,
     isListening,
     startListening
