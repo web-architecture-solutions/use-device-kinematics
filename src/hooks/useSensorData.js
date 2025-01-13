@@ -8,13 +8,11 @@ import usePrevious from './usePrevious'
 
 import SensorData from '../lib/SensorData'
 
-const renameMap = {
+const sensorData = new SensorData({
   position: { latitude: 'y', longitude: 'x', altitude: 'z' },
   orientation: { alpha: 'yaw', beta: 'pitch', gamma: 'roll' },
   angularVelocity: { alpha: 'z', beta: 'x', gamma: 'y' }
-}
-
-const sensorData = new SensorData(renameMap)
+})
 
 export default function useSensorData(config = {}) {
   const motion = useDeviceMotion(config)
@@ -49,9 +47,7 @@ export default function useSensorData(config = {}) {
     [motion.data, orientation.data, geolocation.data]
   )
 
-  const previousRawSensorData = usePrevious(rawSensorData, SensorData.initial, SensorData.isEqual)
-
-  useEffect(() => sensorData.update(rawSensorData, previousRawSensorData, renameMap), [rawSensorData, previousRawSensorData])
+  useEffect(() => sensorData.update(rawSensorData), [rawSensorData])
 
   const errors = useMemo(
     () => ({ ...motion.errors, ...orientation.errors, ...geolocation.errors }),

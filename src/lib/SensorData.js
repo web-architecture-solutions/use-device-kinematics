@@ -4,7 +4,7 @@ export default class SensorData {
   #renameMap
 
   constructor(renameMap) {
-    this._update(SensorData.initial, SensorData.initial, renameMap)
+    this._update(SensorData.initial, renameMap)
     this.#renameMap = renameMap
   }
 
@@ -55,16 +55,16 @@ export default class SensorData {
     )
   }
 
-  _update(rawSensorData, previousRawSensorData, renameMap) {
+  _update(rawSensorData, renameMap) {
     Object.keys(rawSensorData).forEach((variableName) => {
       const current = rawSensorData[variableName]
-      const previous = previousRawSensorData?.[variableName] ?? null
+      const previous = this[variableName] ? this[variableName] : SensorData.initial //previousRawSensorData?.[variableName] ?? null
       const variable = new Variable(current, previous)
       this[variableName] = renameMap[variableName] ? variable.renameComponents(renameMap[variableName]) : variable
     })
   }
 
-  update(rawSensorData, previousRawSensorData) {
-    this._update(rawSensorData, previousRawSensorData, this.#renameMap)
+  update(rawSensorData) {
+    this._update(rawSensorData, this.#renameMap)
   }
 }
