@@ -33,10 +33,14 @@ export default class SensorData {
     }
   }
 
-  static isEqual(current, newValue) {
-    return Object.entries(current).every(([variableName, variableValue]) => {
-      return newValue[variableName] === variableValue
+  isEqual(sensorData) {
+    return Object.entries(this).every(([variableName, variable]) => {
+      return variable.isEqual(sensorData[variableName])
     })
+  }
+
+  get isReady() {
+    return !this.isEqual(SensorData.initial)
   }
 
   _update(rawSensorData, renameMap) {

@@ -21,6 +21,12 @@ export default class Variable {
     return new VariableRecord(this.previous)
   }
 
+  isEqual(variable) {
+    return Object.entries(this).every(([componentName, componentValue]) => {
+      return variable[componentName] === componentValue
+    })
+  }
+
   renameComponents(renameMap) {
     if (!this.previous) return this
     const componentToRenamedComponent = (component) => {
