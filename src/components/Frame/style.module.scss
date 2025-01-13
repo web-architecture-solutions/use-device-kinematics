@@ -1,0 +1,83 @@
+$maskWidth: 2rem;
+
+$backgroundColor: rgb(255, 255, 255, 1);
+$frameColor: black;
+
+.Frame {
+  background-color: $frameColor;
+
+  position: relative;
+}
+
+.mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+
+  color: white; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden; 
+
+  mask-image: linear-gradient(to bottom, $frameColor $maskWidth, transparent $maskWidth), linear-gradient(to top, $frameColor $maskWidth, transparent $maskWidth),
+    linear-gradient(to right, $frameColor $maskWidth, transparent $maskWidth), linear-gradient(to left, $frameColor $maskWidth, transparent $maskWidth);
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+
+  -webkit-mask-image: linear-gradient(to bottom, $frameColor $maskWidth, transparent $maskWidth), linear-gradient(to top, $frameColor $maskWidth, transparent $maskWidth),
+    linear-gradient(to right, $frameColor $maskWidth, transparent $maskWidth), linear-gradient(to left, $frameColor $maskWidth, transparent $maskWidth);
+  -webkit-mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+
+  backdrop-filter: #{'invert()'};
+}
+
+.mask::before {
+  content: '';
+  
+  width: 100%;
+  height: 100%;
+  pointer-events: none; 
+  
+  background: 
+    linear-gradient(to top, rgba(0, 0, 0, 0), $backgroundColor $maskWidth),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0), $backgroundColor $maskWidth),
+    linear-gradient(to left, rgba(0, 0, 0, 0), $backgroundColor $maskWidth),
+    linear-gradient(to right, rgba(0, 0, 0, 0), $backgroundColor $maskWidth);
+  
+  background-repeat: no-repeat;
+  background-size: 100% $maskWidth, 100% $maskWidth, $maskWidth 100%, $maskWidth 100%;
+  background-position: top, bottom, left, right;
+  mix-blend-mode: multiply; 
+}
+
+@media (orientation: landscape) and (max-width: 767px) {
+  .Frame {
+    height: 100vh;
+    width: 100vh;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 767px) {
+  .Frame {
+    height: 100vw;
+    width: 100vw;
+  }
+}
+
+@media (orientation: landscape) and (min-width: 768px) {
+  .Frame {
+    height: 62vh;
+    width: 62vh;
+  }
+}
+
+@media (orientation: portrait) and (min-width: 768px) {
+  .Frame {
+    height: 62vw;
+    width: 62vw;
+  }
+}
