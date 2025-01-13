@@ -17,7 +17,7 @@ export default class VariableRecord extends Array {
   }
 
   update(variable) {
-    this.forEach((component) => component.update(variable[component.name]))
+    this.forEach((component) => component.update([component.name, variable[component.name]]))
   }
 
   isEqual(variableRecord) {
