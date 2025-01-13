@@ -1,17 +1,20 @@
 import VariableRecord from './VariableRecord'
 
 export default class Variable {
-  constructor(data) {
-    Object.entries(data).forEach(([key, value]) => (this[key] = value))
+  #previous
+
+  constructor(current, previous) {
+    Object.entries(current).forEach(([key, value]) => (this[key] = value))
+
+    this.#previous = previous
   }
 
-  get current() {
-    const { previous: _, ...current } = this
-    return current
+  get previous() {
+    return this.#previous
   }
 
-  get currentRecord() {
-    return new VariableRecord(this.current)
+  get record() {
+    return new VariableRecord(this)
   }
 
   get previousRecord() {
@@ -19,11 +22,11 @@ export default class Variable {
   }
 
   renameComponents(renameMap) {
-    if (!this.current || !this.previous) return this
+    if (!this.previous) return this
     const componentToRenamedComponent = (component) => {
       return component.rename(component.name in renameMap ? renameMap[component.name] : component.name)
     }
     const _renameComponents = (components) => Object.fromEntries(components.map(componentToRenamedComponent))
-    return new Variable({ ..._renameComponents(this.currentRecord), previous: _renameComponents(this.previousRecord) })
+    return new Variable(_renameComponents(this.record), _renameComponents(this.previousRecord))
   }
 }

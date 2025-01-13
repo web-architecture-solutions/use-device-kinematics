@@ -1,12 +1,11 @@
 import { useRef, useEffect } from 'react'
 
-export default function usePrevious(value, isEqualFunc = null) {
-  const ref = useRef({ value: value, prev: null })
+export default function usePrevious(newValue, initialValue = null, isEqualFunc = null) {
+  const ref = useRef({ value: newValue, previous: initialValue })
   useEffect(() => {
-    const current = ref.current.value
-    if (isEqualFunc ? !isEqualFunc(current, value) : value !== current) {
-      ref.current = { value: value, prev: current }
+    if (isEqualFunc ? !isEqualFunc(ref.current.value, newValue) : ref.current.value !== newValue) {
+      ref.current = { value: newValue, previous: ref.current.value }
     }
-  }, [value, isEqualFunc])
-  return ref.current.prev
+  }, [newValue, isEqualFunc])
+  return ref.current.previous
 }
