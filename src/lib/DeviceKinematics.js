@@ -3,6 +3,22 @@ import { toRadians, euclideanNorm, Matrix } from './math'
 
 import { haversineDistance } from './physics'
 
+function augmentVariable(variable, callback = (x) => x) {
+  function _augmentVariable(_variable) {
+    const conditionalCallback = (component) => (callback ? callback(component) : component)
+    let { x, y, z } = _variable
+    x = conditionalCallback(x)
+    y = conditionalCallback(y)
+    z = conditionalCallback(z)
+    return {
+      ..._variable,
+      xy: euclideanNorm(x, y),
+      xyz: euclideanNorm(x, y, z)
+    }
+  }
+  return new Variable(_augmentVariable(variable), _augmentVariable(variable.previous))
+}
+
 export default class DeviceKinematics {
   constructor({ position, acceleration, angularVelocity, orientation }, deltaT) {
     this.dimension = 3
@@ -45,23 +61,8 @@ export default class DeviceKinematics {
     return this.derivativesWrtT(this.position)
   }
 
-  static augmentVariable(variable, callback = (x) => x) {
-    return new Variable(
-      {
-        ...variable,
-        xy: euclideanNorm(callback(variable.x), callback(variable.y)),
-        xyz: euclideanNorm(callback(variable.x), callback(variable.y), callback(variable.z))
-      },
-      {
-        ...variable.previous,
-        xy: euclideanNorm(callback(variable.previous.x), callback(variable.previous.y)),
-        xyz: euclideanNorm(callback(variable.previous.x), callback(variable.previous.y), callback(variable.previous.z))
-      }
-    )
-  }
-
   get acceleration() {
-    return DeviceKinematics.augmentVariable(this.accelerationSensorData)
+    return augmentVariable(this.accelerationSensorData)
   }
 
   get jerkFromAcceleration() {
@@ -69,7 +70,7 @@ export default class DeviceKinematics {
   }
 
   get angularVelocity() {
-    return DeviceKinematics.augmentVariable(this.angularVelocitySensorData, toRadians)
+    return augmentVariable(this.angularVelocitySensorData, toRadians)
   }
 
   get angularAccelerationFromVelocity() {
