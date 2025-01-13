@@ -45,12 +45,23 @@ export default class DeviceKinematics {
     return this.derivativesWrtT(this.position)
   }
 
+  static augmentVariable(variable, callback = (x) => x) {
+    return new Variable(
+      {
+        ...variable,
+        xy: euclideanNorm(callback(variable.x), callback(variable.y)),
+        xyz: euclideanNorm(callback(variable.x), callback(variable.y), callback(variable.z))
+      },
+      {
+        ...variable.previous,
+        xy: euclideanNorm(callback(variable.previous.x), callback(variable.previous.y)),
+        xyz: euclideanNorm(callback(variable.previous.x), callback(variable.previous.y), callback(variable.previous.z))
+      }
+    )
+  }
+
   get acceleration() {
-    return new Variable({
-      ...this.accelerationSensorData,
-      xy: euclideanNorm(this.accelerationSensorData.x, this.accelerationSensorData.y),
-      xyz: euclideanNorm(this.accelerationSensorData.x, this.accelerationSensorData.y, this.accelerationSensorData.z)
-    })
+    return DeviceKinematics.augmentVariable(this.accelerationSensorData)
   }
 
   get jerkFromAcceleration() {
@@ -58,15 +69,7 @@ export default class DeviceKinematics {
   }
 
   get angularVelocity() {
-    return new Variable({
-      ...this.angularVelocitySensorData,
-      xy: euclideanNorm(toRadians(this.angularVelocitySensorData.x), toRadians(this.angularVelocitySensorData.y)),
-      xyz: euclideanNorm(
-        toRadians(this.angularVelocitySensorData.z),
-        toRadians(this.angularVelocitySensorData.x),
-        toRadians(this.angularVelocitySensorData.y)
-      )
-    })
+    return DeviceKinematics.augmentVariable(this.angularVelocitySensorData, toRadians)
   }
 
   get angularAccelerationFromVelocity() {

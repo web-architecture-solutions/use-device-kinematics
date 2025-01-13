@@ -41,6 +41,7 @@ export default class SensorData {
     })
   }
 
+  // TODO: Can we simplify and refactor this step?
   static preprocess(rawSensorData) {
     return Object.fromEntries(
       Object.entries(SensorData.initial).map(([variableName, initialVariableData]) => {

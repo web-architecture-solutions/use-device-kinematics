@@ -13,6 +13,7 @@ export default function useSensorData(config = {}) {
   const orientation = useDeviceOrienation(config)
   const geolocation = useGeolocation(config)
 
+  // TODO: Can we simplify and refactor this step?
   const rawSensorData = useMemo(
     () =>
       SensorData.preprocess({
