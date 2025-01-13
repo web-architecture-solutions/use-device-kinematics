@@ -4,8 +4,8 @@ export default class SensorData {
   #renameMap
 
   constructor(renameMap) {
-    this._update(SensorData.initial, renameMap)
     this.#renameMap = renameMap
+    this.update(SensorData.initial)
   }
 
   static get initial() {
@@ -43,17 +43,16 @@ export default class SensorData {
     return !this.isEqual(SensorData.initial)
   }
 
-  _update(rawSensorData, renameMap) {
+  update(rawSensorData) {
     Object.entries(rawSensorData).forEach(([variableName, variableData]) => {
       const initialVariableState = SensorData.initial[variableName]
       const currentState = { ...initialVariableState, ...variableData }
       const previousState = this[variableName] || initialVariableState
-      const variable = new Variable(currentState, previousState)
-      this[variableName] = renameMap[variableName] ? variable.renameComponents(renameMap[variableName]) : variable
+      if (this[variableName]) {
+        this[variableName].update(currentState, previousState)
+      } else {
+        this[variableName] = new Variable(currentState, previousState, this.#renameMap[variableName])
+      }
     })
-  }
-
-  update(rawSensorData) {
-    this._update(rawSensorData, this.#renameMap)
   }
 }

@@ -1,4 +1,5 @@
 import Variable from '../lib/Variable'
+
 import { toRadians, euclideanNorm, Matrix } from '../lib/math'
 
 import { haversineDistance } from '../lib/physics'
@@ -44,8 +45,8 @@ export default class DeviceKinematics {
   _derivativesWrtT(variable) {
     return new Variable(
       Object.fromEntries(
-        Object.entries(variable).map(([component, value]) => {
-          const delta = value - variable.previous[component]
+        variable.record.map((component) => {
+          const delta = component.value - variable.previous[component.name]
           return [component, this.derivativeWrtT(delta)]
         })
       )

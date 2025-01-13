@@ -1,5 +1,5 @@
 export default class Component extends Array {
-  constructor([name, value]) {
+  constructor(name, value) {
     super()
 
     this[0] = name
@@ -8,6 +8,10 @@ export default class Component extends Array {
 
   get name() {
     return this[0]
+  }
+
+  get value() {
+    return this[1]
   }
 
   rename(name) {
