@@ -1,5 +1,5 @@
-import useSensorData from './use-sensor-data/useSensorData'
-import useDeviceKinematics from './use-device-kinematics/useDeviceKinematics'
+import useSensorData from './use-sensor-data/'
+import useDeviceKinematics from './use-device-kinematics/'
 
 export default function App() {
   const { sensorData, errors, isListening, startListening } = useSensorData({ enableHighAccuracy: true })

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 import useClock from './useClock'
 
-import DeviceKinematics from '../lib/DeviceKinematics'
+import DeviceKinematics from '../DeviceKinematics'
 
 const deviceKinematics = new DeviceKinematics()
 

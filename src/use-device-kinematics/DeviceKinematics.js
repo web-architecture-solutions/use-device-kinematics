@@ -1,7 +1,7 @@
-import Variable from './Variable'
-import { toRadians, euclideanNorm, Matrix } from './math'
+import Variable from '../lib/Variable'
+import { toRadians, euclideanNorm, Matrix } from '../lib/math'
 
-import { haversineDistance } from './physics'
+import { haversineDistance } from '../lib/physics'
 
 function augmentVariable(variable, callback = (x) => x) {
   function _augmentVariable(_variable) {

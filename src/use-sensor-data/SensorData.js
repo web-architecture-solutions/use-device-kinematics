@@ -1,4 +1,4 @@
-import Variable from './Variable'
+import Variable from '../lib/Variable'
 
 export default class SensorData {
   #renameMap
