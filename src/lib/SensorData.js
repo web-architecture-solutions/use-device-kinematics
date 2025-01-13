@@ -41,10 +41,18 @@ export default class SensorData {
     })
   }
 
-  static transformObject(dataObject, initialObject) {
-    return Object.entries(initialObject).reduce((acc, [key, value]) => {
-      acc[key] = Object.fromEntries(Object.entries(value).map(([subKey, subValue]) => [subKey, dataObject[key]?.[subKey] ?? subValue]))
-      return acc
-    }, {})
+  static preprocess(rawSensorData) {
+    return Object.fromEntries(
+      Object.entries(SensorData.initial).map(([variableName, initialVariableData]) => {
+        return [
+          variableName,
+          Object.fromEntries(
+            Object.entries(initialVariableData).map(([componentName, initialComponentValue]) => {
+              return [componentName, rawSensorData[variableName]?.[componentName] ?? initialComponentValue]
+            })
+          )
+        ]
+      })
+    )
   }
 }

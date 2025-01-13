@@ -15,31 +15,28 @@ export default function useSensorData(config = {}) {
 
   const rawSensorData = useMemo(
     () =>
-      SensorData.transformObject(
-        {
-          position: {
-            latitude: geolocation.data?.latitude,
-            longitude: geolocation.data?.longitude,
-            altitude: geolocation.data?.altitude
-          },
-          acceleration: {
-            x: motion.data?.acceleration.x,
-            y: motion.data?.acceleration.y,
-            z: motion.data?.acceleration.z
-          },
-          orientation: {
-            alpha: orientation.data?.alpha,
-            beta: orientation.data?.beta,
-            gamma: orientation.data?.gamma
-          },
-          angularVelocity: {
-            alpha: motion.data?.rotationRate.alpha,
-            beta: motion.data?.rotationRate.beta,
-            gamma: motion.data?.rotationRate.gamma
-          }
+      SensorData.preprocess({
+        position: {
+          latitude: geolocation.data?.latitude,
+          longitude: geolocation.data?.longitude,
+          altitude: geolocation.data?.altitude
         },
-        SensorData.initial
-      ),
+        acceleration: {
+          x: motion.data?.acceleration.x,
+          y: motion.data?.acceleration.y,
+          z: motion.data?.acceleration.z
+        },
+        orientation: {
+          alpha: orientation.data?.alpha,
+          beta: orientation.data?.beta,
+          gamma: orientation.data?.gamma
+        },
+        angularVelocity: {
+          alpha: motion.data?.rotationRate.alpha,
+          beta: motion.data?.rotationRate.beta,
+          gamma: motion.data?.rotationRate.gamma
+        }
+      }),
     [motion.data, orientation.data, geolocation.data]
   )
 
