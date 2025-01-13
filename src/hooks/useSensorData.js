@@ -19,10 +19,9 @@ export default function useSensorData(config = {}) {
   const orientation = useDeviceOrienation(config)
   const geolocation = useGeolocation(config)
 
-  // TODO: Can we simplify and refactor this step?
-  const rawSensorData = useMemo(
+  useEffect(
     () =>
-      SensorData.preprocess({
+      sensorData.update({
         position: {
           latitude: geolocation.data?.latitude,
           longitude: geolocation.data?.longitude,
@@ -46,8 +45,6 @@ export default function useSensorData(config = {}) {
       }),
     [motion.data, orientation.data, geolocation.data]
   )
-
-  useEffect(() => sensorData.update(rawSensorData), [rawSensorData])
 
   const errors = useMemo(
     () => ({ ...motion.errors, ...orientation.errors, ...geolocation.errors }),

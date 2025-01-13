@@ -39,27 +39,12 @@ export default class SensorData {
     })
   }
 
-  // TODO: Can we simplify and refactor this step?
-  static preprocess(rawSensorData) {
-    return Object.fromEntries(
-      Object.entries(SensorData.initial).map(([variableName, initialVariableData]) => {
-        return [
-          variableName,
-          Object.fromEntries(
-            Object.entries(initialVariableData).map(([componentName, initialComponentValue]) => {
-              return [componentName, rawSensorData[variableName]?.[componentName] ?? initialComponentValue]
-            })
-          )
-        ]
-      })
-    )
-  }
-
   _update(rawSensorData, renameMap) {
-    Object.keys(rawSensorData).forEach((variableName) => {
-      const current = rawSensorData[variableName]
-      const previous = this[variableName] ? this[variableName] : SensorData.initial //previousRawSensorData?.[variableName] ?? null
-      const variable = new Variable(current, previous)
+    Object.entries(rawSensorData).forEach(([variableName, variableData]) => {
+      const initialVariableState = SensorData.initial[variableName]
+      const currentState = { ...initialVariableState, ...variableData }
+      const previousState = this[variableName] || initialVariableState
+      const variable = new Variable(currentState, previousState)
       this[variableName] = renameMap[variableName] ? variable.renameComponents(renameMap[variableName]) : variable
     })
   }
