@@ -1,5 +1,5 @@
 export default class Component extends Array {
-  #previous
+  //#previous
 
   constructor([name, value], previous) {
     super()
@@ -7,7 +7,7 @@ export default class Component extends Array {
     this[0] = name
     this[1] = value
 
-    this.#previous = previous
+    //this.#previous = previous
   }
 
   get name() {
@@ -16,5 +16,9 @@ export default class Component extends Array {
 
   get value() {
     return this[1]
+  }
+
+  isEqual([name, value]) {
+    return this.name === name && this.value === value
   }
 }

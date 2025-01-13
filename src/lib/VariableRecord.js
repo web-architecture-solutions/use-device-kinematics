@@ -15,4 +15,10 @@ export default class VariableRecord extends Array {
       variableRecord[index] = new Component(component /* TODO: , previousComponent */)
     }
   }
+
+  isEqual(variableRecord) {
+    return variableRecord.every((component, index) => {
+      return component.isEqual(variableRecord[index])
+    })
+  }
 }
