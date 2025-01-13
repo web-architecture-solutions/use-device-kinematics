@@ -14,7 +14,7 @@ const renameMap = {
   angularVelocity: { alpha: 'z', beta: 'x', gamma: 'y' }
 }
 
-const sensorData = new SensorData(SensorData.initial, SensorData.initial, renameMap)
+const sensorData = new SensorData(renameMap)
 
 export default function useSensorData(config = {}) {
   const motion = useDeviceMotion(config)

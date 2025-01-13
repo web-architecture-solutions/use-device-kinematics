@@ -1,22 +1,11 @@
 import Variable from './Variable'
 
 export default class SensorData {
-  constructor(rawSensorData, previousRawSensorData, renameMap) {
-    Object.keys(rawSensorData).forEach((variableName) => {
-      const current = rawSensorData[variableName]
-      const previous = previousRawSensorData?.[variableName] ?? null
-      const variable = new Variable(current, previous)
-      this[variableName] = renameMap[variableName] ? variable.renameComponents(renameMap[variableName]) : variable
-    })
-  }
+  #renameMap
 
-  update(rawSensorData, previousRawSensorData, renameMap) {
-    Object.keys(rawSensorData).forEach((variableName) => {
-      const current = rawSensorData[variableName]
-      const previous = previousRawSensorData?.[variableName] ?? null
-      const variable = new Variable(current, previous)
-      this[variableName] = renameMap[variableName] ? variable.renameComponents(renameMap[variableName]) : variable
-    })
+  constructor(renameMap) {
+    this._update(SensorData.initial, SensorData.initial, renameMap)
+    this.#renameMap = renameMap
   }
 
   static get initial() {
@@ -64,5 +53,18 @@ export default class SensorData {
         ]
       })
     )
+  }
+
+  _update(rawSensorData, previousRawSensorData, renameMap) {
+    Object.keys(rawSensorData).forEach((variableName) => {
+      const current = rawSensorData[variableName]
+      const previous = previousRawSensorData?.[variableName] ?? null
+      const variable = new Variable(current, previous)
+      this[variableName] = renameMap[variableName] ? variable.renameComponents(renameMap[variableName]) : variable
+    })
+  }
+
+  update(rawSensorData, previousRawSensorData) {
+    this._update(rawSensorData, previousRawSensorData, this.#renameMap)
   }
 }
