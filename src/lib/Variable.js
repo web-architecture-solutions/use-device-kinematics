@@ -26,10 +26,10 @@ export default class Variable {
   }
 
   update(currentState, previousState) {
-    new VariableRecord(currentState).forEach((component) => {
-      const componentToBeRenamed = this.#renameComponent && component.name in this.#renameComponent
-      const componentName = componentToBeRenamed ? this.#renameComponent[component.name] : component.name
-      this[componentName] = component.value
+    Object.entries(currentState).forEach(([name, value]) => {
+      const componentToBeRenamed = this.#renameComponent && name in this.#renameComponent
+      const componentName = componentToBeRenamed ? this.#renameComponent[name] : name
+      this[componentName] = value
     })
     this.#record.update(currentState)
     this.#previous = previousState
