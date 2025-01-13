@@ -4,6 +4,7 @@ import { toRadians, euclideanNorm, Matrix } from '../lib/math'
 
 import { haversineDistance } from '../lib/physics'
 
+// TODO: Refactor this function
 function augmentVariable(variable, callback = (x) => x) {
   function _augmentVariable(_variable) {
     const conditionalCallback = (component) => (callback ? callback(component) : component)

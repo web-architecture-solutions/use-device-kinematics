@@ -1,9 +1,13 @@
 export default class Component extends Array {
-  constructor(name, value) {
+  #previous
+
+  constructor([name, value], previous) {
     super()
 
     this[0] = name
     this[1] = value
+
+    this.#previous = previous
   }
 
   get name() {
@@ -12,10 +16,5 @@ export default class Component extends Array {
 
   get value() {
     return this[1]
-  }
-
-  rename(name) {
-    this[0] = name
-    return this
   }
 }

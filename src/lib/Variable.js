@@ -4,9 +4,9 @@ export default class Variable {
   #previous
   #renameComponent
 
-  constructor(current, previous, renameComponent = null) {
+  constructor(currentState, previousState, renameComponent = null) {
     this.#renameComponent = renameComponent
-    this.update(current, previous)
+    this.update(currentState, previousState)
   }
 
   get previous() {
@@ -23,12 +23,12 @@ export default class Variable {
     })
   }
 
-  update(current, previous) {
-    new VariableRecord(current).forEach((component) => {
+  update(currentState, previousState) {
+    new VariableRecord(currentState).forEach((component) => {
       const componentToBeRenamed = this.#renameComponent && component.name in this.#renameComponent
       const componentName = componentToBeRenamed ? this.#renameComponent[component.name] : component.name
       this[componentName] = component.value
     })
-    this.#previous = previous
+    this.#previous = previousState
   }
 }
