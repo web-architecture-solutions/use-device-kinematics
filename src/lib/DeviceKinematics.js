@@ -20,7 +20,9 @@ function augmentVariable(variable, callback = (x) => x) {
 }
 
 export default class DeviceKinematics {
-  constructor({ position, acceleration, angularVelocity, orientation }, deltaT) {
+  dimension = 3
+
+  update({ position, acceleration, angularVelocity, orientation }, deltaT) {
     this.dimension = 3
     this.position = position
     this.accelerationSensorData = acceleration

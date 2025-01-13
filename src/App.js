@@ -1,18 +1,10 @@
-import { useMemo } from 'react'
-
 import useSensorData from './hooks/useSensorData'
-import useClock from './hooks/useClock'
-
-import DeviceKinematics from './lib/DeviceKinematics'
+import useDeviceKinematics from './hooks/useDeviceKinematics'
 
 export default function App() {
   const { sensorData, errors, isListening, startListening } = useSensorData({ enableHighAccuracy: true })
 
-  const { timestamp, previousTimestamp } = useClock(true)
-
-  const stateVector = useMemo(() => {
-    return new DeviceKinematics(sensorData, timestamp - previousTimestamp).stateVector
-  }, [sensorData, timestamp, previousTimestamp])
+  const { stateVector } = useDeviceKinematics(sensorData)
 
   return (
     <div>

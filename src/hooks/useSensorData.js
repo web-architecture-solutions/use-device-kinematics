@@ -4,8 +4,6 @@ import useDeviceMotion from './useDeviceMotion'
 import useDeviceOrienation from './useDeviceOrientation'
 import useGeolocation from './useGeolocation'
 
-import usePrevious from './usePrevious'
-
 import SensorData from '../lib/SensorData'
 
 const sensorData = new SensorData({
