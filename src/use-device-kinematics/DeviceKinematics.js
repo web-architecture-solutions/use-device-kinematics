@@ -40,7 +40,7 @@ export default class DeviceKinematics {
   deriveVelocityFromPosition(variable) {
     const displacement = haversineDistance(variable, variable.previous)
     const displacementToVelocity = ([component, delta]) => [component, this.derivativeWrtT(delta)]
-    return new Variable(Object.fromEntries(Object.entries(displacement).map(displacementToVelocity)))
+    return new Variable(Object.fromEntries(Object.entries(displacement).map(displacementToVelocity)), {})
   }
 
   _derivativesWrtT(variable) {
@@ -48,15 +48,15 @@ export default class DeviceKinematics {
       Object.fromEntries(
         Object.entries(variable).map(([name, value]) => {
           const delta = value - variable.previous[name]
-          return [[name, value], this.derivativeWrtT(delta)]
+          return [name, this.derivativeWrtT(delta)]
         })
-      )
+      ),
+      {}
     )
   }
 
   derivativesWrtT(variable) {
     if (variable && variable.previous) {
-      return variable.isEqual(variable.previous)
       return variable === this.position ? this.deriveVelocityFromPosition(variable) : this._derivativesWrtT(variable)
     }
     return {}
