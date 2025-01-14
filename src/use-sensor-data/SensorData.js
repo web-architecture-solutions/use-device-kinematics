@@ -1,4 +1,8 @@
-import Variable from '../lib/Variable'
+import Variable from '../lib/variables/Variable'
+import Position from '../lib/variables/Position'
+import Acceleration from '../lib/variables/Acceleration'
+import Orientation from '../lib/variables/Orientation'
+import AngularVelocity from '../lib/variables/AngularVelocity'
 
 export default class SensorData {
   #renameMap
@@ -55,10 +59,17 @@ export default class SensorData {
       const currentState = { ...initialVariableState, ...variableState }
       const previousState = { ...initialVariableState, ...previousVariableState }
 
+      const constructor = {
+        position: Position,
+        acceleration: Acceleration,
+        orientation: Orientation,
+        angularVelocity: AngularVelocity
+      }[variableName]
+
       if (this[variableName]) {
         this[variableName].update(currentState, previousState)
       } else {
-        this[variableName] = new Variable(currentState, previousState, this.#renameMap[variableName])
+        this[variableName] = new constructor(currentState, previousState, this.#renameMap[variableName])
       }
     })
   }

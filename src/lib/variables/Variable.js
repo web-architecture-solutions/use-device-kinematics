@@ -1,18 +1,26 @@
-import VariableRecord from './VariableRecord'
-
 export default class Variable {
   #previous
   #renameComponent
   #record
+  #derivativesWrtT
 
   constructor(currentState, previousState, renameComponent = null) {
     this.#renameComponent = renameComponent
     this.#previous = {}
+    this.#derivativesWrtT = {}
     this.update(currentState, previousState)
   }
 
   get previous() {
     return this.#previous
+  }
+
+  get derivativesWrt() {
+    return this.#derivativesWrtT
+  }
+
+  set derivativesWrt(_derivativesWrt) {
+    this.#derivativesWrtT = derivativesWrt
   }
 
   get record() {
@@ -27,6 +35,17 @@ export default class Variable {
 
   isEqual(variable) {
     return Variable.isEqual(this, variable)
+  }
+
+  updateDerivativesWrtT(deltaT) {
+    if (this.previous) {
+      this.#derivativesWrtT = Object.fromEntries(
+        Object.entries(this).map(([name, value]) => {
+          const delta = value - this.previous[name]
+          return [name, delta / deltaT]
+        })
+      )
+    }
   }
 
   _update(variableState, stateObject) {

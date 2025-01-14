@@ -1,4 +1,4 @@
-import Variable from '../lib/Variable'
+import Variable from '../lib/variables/Variable'
 
 import { toRadians, euclideanNorm, Matrix } from '../lib/math'
 
