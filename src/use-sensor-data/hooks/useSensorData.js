@@ -14,7 +14,7 @@ const sensorData = new SensorData({
   angularVelocity: { alpha: 'z', beta: 'x', gamma: 'y' }
 })
 
-export default function useSensorData(config = {}) {
+export default function useSensorData(config = {}, deltaT) {
   const motion = useDeviceMotion(config)
   const orientation = useDeviceOrienation(config)
   const geolocation = useGeolocation(config)
@@ -47,7 +47,7 @@ export default function useSensorData(config = {}) {
 
   const previousRawSensorData = usePrevious(rawSensorData, SensorData.initial, SensorData.isEqual)
 
-  useEffect(() => sensorData.update(rawSensorData, previousRawSensorData), [rawSensorData, previousRawSensorData])
+  useEffect(() => sensorData.update(rawSensorData, previousRawSensorData, deltaT), [rawSensorData, previousRawSensorData, deltaT])
 
   const errors = useMemo(
     () => ({ ...motion.errors, ...orientation.errors, ...geolocation.errors }),

@@ -51,7 +51,7 @@ export default class SensorData {
     return !this.isEqual(SensorData.initial)
   }
 
-  update(rawSensorData, previousRawSensorData) {
+  update(rawSensorData, previousRawSensorData, deltaT) {
     Object.entries(rawSensorData).forEach(([variableName, variableState]) => {
       const initialVariableState = SensorData.initial[variableName]
       const previousVariableState = previousRawSensorData?.[variableName]

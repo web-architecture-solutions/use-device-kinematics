@@ -1,10 +1,21 @@
 import useSensorData from './use-sensor-data/'
 import useDeviceKinematics from './use-device-kinematics/'
 
-export default function App() {
-  const { sensorData, errors, isListening, startListening } = useSensorData({ enableHighAccuracy: true })
+import useClock from './hooks/useClock'
+import { useEffect, useState } from 'react'
 
-  const { stateVector } = useDeviceKinematics(sensorData)
+export default function App() {
+  const [sensorDataIsReady, setSensorDataIsReady] = useState(false)
+
+  const { timestamp, previousTimestamp } = useClock(sensorDataIsReady)
+
+  const { sensorData, errors, isListening, startListening } = useSensorData({ enableHighAccuracy: true }, timestamp - previousTimestamp)
+
+  useEffect(() => {
+    setSensorDataIsReady(sensorData.isReady)
+  }, [sensorData.isReady])
+
+  const { stateVector } = useDeviceKinematics(sensorData, timestamp - previousTimestamp)
 
   return (
     <div>
