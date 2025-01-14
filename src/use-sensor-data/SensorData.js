@@ -33,21 +33,28 @@ export default class SensorData {
     }
   }
 
-  isEqual(sensorData) {
-    return Object.entries(this).every(([variableName, variable]) => {
-      return variable.isEqual(sensorData[variableName])
+  static isEqual(sensorData1, sensorData2) {
+    return Object.entries(sensorData1).every(([variableName, variableData]) => {
+      return Variable.isEqual(variableData, sensorData2[variableName])
     })
+  }
+
+  isEqual(sensorData) {
+    return SensorData.isEqual(this, sensorData)
   }
 
   get isReady() {
     return !this.isEqual(SensorData.initial)
   }
 
-  update(rawSensorData) {
-    Object.entries(rawSensorData).forEach(([variableName, variableData]) => {
+  update(rawSensorData, previousRawSensorData) {
+    Object.entries(rawSensorData).forEach(([variableName, variableState]) => {
       const initialVariableState = SensorData.initial[variableName]
-      const currentState = { ...initialVariableState, ...variableData }
-      const previousState = this[variableName] || initialVariableState
+      const previousVariableState = previousRawSensorData?.[variableName]
+
+      const currentState = { ...initialVariableState, ...variableState }
+      const previousState = { ...initialVariableState, ...previousVariableState }
+
       if (this[variableName]) {
         this[variableName].update(currentState, previousState)
       } else {

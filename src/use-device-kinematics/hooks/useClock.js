@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-import usePrevious from './usePrevious'
+import usePrevious from '../../hooks/usePrevious'
 
 export default function useClock(startCondition, updateFrequency = 100) {
   const startTime = useRef(null)

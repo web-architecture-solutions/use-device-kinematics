@@ -4,6 +4,8 @@ import useDeviceMotion from './useDeviceMotion'
 import useDeviceOrienation from './useDeviceOrientation'
 import useGeolocation from './useGeolocation'
 
+import usePrevious from '../../hooks/usePrevious'
+
 import SensorData from '../SensorData'
 
 const sensorData = new SensorData({
@@ -17,32 +19,35 @@ export default function useSensorData(config = {}) {
   const orientation = useDeviceOrienation(config)
   const geolocation = useGeolocation(config)
 
-  useEffect(
-    () =>
-      sensorData.update({
-        position: {
-          latitude: geolocation.data?.latitude,
-          longitude: geolocation.data?.longitude,
-          altitude: geolocation.data?.altitude
-        },
-        acceleration: {
-          x: motion.data?.acceleration.x,
-          y: motion.data?.acceleration.y,
-          z: motion.data?.acceleration.z
-        },
-        orientation: {
-          alpha: orientation.data?.alpha,
-          beta: orientation.data?.beta,
-          gamma: orientation.data?.gamma
-        },
-        angularVelocity: {
-          alpha: motion.data?.rotationRate.alpha,
-          beta: motion.data?.rotationRate.beta,
-          gamma: motion.data?.rotationRate.gamma
-        }
-      }),
+  const rawSensorData = useMemo(
+    () => ({
+      position: {
+        latitude: geolocation.data?.latitude,
+        longitude: geolocation.data?.longitude,
+        altitude: geolocation.data?.altitude
+      },
+      acceleration: {
+        x: motion.data?.acceleration.x,
+        y: motion.data?.acceleration.y,
+        z: motion.data?.acceleration.z
+      },
+      orientation: {
+        alpha: orientation.data?.alpha,
+        beta: orientation.data?.beta,
+        gamma: orientation.data?.gamma
+      },
+      angularVelocity: {
+        alpha: motion.data?.rotationRate.alpha,
+        beta: motion.data?.rotationRate.beta,
+        gamma: motion.data?.rotationRate.gamma
+      }
+    }),
     [motion.data, orientation.data, geolocation.data]
   )
+
+  const previousRawSensorData = usePrevious(rawSensorData, SensorData.initial, SensorData.isEqual)
+
+  useEffect(() => sensorData.update(rawSensorData, previousRawSensorData), [rawSensorData, previousRawSensorData])
 
   const errors = useMemo(
     () => ({ ...motion.errors, ...orientation.errors, ...geolocation.errors }),

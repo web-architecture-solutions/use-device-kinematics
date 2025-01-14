@@ -46,9 +46,9 @@ export default class DeviceKinematics {
   _derivativesWrtT(variable) {
     return new Variable(
       Object.fromEntries(
-        variable.record.map((component) => {
-          const delta = component.value - variable.previous[component.name]
-          return [component, this.derivativeWrtT(delta)]
+        Object.entries(variable).map(([name, value]) => {
+          const delta = value - variable.previous[name]
+          return [[name, value], this.derivativeWrtT(delta)]
         })
       )
     )
@@ -56,6 +56,7 @@ export default class DeviceKinematics {
 
   derivativesWrtT(variable) {
     if (variable && variable.previous) {
+      return variable.isEqual(variable.previous)
       return variable === this.position ? this.deriveVelocityFromPosition(variable) : this._derivativesWrtT(variable)
     }
     return {}
