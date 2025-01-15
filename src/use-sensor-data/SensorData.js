@@ -7,7 +7,7 @@ import AngularVelocity from '../lib/variables/AngularVelocity'
 export default class SensorData {
   #deltaT
 
-  constructor(rawSensorData, previousRawSensorData, deltaT, renameVariable) {
+  constructor(rawSensorData, previousRawSensorData, deltaT) {
     this.#deltaT = deltaT
 
     Object.entries(rawSensorData).forEach(([variableName, variableState]) => {
@@ -24,7 +24,7 @@ export default class SensorData {
         angularVelocity: AngularVelocity
       }[variableName]
 
-      this[variableName] = new constructor(currentState, previousState, deltaT, constructor)
+      this[variableName] = new constructor(currentState, previousState, deltaT, constructor.name, constructor.derivativeName, constructor)
     })
   }
 

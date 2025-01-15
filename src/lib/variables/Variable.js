@@ -2,38 +2,34 @@ import { euclideanNorm, toRadians } from '../math'
 
 export default class Variable {
   #previous
-  #renameComponent
   #derivativesWrtT
   #deltaT
-  #useRadians
-  #subclassConstructor
 
-  constructor(currentState, previousState, deltaT, subclassConstructor) {
-    this.#renameComponent = subclassConstructor?.renameComponent ?? null
+  constructor(currentState, previousState, deltaT, name, derivativeName, subclassConstructor) {
     this.#previous = {}
     this.#deltaT = deltaT
-    this.name = subclassConstructor.name
-    this.#subclassConstructor = subclassConstructor
-    this.#useRadians = subclassConstructor.useRadians
+    const renameComponent = subclassConstructor?.renameComponent ?? null
 
     Object.entries(currentState).forEach(([name, value]) => {
-      const componentToBeRenamed = this.#renameComponent && name in this.#renameComponent
-      const componentName = componentToBeRenamed ? this.#renameComponent[name] : name
-      this[componentName] = this.#useRadians ? toRadians(value) : value
+      const componentToBeRenamed = renameComponent && name in renameComponent
+      const componentName = componentToBeRenamed ? renameComponent[name] : name
+      this[componentName] = subclassConstructor.useRadians ? toRadians(value) : value
     })
 
     if (previousState) {
-      this.#previous = new this.#subclassConstructor(
+      this.#previous = new subclassConstructor(
         Object.fromEntries(
           Object.entries(previousState).map(([name, value]) => {
-            const componentToBeRenamed = this.#renameComponent && name in this.#renameComponent
-            const componentName = componentToBeRenamed ? this.#renameComponent[name] : name
-            return [componentName, this.#useRadians ? toRadians(value) : value]
+            const componentToBeRenamed = renameComponent && name in renameComponent
+            const componentName = componentToBeRenamed ? renameComponent[name] : name
+            return [componentName, subclassConstructor.useRadians ? toRadians(value) : value]
           })
         ),
         null,
         deltaT,
-        this.#subclassConstructor
+        this.name,
+        derivativeName,
+        subclassConstructor
       )
     }
 
@@ -47,7 +43,7 @@ export default class Variable {
     initializeTotals(this.previous)
 
     if (previousState && Object.keys(previousState).length > 0) {
-      this.#derivativesWrtT = new this.#subclassConstructor(
+      this.#derivativesWrtT = new Variable(
         Object.fromEntries(
           Object.entries(this).map(([name, value]) => {
             const delta = value - this.previous[name]
@@ -56,9 +52,14 @@ export default class Variable {
         ),
         null,
         deltaT,
-        this.#subclassConstructor
+        derivativeName,
+        null,
+        subclassConstructor
       )
     }
+
+    this.name = name
+    this.derivativeName = derivativeName
   }
 
   get deltaT() {

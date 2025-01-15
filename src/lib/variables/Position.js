@@ -4,6 +4,7 @@ import { haversineDistance } from '../physics'
 
 export default class Position extends Variable {
   static name = 'position'
+  static derivativeName = 'velocityFromPosition'
 
   static get initial() {
     return {
