@@ -34,9 +34,15 @@ export default class Variable {
     }
 
     const initializeTotals = (state) => {
-      if (this.name !== 'orientation') {
-        state.xy = euclideanNorm(state.x, state.y)
-        state.xyz = euclideanNorm(state.x, state.y, state.z)
+      //if (name !== 'orientation') {
+      //  state.xy = euclideanNorm(state.x, state.y)
+      //  state.xyz = euclideanNorm(state.x, state.y, state.z)
+      //}
+      if (name === 'angularVelocityFromOrientation') {
+        this.foo = 'foo'
+      } else {
+        //  state.xy = euclideanNorm(state.x, state.y)
+        //  state.xyz = euclideanNorm(state.x, state.y, state.z)
       }
     }
     initializeTotals(this)
@@ -59,7 +65,6 @@ export default class Variable {
     }
 
     this.name = name
-    this.derivativeName = derivativeName
   }
 
   get deltaT() {

@@ -4,6 +4,7 @@ export default class AngularVelocity extends Variable {
   static name = 'acceleration'
   static useRadians = true
   static derivativeName = 'angularJerkFromAcceleration'
+  static components = ['x', 'y', 'z']
 
   static get initial() {
     return {

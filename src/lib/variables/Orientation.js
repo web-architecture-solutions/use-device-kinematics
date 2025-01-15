@@ -4,6 +4,7 @@ export default class Orientation extends Variable {
   static name = 'orientation'
   static derivativeName = 'angularVelocityFromOrientation'
   static useRadians = true
+  static components = ['yaw', 'pitch', 'roll']
 
   static get initial() {
     return {

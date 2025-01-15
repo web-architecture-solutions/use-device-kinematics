@@ -7,22 +7,24 @@ import AngularVelocity from '../lib/variables/AngularVelocity'
 export default class SensorData {
   #deltaT
 
+  static variables = ['position', 'orientation', 'acceleration', 'angularVelocity']
+
   constructor(rawSensorData, previousRawSensorData, deltaT) {
     this.#deltaT = deltaT
 
     Object.entries(rawSensorData).forEach(([variableName, variableState]) => {
-      const initialVariableState = SensorData.initial[variableName]
-      const previousVariableState = previousRawSensorData?.[variableName]
-
-      const currentState = { ...initialVariableState, ...variableState }
-      const previousState = { ...initialVariableState, ...previousVariableState }
-
       const constructor = {
         position: Position,
         acceleration: Acceleration,
         orientation: Orientation,
         angularVelocity: AngularVelocity
       }[variableName]
+
+      const initialVariableState = constructor.initial
+      const previousVariableState = previousRawSensorData?.[variableName]
+
+      const currentState = { ...initialVariableState, ...variableState }
+      const previousState = { ...initialVariableState, ...previousVariableState }
 
       this[variableName] = new constructor(currentState, previousState, deltaT, constructor.name, constructor.derivativeName, constructor)
     })
@@ -34,27 +36,15 @@ export default class SensorData {
 
   static get initial() {
     return {
-      position: {
-        latitude: null,
-        longitude: null,
-        altitude: null
-      },
-      acceleration: {
-        x: null,
-        y: null,
-        z: null
-      },
-      orientation: {
-        alpha: null,
-        beta: null,
-        gamma: null
-      },
-      angularVelocity: {
-        alpha: null,
-        beta: null,
-        gamma: null
-      }
+      position: Position.initial,
+      acceleration: Acceleration.initial,
+      orientation: Orientation.initial,
+      angularVelocity: AngularVelocity.initial
     }
+  }
+
+  get derivativesWrtT() {
+    return Object.values(this).map((variable) => variable.derivativesWrtT)
   }
 
   static isEqual(sensorData1, sensorData2) {
