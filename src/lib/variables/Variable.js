@@ -1,3 +1,5 @@
+import { euclideanNorm, toRadians } from '../math'
+
 export default class Variable {
   #previous
   #renameComponent
@@ -21,6 +23,13 @@ export default class Variable {
 
     initializeWith(this, currentState)
     initializeWith(this.#previous, previousState)
+
+    this.xy =
+      this.constructor.name === 'angularVelocity' ? euclideanNorm(toRadians(this.x), toRadians(this.y)) : euclideanNorm(this.x, this.y)
+    this.xyz =
+      this.constructor.name === 'angularVelocity'
+        ? euclideanNorm(toRadians(this.x), toRadians(this.y), toRadians(this.z))
+        : euclideanNorm(this.x, this.y, this.z)
 
     if (previousState && Object.keys(previousState).length > 0) {
       this.#derivativesWrtT = Object.fromEntries(

@@ -1,9 +1,7 @@
 import Variable from './Variable'
 
 export default class AngularVelocity extends Variable {
-  static get name() {
-    return 'acceleration'
-  }
+  static name = 'acceleration'
 
   static get initial() {
     return {

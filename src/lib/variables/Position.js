@@ -3,9 +3,7 @@ import Variable from './Variable'
 import { haversineDistance } from '../physics'
 
 export default class Position extends Variable {
-  static get name() {
-    return 'position'
-  }
+  static name = 'position'
 
   static get initial() {
     return {
