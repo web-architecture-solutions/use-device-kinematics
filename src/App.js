@@ -2,18 +2,20 @@ import useSensorData from './use-sensor-data/'
 import useDeviceKinematics from './use-device-kinematics/'
 
 import useClock from './hooks/useClock'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 export default function App() {
   const [sensorDataIsReady, setSensorDataIsReady] = useState(false)
 
   const { timestamp, previousTimestamp } = useClock(sensorDataIsReady)
 
-  const { sensorData, errors, isListening, startListening } = useSensorData({ enableHighAccuracy: true }, timestamp - previousTimestamp)
+  const deltaT = useMemo(() => timestamp - previousTimestamp, [timestamp, previousTimestamp])
+
+  const { sensorData, errors, isListening, startListening } = useSensorData({ enableHighAccuracy: true }, deltaT)
 
   useEffect(() => {
     setSensorDataIsReady(sensorData.isReady)
-  }, [sensorData.isReady])
+  }, [sensorData])
 
   const { stateVector } = useDeviceKinematics(sensorData, timestamp - previousTimestamp)
 

@@ -8,12 +8,6 @@ import usePrevious from '../../hooks/usePrevious'
 
 import SensorData from '../SensorData'
 
-const sensorData = new SensorData({
-  position: { latitude: 'y', longitude: 'x', altitude: 'z' },
-  orientation: { alpha: 'yaw', beta: 'pitch', gamma: 'roll' },
-  angularVelocity: { alpha: 'z', beta: 'x', gamma: 'y' }
-})
-
 export default function useSensorData(config = {}, deltaT) {
   const motion = useDeviceMotion(config)
   const orientation = useDeviceOrienation(config)
@@ -42,12 +36,33 @@ export default function useSensorData(config = {}, deltaT) {
         gamma: motion.data?.rotationRate.gamma
       }
     }),
-    [motion.data, orientation.data, geolocation.data]
+    [
+      geolocation.data?.latitude,
+      geolocation.data?.longitude,
+      geolocation.data?.altitude,
+      motion.data?.acceleration.x,
+      motion.data?.acceleration.y,
+      motion.data?.acceleration.z,
+      orientation.data?.alpha,
+      orientation.data?.beta,
+      orientation.data?.gamma,
+      motion.data?.rotationRate.alpha,
+      motion.data?.rotationRate.beta,
+      motion.data?.rotationRate.gamma
+    ]
   )
 
   const previousRawSensorData = usePrevious(rawSensorData, SensorData.initial, SensorData.isEqual)
 
-  useEffect(() => sensorData.update(rawSensorData, previousRawSensorData, deltaT), [rawSensorData, previousRawSensorData, deltaT])
+  const sensorData = useMemo(
+    () =>
+      new SensorData(rawSensorData, previousRawSensorData, deltaT, {
+        position: { latitude: 'y', longitude: 'x', altitude: 'z' },
+        orientation: { alpha: 'yaw', beta: 'pitch', gamma: 'roll' },
+        angularVelocity: { alpha: 'z', beta: 'x', gamma: 'y' }
+      }),
+    [rawSensorData, previousRawSensorData, deltaT]
+  )
 
   const errors = useMemo(
     () => ({ ...motion.errors, ...orientation.errors, ...geolocation.errors }),

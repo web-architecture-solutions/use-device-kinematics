@@ -1,14 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 
 import DeviceKinematics from '../DeviceKinematics'
 
-const deviceKinematics = new DeviceKinematics()
-
-export default function useDeviceKinematics(sensorData, deltaT) {
+export default function useDeviceKinematics(sensorData) {
   const [stateVector, setStateVector] = useState([])
+  const deviceKinematics = useMemo(() => new DeviceKinematics(sensorData), [sensorData])
   useEffect(() => {
-    deviceKinematics.update(sensorData, deltaT)
     setStateVector(deviceKinematics.stateVector)
-  }, [sensorData, deltaT])
+  }, [sensorData])
   return { stateVector }
 }

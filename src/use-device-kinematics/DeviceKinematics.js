@@ -24,13 +24,12 @@ function augmentVariable(variable, callback = (x) => x) {
 export default class DeviceKinematics {
   dimension = 3
 
-  update({ position, acceleration, angularVelocity, orientation }, deltaT) {
-    this.dimension = 3
-    this.position = position
-    this.accelerationSensorData = acceleration
-    this.angularVelocitySensorData = angularVelocity
-    this.orientation = orientation
-    this.deltaT = deltaT
+  constructor(sensorData) {
+    this.position = sensorData.position
+    this.accelerationSensorData = sensorData.acceleration
+    this.angularVelocitySensorData = sensorData.angularVelocity
+    this.orientation = sensorData.orientation
+    this.deltaT = sensorData.deltaT
   }
 
   derivativeWrtT(delta) {
@@ -71,7 +70,7 @@ export default class DeviceKinematics {
   }
 
   get jerkFromAcceleration() {
-    return this.derivativesWrtT(this.acceleration)
+    return this.accelerationSensorData.derivativesWrtT
   }
 
   get angularVelocity() {
@@ -88,6 +87,7 @@ export default class DeviceKinematics {
 
   get stateVector() {
     return [
+      this.deltaT, // DEBUG
       this.position,
       this.velocityFromPosition,
       this.acceleration,

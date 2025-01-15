@@ -6,10 +6,35 @@ import AngularVelocity from '../lib/variables/AngularVelocity'
 
 export default class SensorData {
   #renameMap
+  #deltaT
 
-  constructor(renameMap) {
+  constructor(rawSensorData, previousRawSensorData, deltaT, renameMap) {
+    this.#deltaT = deltaT
     this.#renameMap = renameMap
-    this.update(SensorData.initial)
+
+    Object.entries(rawSensorData).forEach(([variableName, variableState]) => {
+      const initialVariableState = SensorData.initial[variableName]
+      const previousVariableState = previousRawSensorData?.[variableName]
+
+      const currentState = { ...initialVariableState, ...variableState }
+      const previousState = { ...initialVariableState, ...previousVariableState }
+
+      const constructor = {
+        position: Position,
+        acceleration: Acceleration,
+        orientation: Orientation,
+        angularVelocity: AngularVelocity
+      }[variableName]
+
+      this[`${variableName}Test`] = variableName
+      this.foo = 'FOO'
+
+      this[variableName] = new constructor(currentState, previousState, deltaT, this.#renameMap[variableName])
+    })
+  }
+
+  get deltaT() {
+    return this.#deltaT
   }
 
   static get initial() {
@@ -39,7 +64,7 @@ export default class SensorData {
 
   static isEqual(sensorData1, sensorData2) {
     return Object.entries(sensorData1).every(([variableName, variableData]) => {
-      return Variable.isEqual(variableData, sensorData2[variableName])
+      return Variable.isEqual(variableData, sensorData2?.[variableName])
     })
   }
 
@@ -49,28 +74,5 @@ export default class SensorData {
 
   get isReady() {
     return !this.isEqual(SensorData.initial)
-  }
-
-  update(rawSensorData, previousRawSensorData, deltaT) {
-    Object.entries(rawSensorData).forEach(([variableName, variableState]) => {
-      const initialVariableState = SensorData.initial[variableName]
-      const previousVariableState = previousRawSensorData?.[variableName]
-
-      const currentState = { ...initialVariableState, ...variableState }
-      const previousState = { ...initialVariableState, ...previousVariableState }
-
-      const constructor = {
-        position: Position,
-        acceleration: Acceleration,
-        orientation: Orientation,
-        angularVelocity: AngularVelocity
-      }[variableName]
-
-      if (this[variableName]) {
-        this[variableName].update(currentState, previousState)
-      } else {
-        this[variableName] = new constructor(currentState, previousState, this.#renameMap[variableName])
-      }
-    })
   }
 }
