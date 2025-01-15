@@ -3,36 +3,34 @@ import { euclideanNorm, toRadians } from '../math'
 export default class Variable {
   #previous
   #renameComponent
-  #record
   #derivativesWrtT
   #deltaT
 
   constructor(currentState, previousState, deltaT, renameComponent = null) {
     this.#renameComponent = renameComponent
     this.#previous = {}
-    this.#derivativesWrtT = {}
     this.#deltaT = deltaT
 
-    const initializeWith = (stateObject, variableState) => {
-      Object.entries(variableState).forEach(([name, value]) => {
+    const initializeComponents = (target, source) => {
+      Object.entries(source).forEach(([name, value]) => {
         const componentToBeRenamed = this.#renameComponent && name in this.#renameComponent
         const componentName = componentToBeRenamed ? this.#renameComponent[name] : name
-        stateObject[componentName] = value
+        target[componentName] = this.constructor.useRadians ? toRadians(value) : value
       })
     }
 
-    initializeWith(this, currentState)
-    initializeWith(this.#previous, previousState)
+    const initializeTotals = (state) => {
+      state.xy = euclideanNorm(state.x, state.y)
+      state.xyz = euclideanNorm(state.x, state.y, state.z)
+    }
 
-    this.xy =
-      this.constructor.name === 'angularVelocity' ? euclideanNorm(toRadians(this.x), toRadians(this.y)) : euclideanNorm(this.x, this.y)
-    this.xyz =
-      this.constructor.name === 'angularVelocity'
-        ? euclideanNorm(toRadians(this.x), toRadians(this.y), toRadians(this.z))
-        : euclideanNorm(this.x, this.y, this.z)
+    initializeComponents(this, currentState)
+    initializeComponents(this.#previous, previousState)
+    initializeTotals(this)
+    initializeTotals(this.previous)
 
     if (previousState && Object.keys(previousState).length > 0) {
-      this.#derivativesWrtT = Object.fromEntries(
+      this.derivativesWrtT = Object.fromEntries(
         Object.entries(this).map(([name, value]) => {
           const delta = value - this.previous[name]
           return [name, delta / deltaT]
@@ -47,18 +45,6 @@ export default class Variable {
 
   get previous() {
     return this.#previous
-  }
-
-  get derivativesWrt() {
-    return this.#derivativesWrtT
-  }
-
-  set derivativesWrt(_derivativesWrt) {
-    this.#derivativesWrtT = derivativesWrt
-  }
-
-  get record() {
-    return this.#record
   }
 
   static isEqual(variableData1, variableData2) {

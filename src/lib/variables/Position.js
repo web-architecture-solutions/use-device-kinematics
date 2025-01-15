@@ -13,6 +13,10 @@ export default class Position extends Variable {
     }
   }
 
+  static get renameVariables() {
+    return { latitude: 'y', longitude: 'x', altitude: 'z' }
+  }
+
   updateDerivativesWrtT(deltaT) {
     const isPreviousNonEmpty = Object.keys(this.previous) > 0
     if (isPreviousNonEmpty) {

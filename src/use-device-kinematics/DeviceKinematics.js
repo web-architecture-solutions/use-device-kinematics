@@ -1,76 +1,34 @@
-import Variable from '../lib/variables/Variable'
-
 import { Matrix } from '../lib/math'
-
-import { haversineDistance } from '../lib/physics'
 
 export default class DeviceKinematics {
   dimension = 3
 
   constructor(sensorData) {
     this.position = sensorData.position
-    this.accelerationSensorData = sensorData.acceleration
-    this.angularVelocitySensorData = sensorData.angularVelocity
+    this.acceleration = sensorData.acceleration
+    this.angularVelocity = sensorData.angularVelocity
     this.orientation = sensorData.orientation
     this.deltaT = sensorData.deltaT
   }
 
-  derivativeWrtT(delta) {
-    return delta / this.deltaT
-  }
-
-  deriveVelocityFromPosition(variable) {
-    const displacement = haversineDistance(variable, variable.previous)
-    const displacementToVelocity = ([component, delta]) => [component, this.derivativeWrtT(delta)]
-    return new Variable(Object.fromEntries(Object.entries(displacement).map(displacementToVelocity)), {})
-  }
-
-  _derivativesWrtT(variable) {
-    return new Variable(
-      Object.fromEntries(
-        Object.entries(variable).map(([name, value]) => {
-          const delta = value - variable.previous[name]
-          return [name, this.derivativeWrtT(delta)]
-        })
-      ),
-      {}
-    )
-  }
-
-  derivativesWrtT(variable) {
-    if (variable && variable.previous) {
-      return variable === this.position ? this.deriveVelocityFromPosition(variable) : this._derivativesWrtT(variable)
-    }
-    return {}
-  }
-
   get velocityFromPosition() {
-    return this.derivativesWrtT(this.position)
-  }
-
-  get acceleration() {
-    return this.accelerationSensorData
+    return this.position.derivativesWrtT
   }
 
   get jerkFromAcceleration() {
-    return this.accelerationSensorData.derivativesWrtT
-  }
-
-  get angularVelocity() {
-    return this.angularVelocitySensorData
+    return this.acceleration.derivativesWrtT
   }
 
   get angularAccelerationFromVelocity() {
-    return this.derivativesWrtT(this.angularVelocity)
+    return this.angularVelocity.derivativesWrtT
   }
 
   get angularJerkFromAcceleration() {
-    return this.derivativesWrtT(this.angularAccelerationFromVelocity)
+    return this.angularAccelerationFromVelocity.derivativesWrtT
   }
 
   get stateVector() {
     return [
-      this.deltaT, // DEBUG
       this.position,
       this.velocityFromPosition,
       this.acceleration,
