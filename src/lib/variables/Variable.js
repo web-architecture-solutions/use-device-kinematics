@@ -13,15 +13,11 @@ export default class Variable {
     this.#derivativeName = subclassConstructor.derivativeName
     const renameComponent = subclassConstructor?.renameComponent ?? null
 
-    const foo = (componentName, value) => {
-      this[componentName] = subclassConstructor.useRadians ? toRadians(value) : value
-    }
+    const conditionallyTransformAngularValue = (value) => (subclassConstructor.useRadians ? toRadians(value) : value)
+    const currentStateInitializationCallback = (componentName, value) => (this[componentName] = conditionallyTransformAngularValue(value))
+    const previousStateInitializationCallback = (componentName, value) => [componentName, conditionallyTransformAngularValue(value)]
 
-    const bar = (componentName, value) => {
-      return [componentName, subclassConstructor.useRadians ? toRadians(value) : value]
-    }
-
-    const baz = (state, callback) => {
+    const initizalizeState = (state, callback) => {
       return Object.entries(state).map(([name, value]) => {
         const componentToBeRenamed = renameComponent && name in renameComponent
         const componentName = componentToBeRenamed ? renameComponent[name] : name
@@ -29,10 +25,11 @@ export default class Variable {
       })
     }
 
-    baz(currentState, foo)
+    initizalizeState(currentState, currentStateInitializationCallback)
 
     if (previousState) {
-      this.#previous = new subclassConstructor(Object.fromEntries(baz(previousState, bar)), null, deltaT, name, subclassConstructor)
+      const initializedPreviousState = Object.fromEntries(initizalizeState(previousState, previousStateInitializationCallback))
+      this.#previous = new subclassConstructor(initializedPreviousState, null, deltaT, name, subclassConstructor)
     }
 
     const initializeTotals = (state) => {
