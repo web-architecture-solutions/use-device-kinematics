@@ -12,7 +12,7 @@ export default class Orientation extends Variable {
     }
   }
 
-  static get renameVariables() {
+  static get renameComponent() {
     return { alpha: 'yaw', beta: 'pitch', gamma: 'roll' }
   }
 }

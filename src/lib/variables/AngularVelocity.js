@@ -12,7 +12,7 @@ export default class AngularVelocity extends Variable {
     }
   }
 
-  static get renameVariables() {
+  static get renameComponent() {
     return { alpha: 'z', beta: 'x', gamma: 'y' }
   }
 }

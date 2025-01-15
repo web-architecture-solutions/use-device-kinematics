@@ -5,12 +5,10 @@ import Orientation from '../lib/variables/Orientation'
 import AngularVelocity from '../lib/variables/AngularVelocity'
 
 export default class SensorData {
-  #renameMap
   #deltaT
 
-  constructor(rawSensorData, previousRawSensorData, deltaT, renameMap) {
+  constructor(rawSensorData, previousRawSensorData, deltaT, renameVariable) {
     this.#deltaT = deltaT
-    this.#renameMap = renameMap
 
     Object.entries(rawSensorData).forEach(([variableName, variableState]) => {
       const initialVariableState = SensorData.initial[variableName]
@@ -26,10 +24,7 @@ export default class SensorData {
         angularVelocity: AngularVelocity
       }[variableName]
 
-      this[`${variableName}Test`] = variableName
-      this.foo = 'FOO'
-
-      this[variableName] = new constructor(currentState, previousState, deltaT, this.#renameMap[variableName])
+      this[variableName] = new constructor(currentState, previousState, deltaT, constructor)
     })
   }
 

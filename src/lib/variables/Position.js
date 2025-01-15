@@ -13,7 +13,7 @@ export default class Position extends Variable {
     }
   }
 
-  static get renameVariables() {
+  static get renameComponent() {
     return { latitude: 'y', longitude: 'x', altitude: 'z' }
   }
 
