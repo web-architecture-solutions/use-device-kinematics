@@ -4,10 +4,13 @@ export default class Variable {
   #previous
   #derivativesWrtT
   #deltaT
+  #derivativeName
+  #name
 
-  constructor(currentState, previousState, deltaT, name, derivativeName, subclassConstructor) {
+  constructor(currentState, previousState, deltaT, name, subclassConstructor) {
     this.#previous = {}
     this.#deltaT = deltaT
+    this.#derivativeName = subclassConstructor.derivativeName
     const renameComponent = subclassConstructor?.renameComponent ?? null
 
     Object.entries(currentState).forEach(([name, value]) => {
@@ -27,28 +30,20 @@ export default class Variable {
         ),
         null,
         deltaT,
-        this.name,
-        derivativeName,
+        name,
         subclassConstructor
       )
     }
 
     const initializeTotals = (state) => {
-      //if (name !== 'orientation') {
-      //  state.xy = euclideanNorm(state.x, state.y)
-      //  state.xyz = euclideanNorm(state.x, state.y, state.z)
-      //}
-      if (name === 'angularVelocityFromOrientation') {
-        this.foo = 'foo'
-      } else {
-        //  state.xy = euclideanNorm(state.x, state.y)
-        //  state.xyz = euclideanNorm(state.x, state.y, state.z)
-      }
+      state.xy = euclideanNorm(state.x, state.y)
+      state.xyz = euclideanNorm(state.x, state.y, state.z)
     }
     initializeTotals(this)
-    initializeTotals(this.previous)
 
     if (previousState && Object.keys(previousState).length > 0) {
+      initializeTotals(this.previous)
+
       this.#derivativesWrtT = new Variable(
         Object.fromEntries(
           Object.entries(this).map(([name, value]) => {
@@ -58,17 +53,24 @@ export default class Variable {
         ),
         null,
         deltaT,
-        derivativeName,
-        null,
+        subclassConstructor.derivativeName,
         subclassConstructor
       )
     }
 
-    this.name = name
+    this.#name = name
+  }
+
+  get name() {
+    return this.#name
   }
 
   get deltaT() {
     return this.#deltaT
+  }
+
+  get derivativeName() {
+    return this.#derivativeName
   }
 
   get previous() {

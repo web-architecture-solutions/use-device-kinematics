@@ -26,7 +26,7 @@ export default class SensorData {
       const currentState = { ...initialVariableState, ...variableState }
       const previousState = { ...initialVariableState, ...previousVariableState }
 
-      this[variableName] = new constructor(currentState, previousState, deltaT, constructor.name, constructor.derivativeName, constructor)
+      this[variableName] = new constructor(currentState, previousState, deltaT, constructor.name, constructor)
     })
   }
 
@@ -44,7 +44,7 @@ export default class SensorData {
   }
 
   get derivativesWrtT() {
-    return Object.values(this).map((variable) => variable.derivativesWrtT)
+    return Object.fromEntries(Object.values(this).map((variable) => [variable.derivativeName, variable.derivativesWrtT]))
   }
 
   static isEqual(sensorData1, sensorData2) {

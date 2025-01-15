@@ -1,11 +1,13 @@
 import useSensorData from './use-sensor-data/'
-import useDeviceKinematics from './use-device-kinematics/'
+//import useDeviceKinematics from './use-device-kinematics/'
 
 import useClock from './hooks/useClock'
 import { useEffect, useMemo, useState } from 'react'
 
 export default function App() {
   const [sensorDataIsReady, setSensorDataIsReady] = useState(false)
+
+  const [derivativesWrtT, setDerivativesWrtT] = useState({})
 
   const { timestamp, previousTimestamp } = useClock(sensorDataIsReady)
 
@@ -15,9 +17,10 @@ export default function App() {
 
   useEffect(() => {
     setSensorDataIsReady(sensorData.isReady)
+    setDerivativesWrtT(sensorData.derivativesWrtT)
   }, [sensorData])
 
-  const { stateVector } = useDeviceKinematics(sensorData, timestamp - previousTimestamp)
+  //const { stateVector } = useDeviceKinematics(sensorData)
 
   return (
     <div>
@@ -35,7 +38,7 @@ export default function App() {
 
       <h3>Data</h3>
 
-      {isListening ? <pre>{JSON.stringify(sensorData.derivativesWrtT, null, 2)}</pre> : <p>Click button to start.</p>}
+      {isListening ? <pre>{JSON.stringify(derivativesWrtT, null, 2)}</pre> : <p>Click button to start.</p>}
     </div>
   )
 }
