@@ -19,18 +19,13 @@ export default class Variable {
 
     const initizalizeState = (state, callback) => {
       return Object.entries(state).map(([name, value]) => {
-        const componentToBeRenamed = renameComponent && name in renameComponent
-        const componentName = componentToBeRenamed ? renameComponent[name] : name
+        const shouldCcomponentBeRenamed = renameComponent && name in renameComponent
+        const componentName = shouldCcomponentBeRenamed ? renameComponent[name] : name
         return callback(componentName, value)
       })
     }
 
     initizalizeState(currentState, currentStateInitializationCallback)
-
-    if (previousState) {
-      const initializedPreviousState = Object.fromEntries(initizalizeState(previousState, previousStateInitializationCallback))
-      this.#previous = new subclassConstructor(initializedPreviousState, null, deltaT, name, subclassConstructor)
-    }
 
     const initializeTotals = (state) => {
       state.xy = euclideanNorm(state.x, state.y)
@@ -39,6 +34,8 @@ export default class Variable {
     initializeTotals(this)
 
     if (previousState && Object.keys(previousState).length > 0) {
+      const initializedPreviousState = Object.fromEntries(initizalizeState(previousState, previousStateInitializationCallback))
+      this.#previous = new subclassConstructor(initializedPreviousState, null, deltaT, name, subclassConstructor)
       initializeTotals(this.previous)
 
       this.#derivativesWrtT = new Variable(
