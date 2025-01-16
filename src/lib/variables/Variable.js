@@ -7,10 +7,10 @@ export default class Variable {
   #derivativeName
   #name
 
-  constructor(currentState, previousState, deltaT, name, subclassConstructor) {
+  constructor(currentState, previousState, previousDerivativesWrtT, deltaT, name, subclassConstructor) {
     this.#previous = {}
     this.#deltaT = deltaT
-    this.#derivativeName = subclassConstructor.derivativeName
+    this.#derivativeName = subclassConstructor?.derivativeName ?? null
     const renameComponent = subclassConstructor?.renameComponent ?? null
 
     const initizalizeState = (state, callback) => {
@@ -21,7 +21,7 @@ export default class Variable {
       })
     }
 
-    const conditionallyTransformAngularValue = (value) => (subclassConstructor.useRadians ? toRadians(value) : value)
+    const conditionallyTransformAngularValue = (value) => (subclassConstructor?.useRadians ? toRadians(value) : value)
     const currentStateInitializationCallback = (componentName, value) => (this[componentName] = conditionallyTransformAngularValue(value))
     const previousStateInitializationCallback = (componentName, value) => [componentName, conditionallyTransformAngularValue(value)]
 

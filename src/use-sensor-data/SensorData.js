@@ -12,13 +12,14 @@ export default class SensorData {
         variableName,
         rawVariableState,
         previousRawVariableState,
+        previousDerivativesWrtT?.[variableName] ?? {},
         timestamp,
         previousTimestamp
       )
     })
   }
 
-  static variableFactory(variableName, rawVariableState, previousRawVariableState, timestamp, previousTimestamp) {
+  static variableFactory(variableName, rawVariableState, previousRawVariableState, previousDerivativesWrtT, timestamp, previousTimestamp) {
     const constructor = {
       position: Position,
       acceleration: Acceleration,
@@ -33,7 +34,7 @@ export default class SensorData {
     const currentState = { ...initialVariableState, ...rawVariableState, timestamp }
     const previousState = { ...initialVariableState, ...previousRawVariableState, previousTimestamp }
 
-    return new constructor(currentState, previousState, deltaT, constructor.name, constructor)
+    return new constructor(currentState, previousState, previousDerivativesWrtT, deltaT, constructor.name, constructor)
   }
 
   static get initial() {
