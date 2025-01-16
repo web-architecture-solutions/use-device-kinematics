@@ -3,7 +3,7 @@ import { toRadians } from '../math'
 export default class Variable {
   #name
   #previous
-  #derivativesWrtT
+  #derivativeWrtT
   #derivativeName
   #renameComponents
   #useRadians
@@ -39,9 +39,9 @@ export default class Variable {
         const delta = value - this.previous[name]
         return [name, delta / deltaT]
       }
-      const derivativesWrtT = Object.fromEntries(Object.entries(this).map(initializeComponentDerivative))
-      this.#derivativesWrtT = subclassConstructor.derivative
-        ? new subclassConstructor.derivative(derivativesWrtT, previousDerivativesWrtT, {}, subclassConstructor.derivative, sensorData)
+      const derivativeWrtT = Object.fromEntries(Object.entries(this).map(initializeComponentDerivative))
+      this.#derivativeWrtT = subclassConstructor.derivative
+        ? new subclassConstructor.derivative(derivativeWrtT, previousDerivativesWrtT, {}, subclassConstructor.derivative, sensorData)
         : {}
     }
 
@@ -74,8 +74,8 @@ export default class Variable {
     return this.#derivativeName
   }
 
-  get derivativesWrtT() {
-    return this.#derivativesWrtT
+  get derivativeWrtT() {
+    return this.#derivativeWrtT
   }
 
   get stateVector() {

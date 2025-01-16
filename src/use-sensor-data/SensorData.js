@@ -54,9 +54,9 @@ export default class SensorData {
 
   get derivativesWrtT() {
     return Object.fromEntries(
-      Object.entries(this).reduce((derivatives, [name, variable]) => {
+      Object.entries(this).reduce((derivatives, [_, variable]) => {
         if (variable.hasDerivative) {
-          return [...derivatives, [variable.derivativeName, variable.derivativesWrtT]]
+          return [...derivatives, [variable.derivativeName, variable.derivativeWrtT]]
         }
         return derivatives
       }, [])

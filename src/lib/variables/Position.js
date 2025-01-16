@@ -9,6 +9,7 @@ export default class Position extends Variable {
   static initial = { latitude: null, longitude: null, altitude: null }
   static renameComponents = { latitude: 'y', longitude: 'x', altitude: 'z' }
 
+  // BUG: Re-implement post-refactor
   updateDerivativesWrtT(deltaT) {
     const isPreviousNonEmpty = Object.keys(this.previous) > 0
     if (isPreviousNonEmpty) {
