@@ -49,7 +49,13 @@ export default class Variable {
       }
       const derivativesWrtT = Object.fromEntries(Object.entries(this).map(initializeComponentDerivative))
       this.#derivativesWrtT = subclassConstructor.derivativeConstructor
-        ? new subclassConstructor.derivativeConstructor(derivativesWrtT, previousDerivativesWrtT, Variable, sensorData)
+        ? new subclassConstructor.derivativeConstructor(
+            derivativesWrtT,
+            previousDerivativesWrtT,
+            {},
+            subclassConstructor.derivativeConstructor,
+            sensorData
+          )
         : {}
     }
 

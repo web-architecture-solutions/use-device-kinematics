@@ -23,7 +23,11 @@ export default function App() {
 
       <h3>Data</h3>
 
-      {isListening ? <pre>{JSON.stringify(sensorData.derivativesWrtT, null, 2)}</pre> : <p>Click button to start.</p>}
+      {isListening ? (
+        <pre>{JSON.stringify(sensorData.angularVelocity.derivativesWrtT.derivativesWrtT, null, 2)}</pre>
+      ) : (
+        <p>Click button to start.</p>
+      )}
     </div>
   )
 }
