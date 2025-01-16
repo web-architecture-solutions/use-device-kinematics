@@ -1,4 +1,4 @@
-import { euclideanNorm, toRadians } from '../math'
+import { toRadians } from '../math'
 
 export default class Variable {
   #previous
@@ -12,6 +12,7 @@ export default class Variable {
     this.#derivativeName = subclassConstructor?.derivativeName ?? null
     this.#useRadians = subclassConstructor?.useRadians
     this.#renameComponents = subclassConstructor?.renameComponents ?? null
+    this.#derivativeName = subclassConstructor?.derivative?.name
 
     const timestamp = sensorData?.timestamp ?? null
     const previousTimestamp = sensorData?.previousTimestamp ?? null
@@ -25,14 +26,6 @@ export default class Variable {
       this[componentName] = this.conditionallyTransformAngularValue(value)
     })
 
-    /*
-    const initializeTotals = (state) => {
-      state.xy = euclideanNorm(state.x, state.y)
-      state.xyz = euclideanNorm(state.x, state.y, state.z)
-    }
-    initializeTotals(this)
-    */
-
     if (previousState && Object.keys(previousState).length > 0) {
       const initializedPreviousState = Object.fromEntries(
         this.#initizalize(previousState, (componentName, value) => {
@@ -41,7 +34,6 @@ export default class Variable {
       )
 
       this.#previous = new subclassConstructor(initializedPreviousState, null, subclassConstructor, sensorData)
-      //initializeTotals(this.previous)
 
       const initializeComponentDerivative = ([name, value]) => {
         const delta = value - this.previous[name]
@@ -60,6 +52,10 @@ export default class Variable {
     return Object.entries(variableData1).every(([componentName, componentValue]) => {
       return variableData2?.[componentName] === componentValue
     })
+  }
+
+  get derivativeName() {
+    return this.#derivativeName
   }
 
   get previous() {
