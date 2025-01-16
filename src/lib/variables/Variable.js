@@ -7,7 +7,7 @@ export default class Variable {
   #renameComponents
   #useRadians
 
-  constructor(name, rawVariableState, previousRawVariableState, previousDerivativesWrtT, subclassConstructor, sensorData) {
+  constructor(rawVariableState, previousRawVariableState, previousDerivativesWrtT, subclassConstructor, sensorData) {
     this.#previous = {}
     this.#derivativeName = subclassConstructor?.derivativeName ?? null
     this.#useRadians = subclassConstructor?.useRadians
@@ -40,7 +40,7 @@ export default class Variable {
         })
       )
 
-      this.#previous = new subclassConstructor(name, initializedPreviousState, null, subclassConstructor, sensorData)
+      this.#previous = new subclassConstructor(initializedPreviousState, null, subclassConstructor, sensorData)
       //initializeTotals(this.previous)
 
       const initializeComponentDerivative = ([name, value]) => {
@@ -48,16 +48,12 @@ export default class Variable {
         return [name, delta / deltaT]
       }
       const derivativesWrtT = Object.fromEntries(Object.entries(this).map(initializeComponentDerivative))
-      this.#derivativesWrtT = new Variable(
-        subclassConstructor.derivativeName,
-        derivativesWrtT,
-        previousDerivativesWrtT,
-        subclassConstructor,
-        sensorData
-      )
+      this.#derivativesWrtT = subclassConstructor.derivativeConstructor
+        ? new subclassConstructor.derivativeConstructor(derivativesWrtT, previousDerivativesWrtT, Variable, sensorData)
+        : {}
     }
 
-    this.name = name
+    this.name = subclassConstructor.name
   }
 
   static isEqual(variableData1, variableData2) {

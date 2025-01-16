@@ -38,7 +38,7 @@ export default class SensorData {
     const rawVariableState = rawSensorData?.[variableName] ?? {}
     const previousRawVariableState = previousRawSensorData?.[variableName] ?? {}
     const constructor = SensorData.getVariableConstructorByName(variableName)
-    return new constructor(constructor.name, rawVariableState, previousRawVariableState, previousDerivativesWrtT, constructor, this)
+    return new constructor(rawVariableState, previousRawVariableState, previousDerivativesWrtT, constructor, this)
   }
 
   static get initial() {
