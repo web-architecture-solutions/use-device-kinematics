@@ -1,6 +1,7 @@
 import { toRadians } from '../math'
 
 export default class Variable {
+  #name
   #previous
   #derivativesWrtT
   #derivativeName
@@ -44,7 +45,7 @@ export default class Variable {
         : {}
     }
 
-    this.name = subclassConstructor.name
+    this.#name = subclassConstructor.name
   }
 
   static isEqual(variableData1, variableData2) {
@@ -63,6 +64,10 @@ export default class Variable {
 
   get previous() {
     return this.#previous
+  }
+
+  get name() {
+    return this.#name
   }
 
   get derivativeName() {
