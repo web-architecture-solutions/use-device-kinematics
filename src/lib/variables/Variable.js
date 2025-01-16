@@ -3,16 +3,16 @@ import { euclideanNorm, toRadians } from '../math'
 export default class Variable {
   #previous
   #derivativesWrtT
-  #deltaT
   #derivativeName
   #name
 
-  constructor(currentState, previousState, previousDerivativesWrtT, deltaT, name, subclassConstructor, sensorData) {
+  constructor(currentState, previousState, previousDerivativesWrtT, name, subclassConstructor, sensorData) {
     this.#previous = {}
-    this.#deltaT = deltaT
     this.#derivativeName = subclassConstructor?.derivativeName ?? null
     this.timestamp = sensorData?.timestamp ?? null
     this.previousTimestamp = sensorData?.previousTimestamp ?? null
+    this.deltaT = this.timestamp - this.previousTimestamp
+
     const renameComponent = subclassConstructor?.renameComponent ?? null
 
     const initizalizeState = (state, callback) => {
@@ -32,11 +32,10 @@ export default class Variable {
         Object.fromEntries(
           Object.entries(this).map(([name, value]) => {
             const delta = value - this.previous[name]
-            return [name, delta / deltaT]
+            return [name, delta / this.deltaT]
           })
         ),
         previousDerivativesWrtT,
-        deltaT,
         subclassConstructor.derivativeName,
         subclassConstructor
       )
@@ -52,7 +51,7 @@ export default class Variable {
 
     if (previousState && Object.keys(previousState).length > 0) {
       const initializedPreviousState = Object.fromEntries(initizalizeState(previousState, previousStateInitializationCallback))
-      this.#previous = new subclassConstructor(initializedPreviousState, null, deltaT, name, subclassConstructor)
+      this.#previous = new subclassConstructor(initializedPreviousState, null, name, subclassConstructor)
       initializeTotals(this.previous)
 
       this.#derivativesWrtT = initializeDerivative()
@@ -63,10 +62,6 @@ export default class Variable {
 
   get name() {
     return this.#name
-  }
-
-  get deltaT() {
-    return this.#deltaT
   }
 
   get derivativeName() {

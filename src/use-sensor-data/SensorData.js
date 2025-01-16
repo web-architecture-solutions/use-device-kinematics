@@ -45,10 +45,9 @@ export default class SensorData {
   variableFactory(variableName, rawVariableState, previousRawVariableState, previousDerivativesWrtT, timestamp, previousTimestamp) {
     const constructor = SensorData.getVariableConstructorByName(variableName)
     const initialVariableState = constructor.initial
-    const deltaT = timestamp - previousTimestamp
     const currentState = { ...initialVariableState, ...rawVariableState }
     const previousState = { ...initialVariableState, ...previousRawVariableState }
-    return new constructor(currentState, previousState, previousDerivativesWrtT, deltaT, constructor.name, constructor, this)
+    return new constructor(currentState, previousState, previousDerivativesWrtT, constructor.name, constructor, this)
   }
 
   static get initial() {
