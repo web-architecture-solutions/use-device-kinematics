@@ -1,8 +1,6 @@
 import Variable from '../lib/variables/Variable'
-import Position from '../lib/variables/Position'
-import Acceleration from '../lib/variables/Acceleration'
-import Orientation from '../lib/variables/Orientation'
-import AngularVelocity from '../lib/variables/AngularVelocity'
+
+import { VariableNames, VariableConstructors } from './constants'
 
 export default class SensorData {
   #timestamp
@@ -12,13 +10,15 @@ export default class SensorData {
     this.#timestamp = timestamp
     this.#previousTimestamp = previousTimestamp
 
-    Object.entries(rawSensorData).forEach(([variableName, rawVariableState]) => {
+    Object.values(VariableNames).forEach((variableName) => {
+      const rawVariableState = rawSensorData?.[variableName] ?? {}
       const previousRawVariableState = previousRawSensorData?.[variableName] ?? {}
+
       this[variableName] = this.variableFactory(
         variableName,
         rawVariableState,
         previousRawVariableState,
-        Object.entries(previousDerivativesWrtT?.[variableName] ?? {})[1],
+        Object.entries(previousDerivativesWrtT?.[variableName] ?? {})?.[1], // TODO: UGLY!
         timestamp,
         previousTimestamp
       )
@@ -34,12 +34,7 @@ export default class SensorData {
   }
 
   static getVariableConstructorByName(variableName) {
-    return {
-      position: Position,
-      acceleration: Acceleration,
-      orientation: Orientation,
-      angularVelocity: AngularVelocity
-    }[variableName]
+    return VariableConstructors[variableName]
   }
 
   variableFactory(variableName, rawVariableState, previousRawVariableState, previousDerivativesWrtT) {
@@ -48,12 +43,11 @@ export default class SensorData {
   }
 
   static get initial() {
-    return {
-      position: Position.initial,
-      acceleration: Acceleration.initial,
-      orientation: Orientation.initial,
-      angularVelocity: AngularVelocity.initial
-    }
+    return Object.fromEntries(
+      Object.entries(VariableConstructors).map(([variableName, variableConstructor]) => {
+        return [variableName, variableConstructor.initial]
+      })
+    )
   }
 
   get derivativesWrtT() {
