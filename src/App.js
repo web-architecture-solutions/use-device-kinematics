@@ -1,9 +1,9 @@
-import { useSensorDataWithDerivatives } from './use-sensor-data/'
+import useSensorData from './use-sensor-data/'
 
 //import useDeviceKinematics from './use-device-kinematics/'
 
 export default function App() {
-  const { sensorData, errors, isListening, startListening } = useSensorDataWithDerivatives({ enableHighAccuracy: true })
+  const { sensorData, errors, isListening, startListening } = useSensorData({ enableHighAccuracy: true })
 
   //const { stateVector } = useDeviceKinematics(sensorData)
 

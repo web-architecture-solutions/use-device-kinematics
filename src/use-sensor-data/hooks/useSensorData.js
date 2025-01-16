@@ -1,14 +1,18 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState, useEffect } from 'react'
 
 import useDeviceMotion from './useDeviceMotion'
 import useDeviceOrienation from './useDeviceOrientation'
 import useGeolocation from './useGeolocation'
 
 import usePrevious from '../../hooks/usePrevious'
+import useClock from '../../hooks/useClock'
 
 import SensorData from '../SensorData'
 
-export default function useSensorData(config = {}, deltaT, previousDerivativesWrtT = {}) {
+export default function useSensorData(config = {}) {
+  const [sensorDataIsReady, setSensorDataIsReady] = useState(false)
+  const [derivativesWrtT, setDerivativesWrtT] = useState({})
+
   const motion = useDeviceMotion(config)
   const orientation = useDeviceOrienation(config)
   const geolocation = useGeolocation(config)
@@ -54,6 +58,11 @@ export default function useSensorData(config = {}, deltaT, previousDerivativesWr
 
   const previousRawSensorData = usePrevious(rawSensorData, SensorData.initial, SensorData.isEqual)
 
+  const previousDerivativesWrtT = usePrevious(derivativesWrtT, {})
+
+  const { timestamp, previousTimestamp } = useClock(sensorDataIsReady)
+  const deltaT = useMemo(() => timestamp - previousTimestamp, [timestamp, previousTimestamp])
+
   const previousSensorData = useMemo(
     () => ({ ...previousRawSensorData, ...previousDerivativesWrtT }),
     [previousRawSensorData, previousDerivativesWrtT]
@@ -68,6 +77,11 @@ export default function useSensorData(config = {}, deltaT, previousDerivativesWr
       }),
     [rawSensorData, previousRawSensorData, deltaT]
   )
+
+  useEffect(() => {
+    setSensorDataIsReady(sensorData.isReady)
+    setDerivativesWrtT(sensorData.derivativesWrtT)
+  }, [sensorData])
 
   const errors = useMemo(
     () => ({ ...motion.errors, ...orientation.errors, ...geolocation.errors }),
@@ -85,7 +99,6 @@ export default function useSensorData(config = {}, deltaT, previousDerivativesWr
 
   return {
     sensorData,
-    previousSensorData,
     errors,
     isListening,
     startListening
