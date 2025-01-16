@@ -37,7 +37,8 @@ export default class Variable {
         ),
         previousDerivativesWrtT,
         subclassConstructor.derivativeName,
-        subclassConstructor
+        subclassConstructor,
+        sensorData
       )
     }
 
@@ -55,7 +56,7 @@ export default class Variable {
 
     if (previousState && Object.keys(previousState).length > 0) {
       const initializedPreviousState = Object.fromEntries(initizalizeState(previousState, previousStateInitializationCallback))
-      this.#previous = new subclassConstructor(initializedPreviousState, null, name, subclassConstructor)
+      this.#previous = new subclassConstructor(initializedPreviousState, null, name, subclassConstructor, sensorData)
       initializeTotals(this.previous)
 
       this.#derivativesWrtT = initializeDerivative()
