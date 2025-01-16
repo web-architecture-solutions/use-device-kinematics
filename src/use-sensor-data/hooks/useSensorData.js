@@ -1,101 +1,37 @@
-import { useCallback, useMemo, useState, useEffect } from 'react'
-
-import useDeviceMotion from './useDeviceMotion'
-import useDeviceOrienation from './useDeviceOrientation'
-import useGeolocation from './useGeolocation'
+import { useMemo, useState, useEffect } from 'react'
 
 import usePrevious from '../../hooks/usePrevious'
 import useClock from '../../hooks/useClock'
+import useRawSensorData from './useRawSensorData'
 
 import SensorData from '../SensorData'
+
+const renameComponents = {
+  position: { latitude: 'y', longitude: 'x', altitude: 'z' },
+  orientation: { alpha: 'yaw', beta: 'pitch', gamma: 'roll' },
+  angularVelocity: { alpha: 'z', beta: 'x', gamma: 'y' }
+}
 
 export default function useSensorData(config = {}) {
   const [sensorDataIsReady, setSensorDataIsReady] = useState(false)
   const [derivativesWrtT, setDerivativesWrtT] = useState({})
 
-  const motion = useDeviceMotion(config)
-  const orientation = useDeviceOrienation(config)
-  const geolocation = useGeolocation(config)
-
-  const rawSensorData = useMemo(
-    () => ({
-      position: {
-        latitude: geolocation.data?.latitude,
-        longitude: geolocation.data?.longitude,
-        altitude: geolocation.data?.altitude
-      },
-      acceleration: {
-        x: motion.data?.acceleration.x,
-        y: motion.data?.acceleration.y,
-        z: motion.data?.acceleration.z
-      },
-      orientation: {
-        alpha: orientation.data?.alpha,
-        beta: orientation.data?.beta,
-        gamma: orientation.data?.gamma
-      },
-      angularVelocity: {
-        alpha: motion.data?.rotationRate.alpha,
-        beta: motion.data?.rotationRate.beta,
-        gamma: motion.data?.rotationRate.gamma
-      }
-    }),
-    [
-      geolocation.data?.latitude,
-      geolocation.data?.longitude,
-      geolocation.data?.altitude,
-      motion.data?.acceleration.x,
-      motion.data?.acceleration.y,
-      motion.data?.acceleration.z,
-      orientation.data?.alpha,
-      orientation.data?.beta,
-      orientation.data?.gamma,
-      motion.data?.rotationRate.alpha,
-      motion.data?.rotationRate.beta,
-      motion.data?.rotationRate.gamma
-    ]
-  )
-
+  const { rawSensorData, errors, isListening, startListening } = useRawSensorData(config)
   const previousRawSensorData = usePrevious(rawSensorData, SensorData.initial, SensorData.isEqual)
-
   const previousDerivativesWrtT = usePrevious(derivativesWrtT, {})
 
   const { timestamp, previousTimestamp } = useClock(sensorDataIsReady)
   const deltaT = useMemo(() => timestamp - previousTimestamp, [timestamp, previousTimestamp])
 
-  const previousSensorData = useMemo(
-    () => ({ ...previousRawSensorData, ...previousDerivativesWrtT }),
-    [previousRawSensorData, previousDerivativesWrtT]
-  )
-
-  const sensorData = useMemo(
-    () =>
-      new SensorData(rawSensorData, previousSensorData, deltaT, {
-        position: { latitude: 'y', longitude: 'x', altitude: 'z' },
-        orientation: { alpha: 'yaw', beta: 'pitch', gamma: 'roll' },
-        angularVelocity: { alpha: 'z', beta: 'x', gamma: 'y' }
-      }),
-    [rawSensorData, previousRawSensorData, deltaT]
-  )
+  const sensorData = useMemo(() => {
+    const previousSensorDataWithDerivatives = { ...previousRawSensorData, ...previousDerivativesWrtT }
+    return new SensorData(rawSensorData, previousSensorDataWithDerivatives, deltaT, renameComponents)
+  }, [rawSensorData, previousRawSensorData, deltaT])
 
   useEffect(() => {
     setSensorDataIsReady(sensorData.isReady)
     setDerivativesWrtT(sensorData.derivativesWrtT)
   }, [sensorData])
-
-  const errors = useMemo(
-    () => ({ ...motion.errors, ...orientation.errors, ...geolocation.errors }),
-    [motion.errors, orientation.errors, geolocation.errors]
-  )
-
-  const isListening = useMemo(
-    () => motion.isListening || orientation.isListening || geolocation.isListening,
-    [motion.isListening, orientation.isListening, geolocation.isListening]
-  )
-
-  const startListening = useCallback(async () => {
-    await Promise.all([motion.startListening(), orientation.startListening(), geolocation.startListening()])
-  }, [motion.startListening, orientation.startListening, geolocation.startListening])
 
   return {
     sensorData,
