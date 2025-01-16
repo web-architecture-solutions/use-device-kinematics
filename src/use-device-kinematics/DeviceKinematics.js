@@ -29,14 +29,14 @@ export default class DeviceKinematics {
 
   get stateVector() {
     return [
-      this.position,
-      this.velocityFromPosition,
-      this.acceleration,
-      this.jerkFromAcceleration,
-      this.orientation,
-      this.angularVelocity,
-      this.angularAccelerationFromVelocity,
-      this.angularJerkFromAcceleration
+      ...this.position.stateVector,
+      ...this.velocityFromPosition.stateVector,
+      ...this.acceleration.stateVector,
+      ...this.jerkFromAcceleration.stateVector,
+      ...this.orientation.stateVector,
+      ...this.angularVelocity.stateVector,
+      ...this.angularAccelerationFromVelocity.stateVector
+      //...this.angularJerkFromAcceleration.stateVector
     ]
   }
 

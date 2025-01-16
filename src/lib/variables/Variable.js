@@ -4,87 +4,94 @@ export default class Variable {
   #previous
   #derivativesWrtT
   #derivativeName
-  #name
+  #renameComponent
+  #useRadians
 
-  constructor(rawVariableState, previousRawVariableState, previousDerivativesWrtT, name, subclassConstructor, sensorData) {
+  constructor(name, rawVariableState, previousRawVariableState, previousDerivativesWrtT, subclassConstructor, sensorData) {
     this.#previous = {}
     this.#derivativeName = subclassConstructor?.derivativeName ?? null
-    this.timestamp = sensorData?.timestamp ?? null
-    this.previousTimestamp = sensorData?.previousTimestamp ?? null
-    this.deltaT = this.timestamp - this.previousTimestamp
+    this.#useRadians = subclassConstructor?.useRadians
+    this.#renameComponent = subclassConstructor?.renameComponent ?? null
 
-    const renameComponent = subclassConstructor?.renameComponent ?? null
-
-    const initizalizeState = (state, callback) => {
-      return Object.entries(state).map(([name, value]) => {
-        const shouldComponentBeRenamed = renameComponent && name in renameComponent
-        const componentName = shouldComponentBeRenamed ? renameComponent[name] : name
-        return callback(componentName, value)
-      })
-    }
-
-    const conditionallyTransformAngularValue = (value) => (subclassConstructor?.useRadians ? toRadians(value) : value)
-    const currentStateInitializationCallback = (componentName, value) => (this[componentName] = conditionallyTransformAngularValue(value))
-    const previousStateInitializationCallback = (componentName, value) => [componentName, conditionallyTransformAngularValue(value)]
-
-    const initializeDerivative = () => {
-      return new Variable(
-        Object.fromEntries(
-          Object.entries(this).map(([name, value]) => {
-            const delta = value - this.previous[name]
-            return [name, delta / this.deltaT]
-          })
-        ),
-        previousDerivativesWrtT,
-        subclassConstructor.derivativeName,
-        subclassConstructor,
-        sensorData
-      )
-    }
+    const timestamp = sensorData?.timestamp ?? null
+    const previousTimestamp = sensorData?.previousTimestamp ?? null
+    const deltaT = timestamp - previousTimestamp
 
     const initialVariableState = subclassConstructor?.initial ?? {}
     const currentState = { ...initialVariableState, ...rawVariableState }
     const previousState = { ...initialVariableState, ...previousRawVariableState }
 
-    initizalizeState(currentState, currentStateInitializationCallback)
+    this.#initizalize(currentState, (componentName, value) => {
+      this[componentName] = this.conditionallyTransformAngularValue(value)
+    })
 
+    /*
     const initializeTotals = (state) => {
       state.xy = euclideanNorm(state.x, state.y)
       state.xyz = euclideanNorm(state.x, state.y, state.z)
     }
     initializeTotals(this)
+    */
 
     if (previousState && Object.keys(previousState).length > 0) {
-      const initializedPreviousState = Object.fromEntries(initizalizeState(previousState, previousStateInitializationCallback))
-      this.#previous = new subclassConstructor(initializedPreviousState, null, name, subclassConstructor, sensorData)
-      initializeTotals(this.previous)
+      const initializedPreviousState = Object.fromEntries(
+        this.#initizalize(previousState, (componentName, value) => {
+          return [componentName, this.conditionallyTransformAngularValue(value)]
+        })
+      )
 
-      this.#derivativesWrtT = initializeDerivative()
+      this.#previous = new subclassConstructor(name, initializedPreviousState, null, subclassConstructor, sensorData)
+      //initializeTotals(this.previous)
+
+      const initializeComponentDerivative = ([name, value]) => {
+        const delta = value - this.previous[name]
+        return [name, delta / deltaT]
+      }
+      const derivativesWrtT = Object.fromEntries(Object.entries(this).map(initializeComponentDerivative))
+      this.#derivativesWrtT = new Variable(
+        subclassConstructor.derivativeName,
+        derivativesWrtT,
+        previousDerivativesWrtT,
+        subclassConstructor,
+        sensorData
+      )
     }
 
-    this.#name = name
-  }
-
-  get name() {
-    return this.#name
-  }
-
-  get derivativeName() {
-    return this.#derivativeName
-  }
-
-  get previous() {
-    return this.#previous
-  }
-
-  get derivativesWrtT() {
-    return this.#derivativesWrtT
+    this.name = name
   }
 
   static isEqual(variableData1, variableData2) {
     return Object.entries(variableData1).every(([componentName, componentValue]) => {
       return variableData2?.[componentName] === componentValue
     })
+  }
+
+  get previous() {
+    return this.#previous
+  }
+
+  get derivativeName() {
+    return this.#derivativeName
+  }
+
+  get derivativesWrtT() {
+    return this.#derivativesWrtT
+  }
+
+  get stateVector() {
+    return Object.values(this).sort()
+  }
+
+  #initizalize(state, callback) {
+    return Object.entries(state).map(([name, value]) => {
+      const shouldComponentBeRenamed = this.#renameComponent && name in this.#renameComponent
+      const componentName = shouldComponentBeRenamed ? this.#renameComponent[name] : name
+      return callback(componentName, value)
+    })
+  }
+
+  conditionallyTransformAngularValue(value) {
+    return this.#useRadians ? toRadians(value) : value
   }
 
   isEqual(variable) {
