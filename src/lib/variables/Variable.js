@@ -33,7 +33,7 @@ export default class Variable {
             return [name, delta / deltaT]
           })
         ),
-        null,
+        previousDerivativesWrtT,
         deltaT,
         subclassConstructor.derivativeName,
         subclassConstructor

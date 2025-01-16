@@ -12,7 +12,7 @@ export default class SensorData {
         variableName,
         rawVariableState,
         previousRawVariableState,
-        previousDerivativesWrtT?.[variableName] ?? {},
+        Object.entries(previousDerivativesWrtT?.[variableName] ?? {})[1],
         timestamp,
         previousTimestamp
       )
@@ -27,9 +27,9 @@ export default class SensorData {
       angularVelocity: AngularVelocity
     }[variableName]
 
-    const deltaT = timestamp - previousTimestamp
-
     const initialVariableState = constructor.initial
+
+    const deltaT = timestamp - previousTimestamp
 
     const currentState = { ...initialVariableState, ...rawVariableState, timestamp }
     const previousState = { ...initialVariableState, ...previousRawVariableState, previousTimestamp }
