@@ -22,23 +22,14 @@ export default class SensorData {
     })
   }
 
-  get timestamp() {
-    return this.#timestamp
-  }
-
-  get previousTimestamp() {
-    return this.#previousTimestamp
+  static isEqual(sensorData1, sensorData2) {
+    return Object.entries(sensorData1).every(([variableName, variableData]) => {
+      return Variable.isEqual(variableData, sensorData2?.[variableName])
+    })
   }
 
   static getVariableConstructorByName(variableName) {
     return VariableConstructors[variableName]
-  }
-
-  variableFactory(variableName, rawSensorData, previousRawSensorData, previousDerivativesWrtT) {
-    const rawVariableState = rawSensorData?.[variableName] ?? {}
-    const previousRawVariableState = previousRawSensorData?.[variableName] ?? {}
-    const constructor = SensorData.getVariableConstructorByName(variableName)
-    return new constructor(rawVariableState, previousRawVariableState, previousDerivativesWrtT, constructor, this)
   }
 
   static get initial() {
@@ -49,23 +40,37 @@ export default class SensorData {
     )
   }
 
+  get isReady() {
+    return !this.isEqual(SensorData.initial)
+  }
+
+  get timestamp() {
+    return this.#timestamp
+  }
+
+  get previousTimestamp() {
+    return this.#previousTimestamp
+  }
+
   get derivativesWrtT() {
     return Object.fromEntries(
-      Object.values(this).map((variable) => [variable.name, { [variable.derivativeName]: variable.derivativesWrtT }])
+      Object.entries(this).reduce((derivatives, [name, variable]) => {
+        if (variable.hasDerivative) {
+          return [...derivatives, [name, { [variable.derivativeName]: variable.derivativesWrtT }]]
+        }
+        return derivatives
+      }, [])
     )
   }
 
-  static isEqual(sensorData1, sensorData2) {
-    return Object.entries(sensorData1).every(([variableName, variableData]) => {
-      return Variable.isEqual(variableData, sensorData2?.[variableName])
-    })
+  variableFactory(variableName, rawSensorData, previousRawSensorData, previousDerivativesWrtT) {
+    const rawVariableState = rawSensorData?.[variableName] ?? {}
+    const previousRawVariableState = previousRawSensorData?.[variableName] ?? {}
+    const constructor = SensorData.getVariableConstructorByName(variableName)
+    return new constructor(rawVariableState, previousRawVariableState, previousDerivativesWrtT, constructor, this)
   }
 
   isEqual(sensorData) {
     return SensorData.isEqual(this, sensorData)
-  }
-
-  get isReady() {
-    return !this.isEqual(SensorData.initial)
   }
 }

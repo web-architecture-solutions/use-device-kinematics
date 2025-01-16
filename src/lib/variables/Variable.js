@@ -9,7 +9,6 @@ export default class Variable {
 
   constructor(rawVariableState, previousRawVariableState, previousDerivativesWrtT, subclassConstructor, sensorData) {
     this.#previous = {}
-    this.#derivativeName = subclassConstructor?.derivativeName ?? null
     this.#useRadians = subclassConstructor?.useRadians
     this.#renameComponents = subclassConstructor?.renameComponents ?? null
     this.#derivativeName = subclassConstructor?.derivative?.name
@@ -52,6 +51,10 @@ export default class Variable {
     return Object.entries(variableData1).every(([componentName, componentValue]) => {
       return variableData2?.[componentName] === componentValue
     })
+  }
+
+  get hasDerivative() {
+    return this.#derivativeName ? true : false
   }
 
   get derivativeName() {
