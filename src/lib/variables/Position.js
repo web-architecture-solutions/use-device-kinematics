@@ -1,16 +1,15 @@
 import Variable from './Variable'
+import Velocity from './Velocity'
 
 import { haversineDistance } from '../physics'
 
 export default class Position extends Variable {
   static name = 'position'
   static derivativeName = 'velocity'
+  static derivativeConstructor = Velocity
   static components = ['x', 'y', 'z']
   static initial = { latitude: null, longitude: null, altitude: null }
-
-  static get renameComponent() {
-    return { latitude: 'y', longitude: 'x', altitude: 'z' }
-  }
+  static renameComponents = { latitude: 'y', longitude: 'x', altitude: 'z' }
 
   updateDerivativesWrtT(deltaT) {
     const isPreviousNonEmpty = Object.keys(this.previous) > 0

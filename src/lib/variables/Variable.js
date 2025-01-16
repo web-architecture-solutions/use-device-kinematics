@@ -4,14 +4,14 @@ export default class Variable {
   #previous
   #derivativesWrtT
   #derivativeName
-  #renameComponent
+  #renameComponents
   #useRadians
 
   constructor(name, rawVariableState, previousRawVariableState, previousDerivativesWrtT, subclassConstructor, sensorData) {
     this.#previous = {}
     this.#derivativeName = subclassConstructor?.derivativeName ?? null
     this.#useRadians = subclassConstructor?.useRadians
-    this.#renameComponent = subclassConstructor?.renameComponent ?? null
+    this.#renameComponents = subclassConstructor?.renameComponents ?? null
 
     const timestamp = sensorData?.timestamp ?? null
     const previousTimestamp = sensorData?.previousTimestamp ?? null
@@ -84,8 +84,8 @@ export default class Variable {
 
   #initizalize(state, callback) {
     return Object.entries(state).map(([name, value]) => {
-      const shouldComponentBeRenamed = this.#renameComponent && name in this.#renameComponent
-      const componentName = shouldComponentBeRenamed ? this.#renameComponent[name] : name
+      const shouldComponentBeRenamed = this.#renameComponents && name in this.#renameComponents
+      const componentName = shouldComponentBeRenamed ? this.#renameComponents[name] : name
       return callback(componentName, value)
     })
   }
