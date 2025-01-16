@@ -7,10 +7,12 @@ export default class Variable {
   #derivativeName
   #name
 
-  constructor(currentState, previousState, previousDerivativesWrtT, deltaT, name, subclassConstructor) {
+  constructor(currentState, previousState, previousDerivativesWrtT, deltaT, name, subclassConstructor, sensorData) {
     this.#previous = {}
     this.#deltaT = deltaT
     this.#derivativeName = subclassConstructor?.derivativeName ?? null
+    this.timestamp = sensorData?.timestamp ?? null
+    this.previousTimestamp = sensorData?.previousTimestamp ?? null
     const renameComponent = subclassConstructor?.renameComponent ?? null
 
     const initizalizeState = (state, callback) => {
