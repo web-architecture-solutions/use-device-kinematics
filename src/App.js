@@ -1,30 +1,25 @@
-import useSensorData from './use-sensor-data/'
+import { useEffect, useMemo, useState } from 'react'
+
 //import useDeviceKinematics from './use-device-kinematics/'
 
 import useClock from './hooks/useClock'
-import { useEffect, useMemo, useState } from 'react'
 
-import usePrevious from './hooks/usePrevious'
+import { useSensorDataWithDerivatives } from './use-sensor-data/'
 
 export default function App() {
   const [sensorDataIsReady, setSensorDataIsReady] = useState(false)
-
-  const [derivativesWrtT, setDerivativesWrtT] = useState({})
-  const previousDerivativesWrtT = usePrevious(derivativesWrtT, {})
 
   const { timestamp, previousTimestamp } = useClock(sensorDataIsReady)
 
   const deltaT = useMemo(() => timestamp - previousTimestamp, [timestamp, previousTimestamp])
 
-  const { sensorData, previousSensorData, errors, isListening, startListening } = useSensorData(
+  const { sensorData, previousSensorData, errors, isListening, startListening } = useSensorDataWithDerivatives(
     { enableHighAccuracy: true },
-    deltaT,
-    previousDerivativesWrtT
+    deltaT
   )
 
   useEffect(() => {
     setSensorDataIsReady(sensorData.isReady)
-    setDerivativesWrtT(sensorData.derivativesWrtT)
   }, [sensorData])
 
   //const { stateVector } = useDeviceKinematics(sensorData)
@@ -45,7 +40,7 @@ export default function App() {
 
       <h3>Data</h3>
 
-      {isListening ? <pre>{JSON.stringify(derivativesWrtT, null, 2)}</pre> : <p>Click button to start.</p>}
+      {isListening ? <pre>{JSON.stringify(sensorData.derivativesWrtT, null, 2)}</pre> : <p>Click button to start.</p>}
     </div>
   )
 }
