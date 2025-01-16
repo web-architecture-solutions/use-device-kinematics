@@ -8,7 +8,7 @@ import usePrevious from '../../hooks/usePrevious'
 
 import SensorData from '../SensorData'
 
-export default function useSensorData(config = {}, deltaT, previousDerivativesWrtT) {
+export default function useSensorData(config = {}, deltaT, previousDerivativesWrtT = {}) {
   const motion = useDeviceMotion(config)
   const orientation = useDeviceOrienation(config)
   const geolocation = useGeolocation(config)
