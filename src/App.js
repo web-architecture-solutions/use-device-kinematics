@@ -3,7 +3,7 @@ import useSensorData from './use-sensor-data/'
 //import useDeviceKinematics from './use-device-kinematics/'
 
 export default function App() {
-  const { sensorData, errors, isListening, startListening } = useSensorData({ enableHighAccuracy: true })
+  const { timestamp, sensorData, errors, isListening, startListening } = useSensorData({ enableHighAccuracy: true })
 
   //const { stateVector } = useDeviceKinematics(sensorData)
 
@@ -23,7 +23,7 @@ export default function App() {
 
       <h3>Data</h3>
 
-      {isListening ? <pre>{JSON.stringify(sensorData.derivativesWrtT, null, 2)}</pre> : <p>Click button to start.</p>}
+      {isListening ? <pre>{JSON.stringify(sensorData, null, 2)}</pre> : <p>Click button to start.</p>}
     </div>
   )
 }

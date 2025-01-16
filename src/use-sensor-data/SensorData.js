@@ -5,33 +5,35 @@ import Orientation from '../lib/variables/Orientation'
 import AngularVelocity from '../lib/variables/AngularVelocity'
 
 export default class SensorData {
-  #deltaT
-
-  static variables = ['position', 'orientation', 'acceleration', 'angularVelocity']
-
-  constructor(rawSensorData, previousSensorData, deltaT) {
-    this.#deltaT = deltaT
-
-    Object.entries(rawSensorData).forEach(([variableName, variableState]) => {
-      const constructor = {
-        position: Position,
-        acceleration: Acceleration,
-        orientation: Orientation,
-        angularVelocity: AngularVelocity
-      }[variableName]
-
-      const initialVariableState = constructor.initial
-      const previousVariableState = previousSensorData?.[variableName]
-
-      const currentState = { ...initialVariableState, ...variableState }
-      const previousState = { ...initialVariableState, ...previousVariableState }
-
-      this[variableName] = new constructor(currentState, previousState, deltaT, constructor.name, constructor)
+  constructor(rawSensorData, previousRawSensorData, previousDerivativesWrtT, timestamp, previousTimestamp) {
+    Object.entries(rawSensorData).forEach(([variableName, rawVariableState]) => {
+      const previousRawVariableState = previousRawSensorData?.[variableName] ?? {}
+      this[variableName] = SensorData.variableFactory(
+        variableName,
+        rawVariableState,
+        previousRawVariableState,
+        timestamp,
+        previousTimestamp
+      )
     })
   }
 
-  get deltaT() {
-    return this.#deltaT
+  static variableFactory(variableName, rawVariableState, previousRawVariableState, timestamp, previousTimestamp) {
+    const constructor = {
+      position: Position,
+      acceleration: Acceleration,
+      orientation: Orientation,
+      angularVelocity: AngularVelocity
+    }[variableName]
+
+    const deltaT = timestamp - previousTimestamp
+
+    const initialVariableState = constructor.initial
+
+    const currentState = { ...initialVariableState, ...rawVariableState, timestamp }
+    const previousState = { ...initialVariableState, ...previousRawVariableState, previousTimestamp }
+
+    return new constructor(currentState, previousState, deltaT, constructor.name, constructor)
   }
 
   static get initial() {
