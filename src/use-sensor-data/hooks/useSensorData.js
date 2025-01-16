@@ -8,7 +8,7 @@ import usePrevious from '../../hooks/usePrevious'
 
 import SensorData from '../SensorData'
 
-export default function useSensorData(config = {}, deltaT) {
+export default function useSensorData(config = {}, deltaT, previousDerivativesWrtT) {
   const motion = useDeviceMotion(config)
   const orientation = useDeviceOrienation(config)
   const geolocation = useGeolocation(config)
@@ -54,9 +54,14 @@ export default function useSensorData(config = {}, deltaT) {
 
   const previousRawSensorData = usePrevious(rawSensorData, SensorData.initial, SensorData.isEqual)
 
+  const previousSensorData = useMemo(
+    () => ({ ...previousRawSensorData, ...previousDerivativesWrtT }),
+    [previousRawSensorData, previousDerivativesWrtT]
+  )
+
   const sensorData = useMemo(
     () =>
-      new SensorData(rawSensorData, previousRawSensorData, deltaT, {
+      new SensorData(rawSensorData, previousSensorData, deltaT, {
         position: { latitude: 'y', longitude: 'x', altitude: 'z' },
         orientation: { alpha: 'yaw', beta: 'pitch', gamma: 'roll' },
         angularVelocity: { alpha: 'z', beta: 'x', gamma: 'y' }
@@ -80,6 +85,7 @@ export default function useSensorData(config = {}, deltaT) {
 
   return {
     sensorData,
+    previousSensorData,
     errors,
     isListening,
     startListening

@@ -1,9 +1,9 @@
 import Variable from './Variable'
 
 export default class AngularVelocity extends Variable {
-  static name = 'acceleration'
+  static name = 'angularVelocity'
   static useRadians = true
-  static derivativeName = 'angularJerkFromAcceleration'
+  static derivativeName = 'angularJerk'
   static components = ['x', 'y', 'z']
 
   static get initial() {

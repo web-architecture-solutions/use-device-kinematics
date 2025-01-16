@@ -13,16 +13,31 @@ export default class Variable {
     this.#derivativeName = subclassConstructor.derivativeName
     const renameComponent = subclassConstructor?.renameComponent ?? null
 
+    const initizalizeState = (state, callback) => {
+      return Object.entries(state).map(([name, value]) => {
+        const shouldComponentBeRenamed = renameComponent && name in renameComponent
+        const componentName = shouldComponentBeRenamed ? renameComponent[name] : name
+        return callback(componentName, value)
+      })
+    }
+
     const conditionallyTransformAngularValue = (value) => (subclassConstructor.useRadians ? toRadians(value) : value)
     const currentStateInitializationCallback = (componentName, value) => (this[componentName] = conditionallyTransformAngularValue(value))
     const previousStateInitializationCallback = (componentName, value) => [componentName, conditionallyTransformAngularValue(value)]
 
-    const initizalizeState = (state, callback) => {
-      return Object.entries(state).map(([name, value]) => {
-        const shouldCcomponentBeRenamed = renameComponent && name in renameComponent
-        const componentName = shouldCcomponentBeRenamed ? renameComponent[name] : name
-        return callback(componentName, value)
-      })
+    const initializeDerivative = () => {
+      return new Variable(
+        Object.fromEntries(
+          Object.entries(this).map(([name, value]) => {
+            const delta = value - this.previous[name]
+            return [name, delta / deltaT]
+          })
+        ),
+        null,
+        deltaT,
+        subclassConstructor.derivativeName,
+        subclassConstructor
+      )
     }
 
     initizalizeState(currentState, currentStateInitializationCallback)
@@ -38,18 +53,7 @@ export default class Variable {
       this.#previous = new subclassConstructor(initializedPreviousState, null, deltaT, name, subclassConstructor)
       initializeTotals(this.previous)
 
-      this.#derivativesWrtT = new Variable(
-        Object.fromEntries(
-          Object.entries(this).map(([name, value]) => {
-            const delta = value - this.previous[name]
-            return [name, delta / deltaT]
-          })
-        ),
-        null,
-        deltaT,
-        subclassConstructor.derivativeName,
-        subclassConstructor
-      )
+      this.#derivativesWrtT = initializeDerivative()
     }
 
     this.#name = name

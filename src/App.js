@@ -4,16 +4,23 @@ import useSensorData from './use-sensor-data/'
 import useClock from './hooks/useClock'
 import { useEffect, useMemo, useState } from 'react'
 
+import usePrevious from './hooks/usePrevious'
+
 export default function App() {
   const [sensorDataIsReady, setSensorDataIsReady] = useState(false)
 
   const [derivativesWrtT, setDerivativesWrtT] = useState({})
+  const previousDerivativesWrtT = usePrevious(derivativesWrtT, {})
 
   const { timestamp, previousTimestamp } = useClock(sensorDataIsReady)
 
   const deltaT = useMemo(() => timestamp - previousTimestamp, [timestamp, previousTimestamp])
 
-  const { sensorData, errors, isListening, startListening } = useSensorData({ enableHighAccuracy: true }, deltaT)
+  const { sensorData, previousSensorData, errors, isListening, startListening } = useSensorData(
+    { enableHighAccuracy: true },
+    deltaT,
+    previousDerivativesWrtT
+  )
 
   useEffect(() => {
     setSensorDataIsReady(sensorData.isReady)

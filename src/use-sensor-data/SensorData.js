@@ -9,7 +9,7 @@ export default class SensorData {
 
   static variables = ['position', 'orientation', 'acceleration', 'angularVelocity']
 
-  constructor(rawSensorData, previousRawSensorData, deltaT) {
+  constructor(rawSensorData, previousSensorData, deltaT) {
     this.#deltaT = deltaT
 
     Object.entries(rawSensorData).forEach(([variableName, variableState]) => {
@@ -21,7 +21,7 @@ export default class SensorData {
       }[variableName]
 
       const initialVariableState = constructor.initial
-      const previousVariableState = previousRawSensorData?.[variableName]
+      const previousVariableState = previousSensorData?.[variableName]
 
       const currentState = { ...initialVariableState, ...variableState }
       const previousState = { ...initialVariableState, ...previousVariableState }
@@ -44,7 +44,9 @@ export default class SensorData {
   }
 
   get derivativesWrtT() {
-    return Object.fromEntries(Object.values(this).map((variable) => [variable.derivativeName, variable.derivativesWrtT]))
+    return Object.fromEntries(
+      Object.values(this).map((variable) => [variable.name, { [variable.derivativeName]: variable.derivativesWrtT }])
+    )
   }
 
   static isEqual(sensorData1, sensorData2) {
