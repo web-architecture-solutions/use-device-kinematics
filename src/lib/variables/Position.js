@@ -5,7 +5,7 @@ import { haversineDistance } from '../physics'
 
 export default class Position extends Variable {
   static name = 'position'
-  static derivativeConstructor = Velocity
+  static derivative = Velocity
   static initial = { latitude: null, longitude: null, altitude: null }
   static renameComponents = { latitude: 'y', longitude: 'x', altitude: 'z' }
 

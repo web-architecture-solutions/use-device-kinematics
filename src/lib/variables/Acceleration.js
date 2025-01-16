@@ -3,6 +3,6 @@ import Jerk from './Jerk'
 
 export default class Acceleration extends Variable {
   static name = 'acceleration'
-  static derivativeConstructor = Jerk
+  static derivative = Jerk
   static initial = { x: null, y: null, z: null }
 }

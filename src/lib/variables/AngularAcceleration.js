@@ -3,6 +3,6 @@ import AngularJerk from './AngularJerk'
 
 export default class AngularAcceleration extends Variable {
   static name = 'angularAcceleration'
-  static derivativeConstructor = AngularJerk
+  static derivative = AngularJerk
   static initial = { x: null, y: null, z: null }
 }
