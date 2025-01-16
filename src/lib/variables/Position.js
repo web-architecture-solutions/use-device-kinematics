@@ -6,14 +6,7 @@ export default class Position extends Variable {
   static name = 'position'
   static derivativeName = 'velocity'
   static components = ['x', 'y', 'z']
-
-  static get initial() {
-    return {
-      latitude: null,
-      longitude: null,
-      altitude: null
-    }
-  }
+  static initial = { latitude: null, longitude: null, altitude: null }
 
   static get renameComponent() {
     return { latitude: 'y', longitude: 'x', altitude: 'z' }

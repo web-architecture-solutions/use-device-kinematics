@@ -6,7 +6,7 @@ export default class Variable {
   #derivativeName
   #name
 
-  constructor(currentState, previousState, previousDerivativesWrtT, name, subclassConstructor, sensorData) {
+  constructor(rawVariableState, previousRawVariableState, previousDerivativesWrtT, name, subclassConstructor, sensorData) {
     this.#previous = {}
     this.#derivativeName = subclassConstructor?.derivativeName ?? null
     this.timestamp = sensorData?.timestamp ?? null
@@ -40,6 +40,10 @@ export default class Variable {
         subclassConstructor
       )
     }
+
+    const initialVariableState = subclassConstructor?.initial ?? {}
+    const currentState = { ...initialVariableState, ...rawVariableState }
+    const previousState = { ...initialVariableState, ...previousRawVariableState }
 
     initizalizeState(currentState, currentStateInitializationCallback)
 

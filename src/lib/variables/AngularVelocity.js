@@ -5,14 +5,7 @@ export default class AngularVelocity extends Variable {
   static useRadians = true
   static derivativeName = 'angularAcceleration'
   static components = ['x', 'y', 'z']
-
-  static get initial() {
-    return {
-      alpha: null,
-      beta: null,
-      gamma: null
-    }
-  }
+  static initial = { alpha: null, beta: null, gamma: null }
 
   static get renameComponent() {
     return { alpha: 'z', beta: 'x', gamma: 'y' }
