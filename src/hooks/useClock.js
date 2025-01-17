@@ -1,19 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
 
-import usePrevious from './usePrevious'
-
 export default function useClock(startCondition, updateFrequency = 100) {
   const startTime = useRef(null)
   const [timestamp, setTimestamp] = useState(null)
-  const previousTimestamp = usePrevious(timestamp)
+  const previousTimestampRef = useRef(null)
   useEffect(() => {
     if (startCondition) {
       startTime.current = performance.now()
       const intervalId = setInterval(() => {
-        setTimestamp(performance.now() - startTime.current)
+        const newTimestamp = performance.now() - startTime.current
+        setTimestamp(newTimestamp)
+        previousTimestampRef.current = timestamp
       }, updateFrequency)
       return () => clearInterval(intervalId)
+    } else {
+      startTime.current = null
+      setTimestamp(null)
+      previousTimestampRef.current = null
     }
-  }, [startCondition])
+  }, [startCondition, updateFrequency])
+  const previousTimestamp = previousTimestampRef.current
   return { timestamp, previousTimestamp }
 }

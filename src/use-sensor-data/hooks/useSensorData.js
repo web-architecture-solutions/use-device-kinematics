@@ -1,6 +1,5 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useRef, useState, useMemo, useEffect } from 'react'
 
-import usePrevious from '../../hooks/usePrevious'
 import useClock from '../../hooks/useClock'
 import useRawSensorData from './useRawSensorData'
 
@@ -12,19 +11,25 @@ export default function useSensorData(config = {}) {
 
   const { rawSensorData, errors, isListening, startListening } = useRawSensorData(config)
 
-  const previousRawSensorData = usePrevious(rawSensorData, SensorData.initial, SensorData.isEqual)
-  const previousDerivativesWrtT = usePrevious(derivativesWrtT, {})
+  const previousRawSensorDataRef = useRef(SensorData.initial)
+  const previousDerivativesWrtTRef = useRef({})
 
   const { timestamp, previousTimestamp } = useClock(sensorDataIsReady)
 
-  const sensorData = useMemo(() => {
-    return new SensorData(rawSensorData, previousRawSensorData, previousDerivativesWrtT, timestamp, previousTimestamp)
-  }, [rawSensorData, previousRawSensorData, previousDerivativesWrtT, timestamp, previousTimestamp])
+  const sensorData = useMemo(
+    () => new SensorData(rawSensorData, previousRawSensorDataRef.current, previousDerivativesWrtTRef.current, timestamp, previousTimestamp),
+    [rawSensorData, timestamp, previousTimestamp]
+  )
 
   useEffect(() => {
     setSensorDataIsReady(sensorData.isReady)
     setDerivativesWrtT(sensorData.derivativesWrtT)
   }, [sensorData])
+
+  useEffect(() => {
+    previousRawSensorDataRef.current = rawSensorData
+    previousDerivativesWrtTRef.current = derivativesWrtT
+  }, [rawSensorData, derivativesWrtT])
 
   return {
     sensorData,
