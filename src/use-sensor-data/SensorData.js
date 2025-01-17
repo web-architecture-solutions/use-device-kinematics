@@ -13,10 +13,27 @@ export default class SensorData {
     this.#previousDerivativesWrtT = previousDerivativesWrtT
 
     Object.entries(rawSensorData).forEach(([variableName, rawVariableState]) => {
+      const renameComponent = (componentName) => {
+        const renameComponents = SensorData.getRenameComponentsByVariableName(variableName)
+        const shouldComponentBeRenamed = renameComponents && componentName in renameComponents
+        return shouldComponentBeRenamed ? renameComponents[componentName] : componentName
+      }
+      const renamedVariableState = Object.fromEntries(
+        Object.entries(rawVariableState).map(([componentName, componentValue]) => {
+          return [renameComponent(componentName), componentValue]
+        })
+      )
+
       const previousRawVariableState = previousRawSensorData?.[variableName] ?? {}
       const previousVariableDerivativesWrtT = previousDerivativesWrtT?.[variableName] ?? {}
       const constructor = SensorData.getVariableConstructorByName(variableName)
-      this[variableName] = new constructor(rawVariableState, previousRawVariableState, previousVariableDerivativesWrtT, constructor, this)
+      this[variableName] = new constructor(
+        renamedVariableState,
+        previousRawVariableState,
+        previousVariableDerivativesWrtT,
+        constructor,
+        this
+      )
     })
   }
 
@@ -50,6 +67,10 @@ export default class SensorData {
 
   static getVariableConstructorByName(variableName) {
     return VariableConstructors[variableName]
+  }
+
+  static getRenameComponentsByVariableName(variableName) {
+    return VariableConstructors[variableName]?.renameComponents ?? null
   }
 
   static isEqual(sensorData1, sensorData2) {
