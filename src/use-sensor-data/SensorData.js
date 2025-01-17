@@ -9,38 +9,42 @@ export default class SensorData {
   #previousTimestamp
   #previousDerivativesWrtT
 
+  static transformVariable(variableName, variableState) {
+    function renameComponent(variableName, componentName) {
+      const renameComponents = SensorData.getRenameComponentsByVariableName(variableName)
+      const shouldComponentBeRenamed = renameComponents && componentName in renameComponents
+      return shouldComponentBeRenamed ? renameComponents[componentName] : componentName
+    }
+
+    function handleAngularValues(variableName, componentValue) {
+      const useRadians = SensorData.getUseRadiansByVariableName(variableName)
+      return useRadians ? toRadians(componentValue) : componentValue
+    }
+
+    return Object.fromEntries(
+      Object.entries(variableState).map(([componentName, componentValue]) => {
+        return [renameComponent(variableName, componentName), handleAngularValues(variableName, componentValue)]
+      })
+    )
+  }
+
   constructor(rawSensorData, previousRawSensorData, previousDerivativesWrtT, timestamp, previousTimestamp) {
     this.#timestamp = timestamp
     this.#previousTimestamp = previousTimestamp
     this.#previousDerivativesWrtT = previousDerivativesWrtT
 
     Object.entries(rawSensorData).forEach(([variableName, rawVariableState]) => {
-      const renameComponent = (componentName) => {
-        const renameComponents = SensorData.getRenameComponentsByVariableName(variableName)
-        const shouldComponentBeRenamed = renameComponents && componentName in renameComponents
-        return shouldComponentBeRenamed ? renameComponents[componentName] : componentName
-      }
-      const useRadians = SensorData.getUseRadiansByVariableName(variableName)
-      const handleAngularValues = (value) => (useRadians ? toRadians(value) : value)
-      const renamedVariableState = Object.fromEntries(
-        Object.entries(rawVariableState).map(([componentName, componentValue]) => {
-          return [renameComponent(componentName), handleAngularValues(componentValue)]
-        })
-      )
-
       const previousRawVariableState = previousRawSensorData?.[variableName] ?? {}
-      const renamedPreviousVariableState = Object.fromEntries(
-        Object.entries(previousRawVariableState).map(([componentName, componentValue]) => {
-          return [renameComponent(componentName), componentValue]
-        })
-      )
-
       const previousVariableDerivativesWrtT = previousDerivativesWrtT?.[variableName] ?? {}
 
+      const transformedVariableState = SensorData.transformVariable(variableName, rawVariableState)
+      const transformedPreviousVariableState = SensorData.transformVariable(variableName, previousRawVariableState)
+
       const constructor = SensorData.getVariableConstructorByName(variableName)
+
       this[variableName] = new constructor(
-        renamedVariableState,
-        renamedPreviousVariableState,
+        transformedVariableState,
+        transformedPreviousVariableState,
         previousVariableDerivativesWrtT,
         constructor,
         this
