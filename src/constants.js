@@ -1,3 +1,9 @@
+export const Dimension = {
+  x: 'x',
+  y: 'y',
+  z: 'z'
+}
+
 export const VariableNames = {
   POSITION: 'position',
   VELOCITY: 'velocity',

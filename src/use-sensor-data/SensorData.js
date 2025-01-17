@@ -2,6 +2,8 @@ import Variable from '../lib/Variable'
 
 import { VariableConstructors } from './constants'
 
+import { toRadians } from '../lib/math'
+
 export default class SensorData {
   #timestamp
   #previousTimestamp
@@ -18,9 +20,11 @@ export default class SensorData {
         const shouldComponentBeRenamed = renameComponents && componentName in renameComponents
         return shouldComponentBeRenamed ? renameComponents[componentName] : componentName
       }
+      const useRadians = SensorData.getUseRadiansByVariableName(variableName)
+      const handleAngularValues = (value) => (useRadians ? toRadians(value) : value)
       const renamedVariableState = Object.fromEntries(
         Object.entries(rawVariableState).map(([componentName, componentValue]) => {
-          return [renameComponent(componentName), componentValue]
+          return [renameComponent(componentName), handleAngularValues(componentValue)]
         })
       )
 
@@ -78,6 +82,10 @@ export default class SensorData {
 
   static getRenameComponentsByVariableName(variableName) {
     return VariableConstructors[variableName]?.renameComponents ?? null
+  }
+
+  static getUseRadiansByVariableName(variableName) {
+    return VariableConstructors[variableName]?.useRadians ?? false
   }
 
   static isEqual(sensorData1, sensorData2) {

@@ -2,7 +2,6 @@ import { toRadians } from './math'
 
 export default class Variable {
   #useRadians
-  #renameComponents
   #previous
   #timestamp
   #previousTimestamp
@@ -29,9 +28,9 @@ export default class Variable {
   }
 
   #initialize(currentState, previousState) {
-    const previousFactory = (variableState) => {
+    const previousFactory = (previousState) => {
       const initializedPreviousSensorData = Object.fromEntries(
-        Object.entries(variableState).map(([componentName, value]) => [componentName, value])
+        Object.entries(previousState).map(([componentName, value]) => [componentName, value])
       )
       return new this.#subclassConstructor(initializedPreviousSensorData, null, this.#subclassConstructor, this.#sensorData)
     }
@@ -44,14 +43,12 @@ export default class Variable {
     }
 
     const initizalizeCurrent = ({ x, y, z }) => {
-      const handleAngularValues = (value) => (this.#useRadians ? toRadians(value) : value)
-
-      this.x = handleAngularValues(x)
-      this.y = handleAngularValues(y)
-      this.z = handleAngularValues(z)
+      this.x = x
+      this.y = y
+      this.z = z
     }
 
-    const initializePrevious = (variableState) => (this.#previous = previousFactory(variableState))
+    const initializePrevious = (previousState) => (this.#previous = previousFactory(previousState))
 
     const initializeDerivative = () => {
       this.#derivativeWrtT = derivativeFactory(
@@ -75,7 +72,6 @@ export default class Variable {
     this.#previousDerivativesWrtT = previousDerivativesWrtT
     this.#subclassConstructor = subclassConstructor
     this.#useRadians = subclassConstructor?.useRadians ?? null
-    this.#renameComponents = subclassConstructor?.renameComponents ?? null
     this.#derivativeConstructor = subclassConstructor?.derivative ?? null
     this.#derivativeName = this.#derivativeConstructor?.name ?? null
     this.#sensorData = sensorData
