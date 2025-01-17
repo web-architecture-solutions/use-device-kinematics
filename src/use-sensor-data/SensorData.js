@@ -25,11 +25,18 @@ export default class SensorData {
       )
 
       const previousRawVariableState = previousRawSensorData?.[variableName] ?? {}
+      const renamedPreviousVariableState = Object.fromEntries(
+        Object.entries(previousRawVariableState).map(([componentName, componentValue]) => {
+          return [renameComponent(componentName), componentValue]
+        })
+      )
+
       const previousVariableDerivativesWrtT = previousDerivativesWrtT?.[variableName] ?? {}
+
       const constructor = SensorData.getVariableConstructorByName(variableName)
       this[variableName] = new constructor(
         renamedVariableState,
-        previousRawVariableState,
+        renamedPreviousVariableState,
         previousVariableDerivativesWrtT,
         constructor,
         this
