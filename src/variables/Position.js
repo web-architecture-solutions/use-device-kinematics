@@ -14,10 +14,10 @@ export default class Position extends Variable {
 
   static calculateDerivativeWrtT(position, deltaT) {
     const geodeticDisplacement = calculateGeodeticDisplacement(position, position.previous)
-    const initializeComponentDerivative = ([name]) => {
+    const initializeComponentDerivative = (name) => {
       const delta = geodeticDisplacement[name]
       return [name, delta / deltaT]
     }
-    return position.map(initializeComponentDerivative)
+    return position.mapKeys(initializeComponentDerivative)
   }
 }

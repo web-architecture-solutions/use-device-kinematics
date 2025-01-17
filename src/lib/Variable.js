@@ -19,7 +19,7 @@ export default class Variable {
       const delta = value - variable.previous[name]
       return [name, delta / deltaT]
     }
-    return variable.map(initializeComponentDerivative)
+    return variable.mapEntries(initializeComponentDerivative)
   }
 
   static isEqual(variableData1, variableData2) {
@@ -32,22 +32,22 @@ export default class Variable {
     return this.#useRadians ? toRadians(value) : value
   }
 
-  #initizalize(sensorData, initializer) {
-    return Object.entries(sensorData).map(([name, value]) => {
+  #initizalize(variableState, initializer) {
+    return Object.entries(variableState).map(([name, value]) => {
       const shouldComponentBeRenamed = this.#renameComponents && name in this.#renameComponents
       const componentName = shouldComponentBeRenamed ? this.#renameComponents[name] : name
       return initializer(componentName, value)
     })
   }
 
-  #initizalizeCurrent(sensorData) {
+  #initizalizeCurrent(variableState) {
     const initializer = (componentName, value) => (this[componentName] = this.#conditionallyTransformAngularValue(value))
-    this.#initizalize(sensorData, initializer)
+    this.#initizalize(variableState, initializer)
   }
 
-  #initializePrevious(sensorData) {
+  #initializePrevious(variableState) {
     const initializer = (componentName, value) => [componentName, this.#conditionallyTransformAngularValue(value)]
-    const initializedPreviousSensorData = Object.fromEntries(this.#initizalize(sensorData, initializer))
+    const initializedPreviousSensorData = Object.fromEntries(this.#initizalize(variableState, initializer))
     this.#previous = new this.#subclassConstructor(initializedPreviousSensorData, null, this.#subclassConstructor, this.#sensorData)
   }
 
@@ -112,8 +112,12 @@ export default class Variable {
     return Object.entries(this).every(callback)
   }
 
-  map(mapper) {
+  mapEntries(mapper) {
     return Object.fromEntries(Object.entries(this).map(mapper))
+  }
+
+  mapKeys(mapper) {
+    return Object.fromEntries(Object.keys(this).map(mapper))
   }
 
   isEqual(variable) {
