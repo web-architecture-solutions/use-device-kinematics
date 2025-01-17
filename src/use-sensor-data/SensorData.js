@@ -76,7 +76,7 @@ export default class SensorData {
   }
 
   get derivativesWrtT() {
-    const _derivativesWrtT = this.reduce((derivatives, [_, variable]) => {
+    const _derivativesWrtT = this.reduceEntriesToObject((derivatives, [_, variable]) => {
       return variable.hasDerivative ? [...derivatives, [variable.derivativeName, variable.derivativeWrtT]] : derivatives
     })
 
@@ -105,7 +105,7 @@ export default class SensorData {
     Object.entries(this).every(callback)
   }
 
-  reduce(reducer) {
+  reduceEntriesToObject(reducer) {
     return Object.fromEntries(Object.entries(this).reduce(reducer, []))
   }
 

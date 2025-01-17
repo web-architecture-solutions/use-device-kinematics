@@ -24,36 +24,10 @@ export default class Variable extends Array {
     })
   }
 
-  #initialize(currentState, previousState) {
-    this[0] = currentState?.[0]
-    this[1] = currentState?.[1]
-    this[2] = currentState?.[2]
-
-    if (previousState && previousState.length === 3 && !Variable.isEqual(currentState, previousState)) {
-      this.#previous = new this.#subclassConstructor(
-        previousState,
-        [null, null, null],
-        this.#previousDerivativesWrtT,
-        this.#subclassConstructor,
-        this.#sensorData
-      )
-      const derivativeWrtT = this.constructor.calculateDerivativeWrtT(this, this.#deltaT)
-      this.#derivativeWrtT = this.#derivativeConstructor
-        ? new this.#derivativeConstructor(
-            derivativeWrtT,
-            this.#previousDerivativesWrtT,
-            [null, null, null],
-            this.#derivativeConstructor,
-            this.#sensorData
-          )
-        : [null, null, null]
-    }
-  }
-
   constructor(rawVariableState, previousRawVariableState, previousDerivativesWrtT, subclassConstructor, sensorData) {
     super()
 
-    this.#previous = [null, null, null]
+    this.#previous = previousRawVariableState
     this.#previousDerivativesWrtT = previousDerivativesWrtT
     this.#subclassConstructor = subclassConstructor
     this.#derivativeConstructor = subclassConstructor?.derivative ?? null
@@ -62,7 +36,34 @@ export default class Variable extends Array {
     this.#timestamp = this.#sensorData?.timestamp ?? null
     this.#previousTimestamp = this.#sensorData?.previousTimestamp ?? null
     this.#deltaT = this.#timestamp - this.#previousTimestamp
-    this.#initialize(rawVariableState, previousRawVariableState)
+
+    this[0] = rawVariableState?.[0] ?? null
+    this[1] = rawVariableState?.[1] ?? null
+    this[2] = rawVariableState?.[2] ?? null
+
+    if (
+      previousRawVariableState &&
+      previousRawVariableState.length === 3 &&
+      !Variable.isEqual(rawVariableState, previousRawVariableState)
+    ) {
+      this.#previous = new this.#subclassConstructor(
+        previousRawVariableState,
+        [null, null, null],
+        this.#previousDerivativesWrtT,
+        this.#subclassConstructor,
+        this.#sensorData
+      )
+
+      this.#derivativeWrtT = this.#derivativeConstructor
+        ? new this.#derivativeConstructor(
+            this.constructor.calculateDerivativeWrtT(this, this.#deltaT),
+            this.#previousDerivativesWrtT,
+            [null, null, null],
+            this.#derivativeConstructor,
+            this.#sensorData
+          )
+        : [null, null, null]
+    }
   }
 
   get previous() {
