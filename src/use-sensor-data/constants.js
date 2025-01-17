@@ -4,10 +4,10 @@ import Orientation from '../lib/variables/Orientation'
 import AngularVelocity from '../lib/variables/AngularVelocity'
 
 export const VariableNames = {
-  POSITION: 'position',
-  ACCELERATION: 'acceleration',
-  ORIENTATION: 'orientation',
-  ANGULAR_VELOCITY: 'angularVelocity'
+  POSITION: Position.name,
+  ACCELERATION: Acceleration.name,
+  ORIENTATION: Orientation.name,
+  ANGULAR_VELOCITY: AngularVelocity.name
 }
 
 export const VariableConstructors = {

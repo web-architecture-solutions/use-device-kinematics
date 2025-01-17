@@ -10,15 +10,10 @@ export default class SensorData {
     this.#timestamp = timestamp
     this.#previousTimestamp = previousTimestamp
 
-    Object.values(VariableNames).forEach((variableName) => {
-      this[variableName] = this.variableFactory(
-        variableName,
-        rawSensorData,
-        previousRawSensorData,
-        Object.entries(previousDerivativesWrtT?.[variableName] ?? {})?.[1], // TODO: UGLY!
-        timestamp,
-        previousTimestamp
-      )
+    Object.entries(rawSensorData).forEach(([variableName, rawVariableState]) => {
+      const previousRawVariableState = previousRawSensorData?.[variableName] ?? {}
+      const previousVariableDerivativesWrtT = previousDerivativesWrtT?.[variableName] ?? {}
+      this[variableName] = this.variableFactory(variableName, rawVariableState, previousRawVariableState, previousVariableDerivativesWrtT)
     })
   }
 
@@ -63,11 +58,9 @@ export default class SensorData {
     )
   }
 
-  variableFactory(variableName, rawSensorData, previousRawSensorData, previousDerivativesWrtT) {
-    const rawVariableState = rawSensorData?.[variableName] ?? {}
-    const previousRawVariableState = previousRawSensorData?.[variableName] ?? {}
+  variableFactory(variableName, rawVariableState, previousRawVariableState, previousVariableDerivativesWrtT) {
     const constructor = SensorData.getVariableConstructorByName(variableName)
-    return new constructor(rawVariableState, previousRawVariableState, previousDerivativesWrtT, constructor, this)
+    return new constructor(rawVariableState, previousRawVariableState, previousVariableDerivativesWrtT, constructor, this)
   }
 
   isEqual(sensorData) {
