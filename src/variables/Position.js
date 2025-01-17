@@ -9,15 +9,15 @@ import { calculateGeodeticDisplacement } from '../lib/physics'
 export default class Position extends Variable {
   static name = VariableNames.POSITION
   static derivative = Velocity
-  static initial = { latitude: null, longitude: null, altitude: null }
+  static initial = [null, null, null]
   static renameComponents = { latitude: Dimension.y, longitude: Dimension.x, altitude: Dimension.z }
 
   static calculateDerivativeWrtT(position, deltaT) {
     const geodeticDisplacement = calculateGeodeticDisplacement(position, position.previous)
-    const initializeComponentDerivative = (name) => {
-      const delta = geodeticDisplacement[name]
-      return [name, delta / deltaT]
+    const initializeComponentDerivative = (_, index) => {
+      const delta = geodeticDisplacement[index]
+      return delta / deltaT
     }
-    return position.mapKeys(initializeComponentDerivative)
+    return position.map?.(initializeComponentDerivative)
   }
 }

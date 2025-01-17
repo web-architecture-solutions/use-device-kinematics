@@ -19,14 +19,14 @@ export default class DeviceKinematics {
 
   get stateVector() {
     return [
-      ...this.position.stateVector,
-      ...this.position.derivativeWrtT.stateVector,
-      ...this.acceleration.stateVector,
-      ...this.acceleration.derivativeWrtT.stateVector,
-      ...this.orientation.stateVector,
-      ...this.angularVelocity.stateVector,
-      ...this.angularVelocity.derivativeWrtT.stateVector,
-      ...this.angularVelocity.derivativeWrtT.derivativeWrtT.stateVector
+      ...this.position,
+      ...this.position.derivativeWrtT,
+      ...this.acceleration,
+      ...this.acceleration.derivativeWrtT,
+      ...this.orientation,
+      ...this.angularVelocity,
+      ...this.angularVelocity.derivativeWrtT,
+      ...this.angularVelocity.derivativeWrtT.derivativeWrtT
     ]
   }
 

@@ -21,11 +21,14 @@ export default class SensorData {
       return useRadians ? toRadians(componentValue) : componentValue
     }
 
-    return Object.fromEntries(
-      Object.entries(variableState).map(([componentName, componentValue]) => {
-        return [renameComponent(variableName, componentName), handleAngularValues(variableName, componentValue)]
-      })
-    )
+    return variableState
+      ? Object.entries(variableState)
+          .map(([componentName, componentValue]) => {
+            return [renameComponent(variableName, componentName), handleAngularValues(variableName, componentValue)]
+          })
+          .toSorted(([componentName1], [componentName2]) => componentName1 > componentName2)
+          .map(([_, componentValue]) => componentValue)
+      : [null, null, null]
   }
 
   constructor(rawSensorData, previousRawSensorData, previousDerivativesWrtT, timestamp, previousTimestamp) {
@@ -34,8 +37,8 @@ export default class SensorData {
     this.#previousDerivativesWrtT = previousDerivativesWrtT
 
     Object.entries(rawSensorData).forEach(([variableName, rawVariableState]) => {
-      const previousRawVariableState = previousRawSensorData?.[variableName] ?? {}
-      const previousVariableDerivativesWrtT = previousDerivativesWrtT?.[variableName] ?? {}
+      const previousRawVariableState = previousRawSensorData?.[variableName] ?? [null, null, null]
+      const previousVariableDerivativesWrtT = previousDerivativesWrtT?.[variableName] ?? [null, null, null]
 
       const transformedVariableState = SensorData.transformVariable(variableName, rawVariableState)
       const transformedPreviousVariableState = SensorData.transformVariable(variableName, previousRawVariableState)
@@ -93,12 +96,12 @@ export default class SensorData {
   }
 
   static isEqual(sensorData1, sensorData2) {
-    return sensorData1.every(([variableName, variableData]) => {
+    return sensorData1.everyEntry(([variableName, variableData]) => {
       return Variable.isEqual(variableData, sensorData2?.[variableName])
     })
   }
 
-  every(callback) {
+  everyEntry(callback) {
     Object.entries(this).every(callback)
   }
 

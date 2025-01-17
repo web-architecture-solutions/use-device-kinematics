@@ -3,8 +3,8 @@ import { toRadians } from './math'
 const R_E = 6371000
 
 export function calculateGeodeticDisplacement(currentPosition, previousPosition) {
-  const { x: previousLongitude, y: previousLatitude, z: previousAltitude } = previousPosition
-  const { x: currentLongitude, y: currentLatitude, z: currentAltitude } = currentPosition
+  const [previousLongitude, previousLatitude, previousAltitude] = previousPosition
+  const [currentLongitude, currentLatitude, currentAltitude] = currentPosition
 
   const previousLatitudeRadians = toRadians(previousLatitude)
   const previousLongitudeRadians = toRadians(previousLongitude)
@@ -17,13 +17,10 @@ export function calculateGeodeticDisplacement(currentPosition, previousPosition)
   const northwardDisplacement = R_E * (currentLatitudeRadians - previousLatitudeRadians)
   const verticalDisplacement = currentAltitude - previousAltitude
 
-  return {
-    x: eastwardDisplacement,
-    y: northwardDisplacement,
-    z: verticalDisplacement
-  }
+  return [eastwardDisplacement, northwardDisplacement, verticalDisplacement]
 }
 
+/*
 export function calculateHaversineDistance(previousPosition, currentPosition) {
   const { x: previousLongitude, y: previousLatitude } = previousPosition
   const { x: currentLongitude, y: currentLatitude } = currentPosition
@@ -43,3 +40,4 @@ export function calculateHaversineDistance(previousPosition, currentPosition) {
 
   return R_E * centralAngle
 }
+*/
