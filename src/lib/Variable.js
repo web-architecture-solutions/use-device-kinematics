@@ -29,9 +29,20 @@ export default class Variable {
   }
 
   #initialize(currentState, previousState) {
-    const conditionallyTransformAngularValue = (value) => {
-      return this.#useRadians ? toRadians(value) : value
+    const previousFactory = (variableState) => {
+      const previousStateInitializer = (componentName, value) => [componentName, handleAngularValues(value)]
+      const initializedPreviousSensorData = Object.fromEntries(initizalizeWith(variableState, previousStateInitializer))
+      return new this.#subclassConstructor(initializedPreviousSensorData, null, this.#subclassConstructor, this.#sensorData)
     }
+
+    const derivativeFactory = (variable, deltaT, derivativeConstructor, previousDerivativesWrtT, sensorData) => {
+      const derivativeWrtT = variable.constructor.calculateDerivativeWrtT(variable, deltaT)
+      return derivativeConstructor
+        ? new derivativeConstructor(derivativeWrtT, previousDerivativesWrtT, {}, derivativeConstructor, sensorData)
+        : {}
+    }
+
+    const handleAngularValues = (value) => (this.#useRadians ? toRadians(value) : value)
 
     const renameComponent = (name) => {
       const shouldComponentBeRenamed = this.#renameComponents && name in this.#renameComponents
@@ -43,26 +54,13 @@ export default class Variable {
     }
 
     const initizalizeCurrent = (variableState) => {
-      const initializer = (componentName, value) => (this[componentName] = conditionallyTransformAngularValue(value))
-      initizalizeWith(variableState, initializer)
+      const currentStateInitializer = (componentName, value) => (this[componentName] = handleAngularValues(value))
+      initizalizeWith(variableState, currentStateInitializer)
     }
 
-    const initializePrevious = (variableState) => {
-      const initializer = (componentName, value) => [componentName, conditionallyTransformAngularValue(value)]
-      const initializedPreviousSensorData = Object.fromEntries(initizalizeWith(variableState, initializer))
-      this.#previous = new this.#subclassConstructor(initializedPreviousSensorData, null, this.#subclassConstructor, this.#sensorData)
-    }
+    const initializePrevious = (variableState) => (this.#previous = previousFactory(variableState))
 
-    const derivativeFactory = (variable, deltaT, derivativeConstructor, previousDerivativesWrtT, sensorData) => {
-      const derivativeWrtT = variable.constructor.calculateDerivativeWrtT(variable, deltaT)
-      return derivativeConstructor
-        ? new derivativeConstructor(derivativeWrtT, previousDerivativesWrtT, {}, derivativeConstructor, sensorData)
-        : {}
-    }
-
-    initizalizeCurrent(currentState)
-    if (Object.keys(previousState).length > 0) {
-      initializePrevious(previousState)
+    const initializeDerivative = () => {
       this.#derivativeWrtT = derivativeFactory(
         this,
         this.#deltaT,
@@ -70,6 +68,12 @@ export default class Variable {
         this.#previousDerivativesWrtT,
         this.#sensorData
       )
+    }
+
+    initizalizeCurrent(currentState)
+    if (Object.keys(previousState).length > 0) {
+      initializePrevious(previousState)
+      initializeDerivative()
     }
   }
 
