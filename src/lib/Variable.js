@@ -14,6 +14,23 @@ export default class Variable {
   #derivativeName
   #sensorData
 
+  static initializeDerivative(current, previous, deltaT, derivativeConstructor, previousDerivativesWrtT, sensorData) {
+    const initializeComponentDerivative = ([name, value]) => {
+      const delta = value - previous[name]
+      return [name, delta / deltaT]
+    }
+    const derivativeWrtT = current.map(initializeComponentDerivative)
+    return derivativeConstructor
+      ? new derivativeConstructor(derivativeWrtT, previousDerivativesWrtT, {}, derivativeConstructor, sensorData)
+      : {}
+  }
+
+  static isEqual(variableData1, variableData2) {
+    return variableData1.every(([componentName, componentValue]) => {
+      return variableData2?.[componentName] === componentValue
+    })
+  }
+
   #conditionallyTransformAngularValue(value) {
     return this.#useRadians ? toRadians(value) : value
   }
@@ -37,25 +54,6 @@ export default class Variable {
     this.#previous = new this.#subclassConstructor(initializedPreviousState, null, this.#subclassConstructor, this.#sensorData)
   }
 
-  // NOTE: Must be an arrow function to maintain reference
-  #initializeComponentDerivative = ([name, value]) => {
-    const delta = value - this.#previous[name]
-    return [name, delta / this.#deltaT]
-  }
-
-  #initializeDerivatives() {
-    const derivativeWrtT = this.map(this.#initializeComponentDerivative)
-    this.#derivativeWrtT = this.#subclassConstructor.derivative
-      ? new this.#subclassConstructor.derivative(
-          derivativeWrtT,
-          this.#previousDerivativesWrtT,
-          {},
-          this.#derivativeConstructor,
-          this.#sensorData
-        )
-      : {}
-  }
-
   constructor(rawVariableState, previousRawVariableState, previousDerivativesWrtT, subclassConstructor, sensorData) {
     this.#previous = null
     this.#previousDerivativesWrtT = previousDerivativesWrtT
@@ -76,7 +74,14 @@ export default class Variable {
     this.#initizalizeCurrent(currentState)
     if (Object.keys(previousState).length > 0) {
       this.#initializePrevious(previousState)
-      this.#initializeDerivatives()
+      this.#derivativeWrtT = this.#subclassConstructor.initializeDerivative(
+        this,
+        this.#previous,
+        this.#deltaT,
+        this.#subclassConstructor.derivative,
+        this.#previousDerivativesWrtT,
+        this.#sensorData
+      )
     }
   }
 
@@ -122,12 +127,6 @@ export default class Variable {
 
   get stateVector() {
     return Object.values(this).sort()
-  }
-
-  static isEqual(variableData1, variableData2) {
-    return variableData1.every(([componentName, componentValue]) => {
-      return variableData2?.[componentName] === componentValue
-    })
   }
 
   every(callback) {
