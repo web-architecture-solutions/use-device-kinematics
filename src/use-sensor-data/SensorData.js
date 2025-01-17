@@ -41,14 +41,10 @@ export default class SensorData {
   }
 
   get derivativesWrtT() {
-    const _derivativesWrtT = Object.fromEntries(
-      Object.entries(this).reduce((derivatives, [_, variable]) => {
-        if (variable.hasDerivative) {
-          return [...derivatives, [variable.derivativeName, variable.derivativeWrtT]]
-        }
-        return derivatives
-      }, [])
-    )
+    const _derivativesWrtT = this.reduce((derivatives, [_, variable]) => {
+      return variable.hasDerivative ? [...derivatives, [variable.derivativeName, variable.derivativeWrtT]] : derivatives
+    })
+
     return new SensorData(_derivativesWrtT, this.#previousDerivativesWrtT, {}, this.#timestamp, this.#previousTimestamp)
   }
 
@@ -57,9 +53,17 @@ export default class SensorData {
   }
 
   static isEqual(sensorData1, sensorData2) {
-    return Object.entries(sensorData1).every(([variableName, variableData]) => {
+    return sensorData1.every(([variableName, variableData]) => {
       return Variable.isEqual(variableData, sensorData2?.[variableName])
     })
+  }
+
+  every(callback) {
+    Object.entries(this).every(callback)
+  }
+
+  reduce(reducer) {
+    return Object.fromEntries(Object.entries(this).reduce(reducer, []))
   }
 
   isEqual(sensorData) {

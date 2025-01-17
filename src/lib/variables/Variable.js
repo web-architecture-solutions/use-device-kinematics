@@ -1,7 +1,6 @@
 import { toRadians } from '../math'
 
 export default class Variable {
-  #name
   #useRadians
   #renameComponents
   #previous
@@ -45,7 +44,7 @@ export default class Variable {
   }
 
   #initializeDerivatives() {
-    const derivativeWrtT = Object.fromEntries(Object.entries(this).map(this.#initializeComponentDerivative))
+    const derivativeWrtT = this.map(this.#initializeComponentDerivative)
     this.#derivativeWrtT = this.#subclassConstructor.derivative
       ? new this.#subclassConstructor.derivative(
           derivativeWrtT,
@@ -79,8 +78,6 @@ export default class Variable {
       this.#initializePrevious(previousState)
       this.#initializeDerivatives()
     }
-
-    this.#name = subclassConstructor.name
   }
 
   get hasDerivative() {
@@ -100,9 +97,17 @@ export default class Variable {
   }
 
   static isEqual(variableData1, variableData2) {
-    return Object.entries(variableData1).every(([componentName, componentValue]) => {
+    return variableData1.every(([componentName, componentValue]) => {
       return variableData2?.[componentName] === componentValue
     })
+  }
+
+  every(callback) {
+    return Object.entries(this).every(callback)
+  }
+
+  map(mapper) {
+    return Object.fromEntries(Object.entries(this).map(mapper))
   }
 
   isEqual(variable) {
