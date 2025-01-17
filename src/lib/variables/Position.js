@@ -3,7 +3,7 @@ import Velocity from './Velocity'
 
 import { haversineDistance } from '../physics'
 
-import { VariableNames } from '../../use-sensor-data/constants'
+import { VariableNames } from './constants'
 
 export default class Position extends Variable {
   static name = VariableNames.POSITION

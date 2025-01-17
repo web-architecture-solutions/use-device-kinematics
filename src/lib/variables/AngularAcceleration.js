@@ -1,7 +1,7 @@
 import Variable from './Variable'
 import AngularJerk from './AngularJerk'
 
-import { VariableNames } from '../../use-sensor-data/constants'
+import { VariableNames } from './constants'
 
 export default class AngularAcceleration extends Variable {
   static name = VariableNames.ANGULAR_ACCELERATION
