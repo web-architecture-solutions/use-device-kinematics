@@ -2,21 +2,26 @@ import { toRadians } from '../math'
 
 export default class Variable {
   #name
+  #timestamp
+  #previousTimestamp
+  #deltaT
   #previous
   #derivativeWrtT
+  #derivativeConstructor
   #derivativeName
   #renameComponents
   #useRadians
 
   constructor(rawVariableState, previousRawVariableState, previousDerivativesWrtT, subclassConstructor, sensorData) {
-    this.#previous = {}
+    this.#previous = null
     this.#useRadians = subclassConstructor?.useRadians
     this.#renameComponents = subclassConstructor?.renameComponents ?? null
-    this.#derivativeName = subclassConstructor?.derivative?.name
+    this.#derivativeConstructor = subclassConstructor?.derivative
+    this.#derivativeName = this.#derivativeConstructor?.name
 
-    const timestamp = sensorData?.timestamp ?? null
-    const previousTimestamp = sensorData?.previousTimestamp ?? null
-    const deltaT = timestamp - previousTimestamp
+    this.#timestamp = sensorData?.timestamp ?? null
+    this.#previousTimestamp = sensorData?.previousTimestamp ?? null
+    this.#deltaT = this.#timestamp - this.#previousTimestamp
 
     const initialVariableState = subclassConstructor?.initial ?? {}
     const currentState = { ...initialVariableState, ...rawVariableState }
@@ -26,7 +31,7 @@ export default class Variable {
       this[componentName] = this.conditionallyTransformAngularValue(value)
     })
 
-    if (previousState && Object.keys(previousState).length > 0) {
+    if (Object.keys(previousState).length > 0) {
       const initializedPreviousState = Object.fromEntries(
         this.#initizalize(previousState, (componentName, value) => {
           return [componentName, this.conditionallyTransformAngularValue(value)]
@@ -37,7 +42,7 @@ export default class Variable {
 
       const initializeComponentDerivative = ([name, value]) => {
         const delta = value - this.previous[name]
-        return [name, delta / deltaT]
+        return [name, delta / this.#deltaT]
       }
       const derivativeWrtT = Object.fromEntries(Object.entries(this).map(initializeComponentDerivative))
       this.#derivativeWrtT = subclassConstructor.derivative
@@ -55,7 +60,7 @@ export default class Variable {
   }
 
   get hasDerivative() {
-    return this.#derivativeName ? true : false
+    return this.#derivativeConstructor ? true : false
   }
 
   get derivativeName() {
