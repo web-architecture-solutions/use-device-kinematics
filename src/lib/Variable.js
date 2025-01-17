@@ -1,4 +1,4 @@
-import { toRadians } from '../math'
+import { toRadians } from './math'
 
 export default class Variable {
   #useRadians

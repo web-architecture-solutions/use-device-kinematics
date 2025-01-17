@@ -1,9 +1,10 @@
-import Variable from './Variable'
+import Variable from '../lib/Variable'
+
 import Velocity from './Velocity'
 
-import { haversineDistance } from '../physics'
+import { haversineDistance } from '../lib/physics'
 
-import { VariableNames } from './constants'
+import { VariableNames } from '../constants'
 
 export default class Position extends Variable {
   static name = VariableNames.POSITION

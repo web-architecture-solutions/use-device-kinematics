@@ -1,7 +1,8 @@
-import Variable from './Variable'
+import Variable from '../lib/Variable'
+
 import AngularAcceleration from './AngularAcceleration'
 
-import { VariableNames } from './constants'
+import { VariableNames } from '../constants'
 
 export default class AngularVelocity extends Variable {
   static name = VariableNames.ANGULAR_VELOCITY

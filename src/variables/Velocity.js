@@ -1,6 +1,6 @@
-import Variable from './Variable'
+import Variable from '../lib/Variable'
 
-import { VariableNames } from './constants'
+import { VariableNames } from '../constants'
 
 export default class Velocity extends Variable {
   static name = VariableNames.VELOCITY

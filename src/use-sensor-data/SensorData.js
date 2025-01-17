@@ -1,4 +1,4 @@
-import Variable from '../lib/variables/Variable'
+import Variable from '../lib/Variable'
 
 import { VariableConstructors } from './constants'
 

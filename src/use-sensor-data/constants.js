@@ -1,13 +1,13 @@
-import Position from '../lib/variables/Position'
-import Acceleration from '../lib/variables/Acceleration'
-import Orientation from '../lib/variables/Orientation'
-import AngularVelocity from '../lib/variables/AngularVelocity'
-import Velocity from '../lib/variables/Velocity'
-import Jerk from '../lib/variables/Jerk'
-import AngularAcceleration from '../lib/variables/AngularAcceleration'
-import AngularJerk from '../lib/variables/AngularJerk'
+import Position from '../variables/Position'
+import Acceleration from '../variables/Acceleration'
+import Orientation from '../variables/Orientation'
+import AngularVelocity from '../variables/AngularVelocity'
+import Velocity from '../variables/Velocity'
+import Jerk from '../variables/Jerk'
+import AngularAcceleration from '../variables/AngularAcceleration'
+import AngularJerk from '../variables/AngularJerk'
 
-import { VariableNames } from '../lib/variables/constants'
+import { VariableNames } from '../constants'
 
 export const VariableConstructors = {
   [VariableNames.POSITION]: Position,
