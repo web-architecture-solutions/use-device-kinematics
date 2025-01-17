@@ -12,13 +12,13 @@ export default class Position extends Variable {
   static initial = { latitude: null, longitude: null, altitude: null }
   static renameComponents = { latitude: 'y', longitude: 'x', altitude: 'z' }
 
-  static initializeDerivative(current, previous, deltaT, derivativeConstructor, previousDerivativesWrtT, sensorData) {
-    const geodeticDisplacement = calculateGeodeticDisplacement(current, previous)
+  static initializeDerivative(position, deltaT, derivativeConstructor, previousDerivativesWrtT, sensorData) {
+    const geodeticDisplacement = calculateGeodeticDisplacement(position, position.previous)
     const initializeComponentDerivative = ([name]) => {
       const delta = geodeticDisplacement[name]
       return [name, delta / deltaT]
     }
-    const derivativeWrtT = current.map(initializeComponentDerivative)
+    const derivativeWrtT = position.map(initializeComponentDerivative)
     return derivativeConstructor
       ? new derivativeConstructor(derivativeWrtT, previousDerivativesWrtT, {}, derivativeConstructor, sensorData)
       : {}

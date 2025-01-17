@@ -14,12 +14,12 @@ export default class Variable {
   #derivativeName
   #sensorData
 
-  static initializeDerivative(current, previous, deltaT, derivativeConstructor, previousDerivativesWrtT, sensorData) {
+  static initializeDerivative(variable, deltaT, derivativeConstructor, previousDerivativesWrtT, sensorData) {
     const initializeComponentDerivative = ([name, value]) => {
-      const delta = value - previous[name]
+      const delta = value - variable.previous[name]
       return [name, delta / deltaT]
     }
-    const derivativeWrtT = current.map(initializeComponentDerivative)
+    const derivativeWrtT = variable.map(initializeComponentDerivative)
     return derivativeConstructor
       ? new derivativeConstructor(derivativeWrtT, previousDerivativesWrtT, {}, derivativeConstructor, sensorData)
       : {}
@@ -35,23 +35,23 @@ export default class Variable {
     return this.#useRadians ? toRadians(value) : value
   }
 
-  #initizalize(state, initializer) {
-    return Object.entries(state).map(([name, value]) => {
+  #initizalize(sensorData, initializer) {
+    return Object.entries(sensorData).map(([name, value]) => {
       const shouldComponentBeRenamed = this.#renameComponents && name in this.#renameComponents
       const componentName = shouldComponentBeRenamed ? this.#renameComponents[name] : name
       return initializer(componentName, value)
     })
   }
 
-  #initizalizeCurrent(currentState) {
+  #initizalizeCurrent(sensorData) {
     const initializer = (componentName, value) => (this[componentName] = this.#conditionallyTransformAngularValue(value))
-    this.#initizalize(currentState, initializer)
+    this.#initizalize(sensorData, initializer)
   }
 
-  #initializePrevious(previousState) {
+  #initializePrevious(sensorData) {
     const initializer = (componentName, value) => [componentName, this.#conditionallyTransformAngularValue(value)]
-    const initializedPreviousState = Object.fromEntries(this.#initizalize(previousState, initializer))
-    this.#previous = new this.#subclassConstructor(initializedPreviousState, null, this.#subclassConstructor, this.#sensorData)
+    const initializedPreviousSensorData = Object.fromEntries(this.#initizalize(sensorData, initializer))
+    this.#previous = new this.#subclassConstructor(initializedPreviousSensorData, null, this.#subclassConstructor, this.#sensorData)
   }
 
   constructor(rawVariableState, previousRawVariableState, previousDerivativesWrtT, subclassConstructor, sensorData) {
@@ -76,7 +76,6 @@ export default class Variable {
       this.#initializePrevious(previousState)
       this.#derivativeWrtT = this.#subclassConstructor.initializeDerivative(
         this,
-        this.#previous,
         this.#deltaT,
         this.#subclassConstructor.derivative,
         this.#previousDerivativesWrtT,
