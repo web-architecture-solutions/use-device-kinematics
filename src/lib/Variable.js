@@ -1,6 +1,6 @@
 import { toRadians } from './math'
 
-export default class Variable extends Array {
+export default class Variable {
   #useRadians
   #renameComponents
   #previous
@@ -29,17 +29,6 @@ export default class Variable extends Array {
   }
 
   #initialize(currentState, previousState) {
-    const renameComponent = (name) => {
-      const shouldComponentBeRenamed = this.#renameComponents && name in this.#renameComponents
-      return shouldComponentBeRenamed ? this.#renameComponents[name] : name
-    }
-
-    const handleAngularValues = (value) => (this.#useRadians ? toRadians(value) : value)
-
-    const initizalizeWith = (variableState, initializer) => {
-      return Object.entries(variableState).map(([name, value]) => initializer(renameComponent(name), value))
-    }
-
     const previousFactory = (variableState) => {
       const previousStateInitializer = (componentName, value) => [componentName, handleAngularValues(value)]
       const initializedPreviousSensorData = Object.fromEntries(initizalizeWith(variableState, previousStateInitializer))
@@ -53,25 +42,19 @@ export default class Variable extends Array {
         : {}
     }
 
+    const handleAngularValues = (value) => (this.#useRadians ? toRadians(value) : value)
+
+    const renameComponent = (name) => {
+      const shouldComponentBeRenamed = this.#renameComponents && name in this.#renameComponents
+      return shouldComponentBeRenamed ? this.#renameComponents[name] : name
+    }
+
+    const initizalizeWith = (variableState, initializer) => {
+      return Object.entries(variableState).map(([name, value]) => initializer(renameComponent(name), value))
+    }
+
     const initizalizeCurrent = (variableState) => {
-      const currentStateInitializer = (componentName, value) => {
-        switch (componentName) {
-          case 'x':
-            this[0] = handleAngularValues(value)
-            break
-
-          case 'y':
-            this[1] = handleAngularValues(value)
-            break
-
-          case 'z':
-            this[2] = handleAngularValues(value)
-            break
-
-          default:
-            break
-        }
-      }
+      const currentStateInitializer = (componentName, value) => (this[componentName] = handleAngularValues(value))
       initizalizeWith(variableState, currentStateInitializer)
     }
 
@@ -95,8 +78,6 @@ export default class Variable extends Array {
   }
 
   constructor(rawVariableState, previousRawVariableState, previousDerivativesWrtT, subclassConstructor, sensorData) {
-    super()
-
     this.#previous = null
     this.#previousDerivativesWrtT = previousDerivativesWrtT
     this.#subclassConstructor = subclassConstructor
@@ -115,18 +96,6 @@ export default class Variable extends Array {
 
   get previous() {
     return this.#previous
-  }
-
-  get x() {
-    return this[0]
-  }
-
-  get y() {
-    return this[1]
-  }
-
-  get z() {
-    return this[2]
   }
 
   get hasDerivative() {
