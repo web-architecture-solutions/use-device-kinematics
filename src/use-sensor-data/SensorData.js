@@ -1,19 +1,22 @@
 import Variable from '../lib/variables/Variable'
 
-import { VariableNames, VariableConstructors } from './constants'
+import { VariableConstructors } from './constants'
 
 export default class SensorData {
   #timestamp
   #previousTimestamp
+  #previousDerivativesWrtT
 
   constructor(rawSensorData, previousRawSensorData, previousDerivativesWrtT, timestamp, previousTimestamp) {
     this.#timestamp = timestamp
     this.#previousTimestamp = previousTimestamp
+    this.#previousDerivativesWrtT = previousDerivativesWrtT
 
     Object.entries(rawSensorData).forEach(([variableName, rawVariableState]) => {
       const previousRawVariableState = previousRawSensorData?.[variableName] ?? {}
       const previousVariableDerivativesWrtT = previousDerivativesWrtT?.[variableName] ?? {}
-      this[variableName] = this.variableFactory(variableName, rawVariableState, previousRawVariableState, previousVariableDerivativesWrtT)
+      const constructor = SensorData.getVariableConstructorByName(variableName)
+      this[variableName] = new constructor(rawVariableState, previousRawVariableState, previousVariableDerivativesWrtT, constructor, this)
     })
   }
 
@@ -48,7 +51,7 @@ export default class SensorData {
   }
 
   get derivativesWrtT() {
-    return Object.fromEntries(
+    const _derivativesWrtT = Object.fromEntries(
       Object.entries(this).reduce((derivatives, [_, variable]) => {
         if (variable.hasDerivative) {
           return [...derivatives, [variable.derivativeName, variable.derivativeWrtT]]
@@ -56,11 +59,7 @@ export default class SensorData {
         return derivatives
       }, [])
     )
-  }
-
-  variableFactory(variableName, rawVariableState, previousRawVariableState, previousVariableDerivativesWrtT) {
-    const constructor = SensorData.getVariableConstructorByName(variableName)
-    return new constructor(rawVariableState, previousRawVariableState, previousVariableDerivativesWrtT, constructor, this)
+    return new SensorData(_derivativesWrtT, this.#previousDerivativesWrtT, {}, this.#timestamp, this.#previousTimestamp)
   }
 
   isEqual(sensorData) {
