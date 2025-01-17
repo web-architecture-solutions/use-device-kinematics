@@ -1,7 +1,4 @@
-import { toRadians } from './math'
-
 export default class Variable {
-  #useRadians
   #previous
   #timestamp
   #previousTimestamp
@@ -71,7 +68,6 @@ export default class Variable {
     this.#previous = null
     this.#previousDerivativesWrtT = previousDerivativesWrtT
     this.#subclassConstructor = subclassConstructor
-    this.#useRadians = subclassConstructor?.useRadians ?? null
     this.#derivativeConstructor = subclassConstructor?.derivative ?? null
     this.#derivativeName = this.#derivativeConstructor?.name ?? null
     this.#sensorData = sensorData
