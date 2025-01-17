@@ -20,16 +20,6 @@ export default class SensorData {
     })
   }
 
-  static isEqual(sensorData1, sensorData2) {
-    return Object.entries(sensorData1).every(([variableName, variableData]) => {
-      return Variable.isEqual(variableData, sensorData2?.[variableName])
-    })
-  }
-
-  static getVariableConstructorByName(variableName) {
-    return VariableConstructors[variableName]
-  }
-
   static get initial() {
     return Object.fromEntries(
       Object.entries(VariableConstructors).map(([variableName, variableConstructor]) => {
@@ -60,6 +50,16 @@ export default class SensorData {
       }, [])
     )
     return new SensorData(_derivativesWrtT, this.#previousDerivativesWrtT, {}, this.#timestamp, this.#previousTimestamp)
+  }
+
+  static getVariableConstructorByName(variableName) {
+    return VariableConstructors[variableName]
+  }
+
+  static isEqual(sensorData1, sensorData2) {
+    return Object.entries(sensorData1).every(([variableName, variableData]) => {
+      return Variable.isEqual(variableData, sensorData2?.[variableName])
+    })
   }
 
   isEqual(sensorData) {
