@@ -29,15 +29,10 @@ export default class Variable {
   }
 
   #initialize(currentState, previousState) {
-    const handleAngularValues = (value) => (this.#useRadians ? toRadians(value) : value)
-
-    const initizalizeWith = (variableState, initializer) => {
-      return Object.entries(variableState).map(([name, value]) => initializer(name, value))
-    }
-
     const previousFactory = (variableState) => {
-      const previousStateInitializer = (componentName, value) => [componentName, handleAngularValues(value)]
-      const initializedPreviousSensorData = Object.fromEntries(initizalizeWith(variableState, previousStateInitializer))
+      const initializedPreviousSensorData = Object.fromEntries(
+        Object.entries(variableState).map(([componentName, value]) => [componentName, value])
+      )
       return new this.#subclassConstructor(initializedPreviousSensorData, null, this.#subclassConstructor, this.#sensorData)
     }
 
@@ -48,15 +43,12 @@ export default class Variable {
         : {}
     }
 
-    const renameComponent = (name) => {
-      const shouldComponentBeRenamed = this.#renameComponents && name in this.#renameComponents
-      return shouldComponentBeRenamed ? this.#renameComponents[name] : name
-    }
-
     const initizalizeCurrent = ({ x, y, z }) => {
-      this.x = x
-      this.y = y
-      this.z = z
+      const handleAngularValues = (value) => (this.#useRadians ? toRadians(value) : value)
+
+      this.x = handleAngularValues(x)
+      this.y = handleAngularValues(y)
+      this.z = handleAngularValues(z)
     }
 
     const initializePrevious = (variableState) => (this.#previous = previousFactory(variableState))
