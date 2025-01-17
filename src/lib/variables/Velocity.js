@@ -1,5 +1,7 @@
 import Variable from './Variable'
 
+import { VariableNames } from '../../use-sensor-data/constants'
+
 export default class Velocity extends Variable {
-  static name = 'velocity'
+  static name = VariableNames.VELOCITY
 }

@@ -80,6 +80,34 @@ export default class Variable {
     }
   }
 
+  get previous() {
+    return this.#previous
+  }
+
+  get deltaT() {
+    return this.#deltaT
+  }
+
+  get derivativeConstructor() {
+    return this.#derivativeConstructor
+  }
+
+  get sensorData() {
+    return this.#sensorData
+  }
+
+  get previousDerivativesWrtT() {
+    return this.#previousDerivativesWrtT
+  }
+
+  set derivativeWrtT(_derivativeWrtT) {
+    this.#derivativeWrtT = _derivativeWrtT
+  }
+
+  get subclassConstructor() {
+    return this.#subclassConstructor
+  }
+
   get hasDerivative() {
     return this.#derivativeConstructor ? true : false
   }
