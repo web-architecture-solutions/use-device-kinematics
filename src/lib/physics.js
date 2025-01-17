@@ -1,10 +1,10 @@
 import { toRadians } from './math'
 
+const R_E = 6371000
+
 export function calculateGeodeticDisplacement(currentPosition, previousPosition) {
   const { x: previousLongitude, y: previousLatitude, z: previousAltitude } = previousPosition
   const { x: currentLongitude, y: currentLatitude, z: currentAltitude } = currentPosition
-
-  const earthRadius = 6371000
 
   const previousLatitudeRadians = toRadians(previousLatitude)
   const previousLongitudeRadians = toRadians(previousLongitude)
@@ -13,8 +13,8 @@ export function calculateGeodeticDisplacement(currentPosition, previousPosition)
 
   const longitudeDifferenceRadians = currentLongitudeRadians - previousLongitudeRadians
 
-  const eastwardDisplacement = earthRadius * Math.cos(currentLatitudeRadians) * longitudeDifferenceRadians
-  const northwardDisplacement = earthRadius * (currentLatitudeRadians - previousLatitudeRadians)
+  const eastwardDisplacement = R_E * Math.cos(currentLatitudeRadians) * longitudeDifferenceRadians
+  const northwardDisplacement = R_E * (currentLatitudeRadians - previousLatitudeRadians)
   const verticalDisplacement = currentAltitude - previousAltitude
 
   return {
@@ -27,8 +27,6 @@ export function calculateGeodeticDisplacement(currentPosition, previousPosition)
 export function calculateHaversineDistance(previousPosition, currentPosition) {
   const { x: previousLongitude, y: previousLatitude } = previousPosition
   const { x: currentLongitude, y: currentLatitude } = currentPosition
-
-  const earthRadius = 6371000
 
   const previousLatitudeRadians = toRadians(previousLatitude)
   const currentLatitudeRadians = toRadians(currentLatitude)
@@ -43,5 +41,5 @@ export function calculateHaversineDistance(previousPosition, currentPosition) {
       Math.sin(longitudeDifferenceRadians / 2)
   const centralAngle = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 
-  return earthRadius * centralAngle
+  return R_E * centralAngle
 }
