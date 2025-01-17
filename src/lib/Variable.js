@@ -14,15 +14,12 @@ export default class Variable {
   #derivativeName
   #sensorData
 
-  static derivativeFactory(variable, deltaT, derivativeConstructor, previousDerivativesWrtT, sensorData) {
+  static calculateDerivativeWrtT(variable, deltaT) {
     const initializeComponentDerivative = ([name, value]) => {
       const delta = value - variable.previous[name]
       return [name, delta / deltaT]
     }
-    const derivativeWrtT = variable.map(initializeComponentDerivative)
-    return derivativeConstructor
-      ? new derivativeConstructor(derivativeWrtT, previousDerivativesWrtT, {}, derivativeConstructor, sensorData)
-      : {}
+    return variable.map(initializeComponentDerivative)
   }
 
   static isEqual(variableData1, variableData2) {
@@ -54,6 +51,13 @@ export default class Variable {
     this.#previous = new this.#subclassConstructor(initializedPreviousSensorData, null, this.#subclassConstructor, this.#sensorData)
   }
 
+  #derivativeFactory(variable, deltaT, derivativeConstructor, previousDerivativesWrtT, sensorData) {
+    const derivativeWrtT = variable.constructor.calculateDerivativeWrtT(variable, deltaT)
+    return derivativeConstructor
+      ? new derivativeConstructor(derivativeWrtT, previousDerivativesWrtT, {}, derivativeConstructor, sensorData)
+      : {}
+  }
+
   constructor(rawVariableState, previousRawVariableState, previousDerivativesWrtT, subclassConstructor, sensorData) {
     this.#previous = null
     this.#previousDerivativesWrtT = previousDerivativesWrtT
@@ -74,7 +78,7 @@ export default class Variable {
     this.#initizalizeCurrent(currentState)
     if (Object.keys(previousState).length > 0) {
       this.#initializePrevious(previousState)
-      this.#derivativeWrtT = this.#subclassConstructor.derivativeFactory(
+      this.#derivativeWrtT = this.#derivativeFactory(
         this,
         this.#deltaT,
         this.#subclassConstructor.derivative,
