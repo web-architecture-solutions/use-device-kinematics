@@ -66,6 +66,18 @@ export default class Variable extends Array {
     }
   }
 
+  get x() {
+    return this[0]
+  }
+
+  get y() {
+    return this[1]
+  }
+
+  get z() {
+    return this[2]
+  }
+
   get previous() {
     return this.#previous
   }
