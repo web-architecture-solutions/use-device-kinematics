@@ -1,5 +1,7 @@
 import { Matrix } from '../lib/math'
 
+import Vector3 from '../lib/math/Vector3'
+
 export default class DeviceKinematics {
   dimension = 3
 
@@ -17,45 +19,45 @@ export default class DeviceKinematics {
   }
 
   get position() {
-    return this.#position ?? [null, null, null]
+    return this.#position ?? new Vector3(null, null, null)
   }
 
   get velocity() {
-    return this.position?.derivativeWrtT ?? [null, null, null]
+    return this.position?.derivativeWrtT ?? new Vector3(null, null, null)
   }
 
   get acceleration() {
-    return this.#acceleration ?? [null, null, null]
+    return this.#acceleration ?? new Vector3(null, null, null)
   }
 
   get jerk() {
-    return this.acceleration?.derivativeWrtT ?? [null, null, null]
+    return this.acceleration?.derivativeWrtT ?? new Vector3(null, null, null)
   }
 
   get orientation() {
-    return this.#orientation ?? [null, null, null]
+    return this.#orientation ?? new Vector3(null, null, null)
   }
 
   get angularVelocity() {
-    return this.#angularVelocity ?? [null, null, null]
+    return this.#angularVelocity ?? new Vector3(null, null, null)
   }
 
   get angularAcceleration() {
-    return this.angularVelocity?.derivativeWrtT ?? [null, null, null]
+    return this.angularVelocity?.derivativeWrtT ?? new Vector3(null, null, null)
   }
 
   get angularJerk() {
-    return this.angularAcceleration?.derivativeWrtT ?? [null, null, null]
+    return this.angularAcceleration?.derivativeWrtT ?? new Vector3(null, null, null)
   }
 
   get offset() {
-    const crossProduct = this.angularVelocity.cross?.(this.angularVelocity.cross?.(this.acceleration))
-    const combined = this.angularAcceleration.cross?.(this.acceleration).add(crossProduct)
-    return combined?.scale?.(1 / this.angularVelocity?.magnitude() ** 2 || 1)
+    const crossProduct = this.angularVelocity.cross(this.angularVelocity.cross(this.acceleration))
+    const combined = this.angularAcceleration.cross(this.acceleration).add(crossProduct)
+    return combined.scale(1 / this.angularVelocity.magnitude() ** 2 || 1)
   }
 
   get stateVector() {
-    return this.offset
+    return this.coriolisEffectJacobian
     return [
       ...this.position,
       ...this.velocity,
@@ -69,51 +71,45 @@ export default class DeviceKinematics {
   }
 
   get leverArmEffectJacobian() {
-    if (this.offset && this.angularVelocity) {
-      return {
-        wrtAlpha: new Matrix([
-          [0, -this.offset.z, this.offset.y],
-          [this.offset.z, 0, -this.offset.x],
-          [-this.offset.y, this.offset.x, 0]
-        ]),
-        wrtOmega: new Matrix([
-          [
-            0,
-            -2 * this.angularVelocity.z * this.offset.z,
-            2 * this.angularVelocity.y * this.offset.y + this.angularVelocity.y * this.offset.z - this.angularVelocity.z * this.offset.x
-          ],
-          [
-            2 * this.angularVelocity.z * this.offset.x - this.angularVelocity.x * this.offset.z,
-            0,
-            -2 * this.angularVelocity.x * this.offset.x
-          ],
-          [
-            -2 * this.angularVelocity.y * this.offset.x - this.angularVelocity.y * this.offset.z + this.angularVelocity.z * this.offset.x,
-            2 * this.angularVelocity.x * this.offset.y,
-            0
-          ]
-        ])
-      }
+    return {
+      wrtAlpha: new Matrix([
+        [0, -this.offset.z, this.offset.y],
+        [this.offset.z, 0, -this.offset.x],
+        [-this.offset.y, this.offset.x, 0]
+      ]),
+      wrtOmega: new Matrix([
+        [
+          0,
+          -2 * this.angularVelocity.z * this.offset.z,
+          2 * this.angularVelocity.y * this.offset.y + this.angularVelocity.y * this.offset.z - this.angularVelocity.z * this.offset.x
+        ],
+        [
+          2 * this.angularVelocity.z * this.offset.x - this.angularVelocity.x * this.offset.z,
+          0,
+          -2 * this.angularVelocity.x * this.offset.x
+        ],
+        [
+          -2 * this.angularVelocity.y * this.offset.x - this.angularVelocity.y * this.offset.z + this.angularVelocity.z * this.offset.x,
+          2 * this.angularVelocity.x * this.offset.y,
+          0
+        ]
+      ])
     }
-    return {}
   }
 
   get coriolisEffectJacobian() {
-    if (this.angularVelocity && this.velocity) {
-      return {
-        wrtV: new Matrix([
-          [0, -2 * this.angularVelocity.z, 2 * this.angularVelocity.y],
-          [2 * this.angularVelocity.z, 0, -2 * this.angularVelocity.x],
-          [-2 * this.angularVelocity.y, 2 * this.angularVelocity.x, 0]
-        ]),
-        wrtOmega: new Matrix([
-          [-2 * this.velocity.z, 2 * this.velocity.y, 0],
-          [2 * this.velocity.z, -2 * this.velocity.x, 0],
-          [0, 2 * this.velocity.x, -2 * this.velocity.y]
-        ])
-      }
+    return {
+      wrtV: new Matrix([
+        [0, -2 * this.angularVelocity.z, 2 * this.angularVelocity.y],
+        [2 * this.angularVelocity.z, 0, -2 * this.angularVelocity.x],
+        [-2 * this.angularVelocity.y, 2 * this.angularVelocity.x, 0]
+      ]),
+      wrtOmega: new Matrix([
+        [-2 * this.velocity.z, 2 * this.velocity.y, 0],
+        [2 * this.velocity.z, -2 * this.velocity.x, 0],
+        [0, 2 * this.velocity.x, -2 * this.velocity.y]
+      ])
     }
-    return {}
   }
 
   // TODO: Double check that we haven't lost refinement in our core kinematics model per loss of more sophisticated coefficients
