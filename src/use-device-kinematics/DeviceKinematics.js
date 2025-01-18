@@ -5,41 +5,20 @@ import Vector3 from '../lib/math/Vector3'
 export default class DeviceKinematics {
   dimension = 3
 
-  #position
-  #acceleration
-  #angularVelocity
-  #orientation
-
   constructor(sensorData) {
-    this.#position = sensorData.position
-    this.#acceleration = sensorData.acceleration
-    this.#angularVelocity = sensorData.angularVelocity
-    this.#orientation = sensorData.orientation
+    this.position = sensorData.position ?? new Vector3(null, null, null)
+    this.acceleration = sensorData.acceleration ?? new Vector3(null, null, null)
+    this.angularVelocity = sensorData.angularVelocity ?? new Vector3(null, null, null)
+    this.orientation = sensorData.orientation ?? new Vector3(null, null, null)
     this.deltaT = sensorData.deltaT
-  }
-
-  get position() {
-    return this.#position ?? new Vector3(null, null, null)
   }
 
   get velocity() {
     return this.position?.derivativeWrtT ?? new Vector3(null, null, null)
   }
 
-  get acceleration() {
-    return this.#acceleration ?? new Vector3(null, null, null)
-  }
-
   get jerk() {
     return this.acceleration?.derivativeWrtT ?? new Vector3(null, null, null)
-  }
-
-  get orientation() {
-    return this.#orientation ?? new Vector3(null, null, null)
-  }
-
-  get angularVelocity() {
-    return this.#angularVelocity ?? new Vector3(null, null, null)
   }
 
   get angularAcceleration() {
@@ -57,7 +36,6 @@ export default class DeviceKinematics {
   }
 
   get stateVector() {
-    return this.coriolisEffectJacobian
     return [
       ...this.position,
       ...this.velocity,

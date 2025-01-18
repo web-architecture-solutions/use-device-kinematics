@@ -7,6 +7,7 @@ import { toRadians } from '../lib/math'
 export default class SensorData {
   #timestamp
   #previousTimestamp
+  #deltaT
   #previousDerivativesWrtT
 
   static transformVariable(variableName, variableState) {
@@ -34,6 +35,7 @@ export default class SensorData {
   constructor(rawSensorData, previousRawSensorData, previousDerivativesWrtT, timestamp, previousTimestamp) {
     this.#timestamp = timestamp
     this.#previousTimestamp = previousTimestamp
+    this.#deltaT = timestamp - previousTimestamp
     this.#previousDerivativesWrtT = previousDerivativesWrtT
 
     Object.entries(rawSensorData).forEach(([variableName, rawVariableState]) => {
@@ -73,6 +75,10 @@ export default class SensorData {
 
   get previousTimestamp() {
     return this.#previousTimestamp
+  }
+
+  get deltaT() {
+    return this.#deltaT
   }
 
   get derivativesWrtT() {
