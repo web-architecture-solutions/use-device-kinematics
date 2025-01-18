@@ -1,8 +1,22 @@
-export default class Vector3 {
+export default class Vector3 extends Array {
   constructor(x, y, z) {
-    this.x = x
-    this.y = y
-    this.z = z
+    super()
+
+    this[0] = x
+    this[1] = y
+    this[2] = z
+  }
+
+  get x() {
+    return this[0]
+  }
+
+  get y() {
+    return this[1]
+  }
+
+  get z() {
+    return this[2]
   }
 
   cross(v) {
@@ -30,8 +44,8 @@ export default class Vector3 {
   }
 
   normalize() {
-    const mag = this.magnitude()
-    return mag === 0 ? new Vector3(0, 0, 0) : this.scale(1 / mag)
+    const magnitude = this.magnitude()
+    return magnitude === 0 ? new Vector3(0, 0, 0) : this.scale(1 / mag)
   }
 
   toArray() {

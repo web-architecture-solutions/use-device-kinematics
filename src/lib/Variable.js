@@ -1,4 +1,6 @@
-export default class Variable extends Array {
+import Vector3 from './math/Vector3'
+
+export default class Variable extends Vector3 {
   #previous
   #timestamp
   #previousTimestamp
@@ -64,18 +66,6 @@ export default class Variable extends Array {
           )
         : [null, null, null]
     }
-  }
-
-  get x() {
-    return this[0]
-  }
-
-  get y() {
-    return this[1]
-  }
-
-  get z() {
-    return this[2]
   }
 
   get previous() {

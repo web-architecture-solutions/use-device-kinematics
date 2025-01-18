@@ -11,13 +11,30 @@ export default class DeviceKinematics {
     this.deltaT = sensorData.deltaT
   }
 
+  get jerk() {
+    return this.acceleration.derivativeWrtT
+  }
+
+  get angularAcceleration() {
+    return this.angularVelocity.derivativeWrtT
+  }
+
+  get angularJerk() {
+    return this.angularAcceleration.derivativeWrtT
+  }
+
   get offset() {
-    const crossProduct = this.angularVelocity.cross(this.angularVelocity.cross(this.acceleration))
-    const combined = this.angularAcceleration.cross(this.acceleration).add(crossProduct)
-    return combined.scale(1 / angularVelocity.magnitude() ** 2 || 1)
+    if (this.angularVelocity && this.acceleration && this.angularAcceleration) {
+      const crossProduct = this.angularVelocity.cross(this.angularVelocity.cross(this.acceleration))
+      const combined = this.angularAcceleration.cross(this.acceleration).add(crossProduct)
+      return combined.scale(1 / this.angularVelocity.magnitude() ** 2 || 1)
+    }
+    return [null, null, null]
   }
 
   get stateVector() {
+    return this.offset
+    /*
     return [
       ...this.position,
       ...this.position.derivativeWrtT,
@@ -27,7 +44,7 @@ export default class DeviceKinematics {
       ...this.angularVelocity,
       ...this.angularVelocity.derivativeWrtT,
       ...this.angularVelocity.derivativeWrtT.derivativeWrtT
-    ]
+    ]*/
   }
 
   get leverArmEffectJacobian() {
