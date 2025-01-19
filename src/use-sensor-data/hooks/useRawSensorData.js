@@ -4,6 +4,9 @@ import useDeviceMotion from './useDeviceMotion'
 import useDeviceOrienation from './useDeviceOrientation'
 import useGeolocation from './useGeolocation'
 
+const initialAcceleration = { x: null, y: null, z: null }
+const initialRotationRate = { alpha: null, beta: null, gamma: null }
+
 export default function useRawSensorData(config) {
   const motion = useDeviceMotion(config)
   const orientation = useDeviceOrienation(config)
@@ -11,41 +14,16 @@ export default function useRawSensorData(config) {
 
   const rawSensorData = useMemo(
     () => ({
-      position: {
-        latitude: geolocation.data?.latitude ?? null,
-        longitude: geolocation.data?.longitude ?? null,
-        altitude: geolocation.data?.altitude ?? null
-      },
-      acceleration: {
-        x: motion.data?.acceleration.x ?? null,
-        y: motion.data?.acceleration.y ?? null,
-        z: motion.data?.acceleration.z ?? null
-      },
-      orientation: {
-        alpha: orientation.data?.alpha ?? null,
-        beta: orientation.data?.beta ?? null,
-        gamma: orientation.data?.gamma ?? null
-      },
-      angularVelocity: {
-        alpha: motion.data?.rotationRate.alpha ?? null,
-        beta: motion.data?.rotationRate.beta ?? null,
-        gamma: motion.data?.rotationRate.gamma ?? null
-      }
+      latitude: geolocation.data?.latitude ?? null,
+      longitude: geolocation.data?.longitude ?? null,
+      altitude: geolocation.data?.altitude ?? null,
+      acceleration: motion.data?.acceleration.x ?? initialAcceleration,
+      alpha: orientation.data?.alpha ?? null,
+      beta: orientation.data?.beta ?? null,
+      gamma: orientation.data?.gamma ?? null,
+      rotationRate: motion.data?.rotationRate ?? initialRotationRate
     }),
-    [
-      geolocation.data?.latitude,
-      geolocation.data?.longitude,
-      geolocation.data?.altitude,
-      motion.data?.acceleration.x,
-      motion.data?.acceleration.y,
-      motion.data?.acceleration.z,
-      orientation.data?.alpha,
-      orientation.data?.beta,
-      orientation.data?.gamma,
-      motion.data?.rotationRate.alpha,
-      motion.data?.rotationRate.beta,
-      motion.data?.rotationRate.gamma
-    ]
+    [geolocation.data, motion.data, orientation.data]
   )
 
   const errors = useMemo(

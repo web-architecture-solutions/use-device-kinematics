@@ -11,25 +11,55 @@ export default function useSensorData(config = {}) {
 
   const { rawSensorData, errors, isListening, startListening } = useRawSensorData(config)
 
-  const previousRawSensorDataRef = useRef(SensorData.initial)
-  const previousDerivativesWrtTRef = useRef({})
+  const previousRawSensorDataRef = useRef(null)
+  const previousDerivativesWrtTRef = useRef(null)
 
   const { timestamp, previousTimestamp } = useClock(sensorDataIsReady)
 
   const sensorData = useMemo(
-    () => new SensorData(rawSensorData, previousRawSensorDataRef.current, previousDerivativesWrtTRef.current, timestamp, previousTimestamp),
+    () =>
+      new SensorData(
+        {
+          position: {
+            latitude: rawSensorData.latitude,
+            longitude: rawSensorData.longitude,
+            altitude: rawSensorData.altitude
+          },
+          acceleration: {
+            x: rawSensorData.acceleration.x,
+            y: rawSensorData.acceleration.y,
+            z: rawSensorData.acceleration.z
+          },
+          orientation: {
+            alpha: rawSensorData.alpha,
+            beta: rawSensorData.beta,
+            gamma: rawSensorData.gamma
+          },
+          angularVelocity: {
+            alpha: rawSensorData.rotationRate.alpha,
+            beta: rawSensorData.rotationRate.beta,
+            gamma: rawSensorData.rotationRate.gamma
+          }
+        },
+        previousRawSensorDataRef.current,
+        previousDerivativesWrtTRef.current,
+        timestamp,
+        previousTimestamp
+      ),
     [rawSensorData]
   )
 
   useEffect(() => {
-    setSensorDataIsReady(sensorData.isReady)
-    setDerivativesWrtT(sensorData.derivativesWrtT)
-  }, [sensorData])
+    if (sensorData.isReady && !sensorDataIsReady) {
+      setSensorDataIsReady(sensorData.isReady)
+    }
 
-  useEffect(() => {
-    previousRawSensorDataRef.current = rawSensorData
-    previousDerivativesWrtTRef.current = derivativesWrtT
-  }, [rawSensorData, derivativesWrtT])
+    if (sensorData.isReady) {
+      previousRawSensorDataRef.current = rawSensorData
+      previousDerivativesWrtTRef.current = derivativesWrtT
+      setDerivativesWrtT(sensorData.derivativesWrtT)
+    }
+  }, [sensorData])
 
   return {
     sensorData,
