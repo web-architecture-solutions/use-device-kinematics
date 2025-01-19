@@ -14,7 +14,7 @@ export default function useSensorData(config = {}) {
   const previousRawSensorDataRef = useRef(SensorData.initial)
   const previousDerivativesWrtTRef = useRef({})
 
-  const { timestamp, previousTimestamp } = useClock(true)
+  const { timestamp, previousTimestamp } = useClock(sensorDataIsReady)
 
   const sensorData = useMemo(
     () => new SensorData(rawSensorData, previousRawSensorDataRef.current, previousDerivativesWrtTRef.current, timestamp, previousTimestamp),

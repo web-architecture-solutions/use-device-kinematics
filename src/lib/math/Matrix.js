@@ -1,27 +1,41 @@
 export default class Matrix extends Array {
   constructor(m) {
-    if (Matrix.isMatrix(m)) {
-      super()
-      for (let i = 0; i < m.length; i++) {
-        this.push([...m[i]])
-      }
-    } else {
-      throw new Error('Data provided is not a valid matrix')
+    super()
+    for (let i = 0; i < m.length; i++) {
+      this.push([...m[i]])
     }
   }
 
+  static hasEqualRowLengths(m) {
+    const columnLength = m[0].length
+    return m.every((row) => Array.isArray(row) && row.length === columnLength)
+  }
+
   static isMatrix(m) {
-    if (!Array.isArray(m) || m.length === 0) return false
-    const numCols = m[0].length
-    return m.every((row) => Array.isArray(row) && row.length === numCols)
+    if (!Array.isArray(m)) {
+      throw new Error('Matrix: Object provided is not an array')
+    } else if (m.length === 0) {
+      throw new Error('Matrix: Array provided is not a valid matrix')
+    } else if (!Matrix.hasEqualRowLengths(m)) {
+      throw new Error('Matrix: Array provided has unequal row lengths')
+    }
+    return true
+  }
+
+  get rows() {
+    return this.length
+  }
+
+  get cols() {
+    this[0].length
+  }
+
+  hasSameDimension(m) {
+    return this.rows === m.rows && this.cols === m.cols
   }
 
   static constant(dimension, value) {
     return Array.from({ length: dimension }, () => Array(dimension).fill(value))
-  }
-
-  static diagonal(dimension, value) {
-    return Array.from({ length: dimension }, (_, i) => Array.from({ length: dimension }, (_, j) => (i === j ? value : 0)))
   }
 
   static zero(dimension) {
@@ -32,8 +46,13 @@ export default class Matrix extends Array {
     return Matrix.diagonal(dimension, 1)
   }
 
+  static diagonal(element, dimension) {
+    const data = Array.from({ length: dimension }, (_, i) => Array.from({ length: dimension }, (_, j) => (i === j ? element : 0)))
+    return new Matrix(data)
+  }
+
   static block(m, rowMapper = null) {
-    return new Matrix(m.flatMap((row) => (rowMapper ? row.map(rowMapper) : row)))
+    return m.flatMap((row) => (rowMapper ? row.map(rowMapper) : row))
   }
 
   static blockDiagonal(m, dimension) {
@@ -42,7 +61,10 @@ export default class Matrix extends Array {
   }
 
   add(matrix) {
-    return this.map((row, i) => row.map((value, j) => value + matrix[i][j]))
+    if (!this.hasSameDimension(matrix)) {
+      throw new Error('Matrix: Cannot add matrices with different dimensions')
+    }
+    return new Matrix(this.map((row, i) => row.map((value, j) => value + matrix[i][j])))
   }
 
   pad(padding) {
@@ -59,6 +81,6 @@ export default class Matrix extends Array {
         return i >= topPad && i < topPad + sourceRows && j >= leftPad && j < leftPad + sourceCols ? this[i - topPad][j - leftPad] : 0
       })
     )
-    return paddedMatrix
+    return new Matrix(paddedMatrix)
   }
 }

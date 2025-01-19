@@ -90,14 +90,13 @@ export default class DeviceKinematics {
     }
   }
 
-  // TODO: Double check that we haven't lost refinement in our core kinematics model per loss of more sophisticated coefficients
   get kinematicsMatrix() {
     return Matrix.blockDiagonal(
       [
-        [1, this.deltaT, 0.5 * Math.pow(this.deltaT, 2), 0],
-        [0, 1, this.deltaT, 0],
-        [0, 0, 1, this.deltaT],
-        [0, 0, 0, 1]
+        [1, deltaT, 0.5 * Math.pow(deltaT, 2), (1 / 6) * Math.pow(deltaT, 3)], // Position
+        [0, 1, deltaT, 0.5 * Math.pow(deltaT, 2)], // Velocity
+        [0, 0, 1, deltaT], // Acceleration
+        [0, 0, 0, 1] // Jerk (constant)
       ],
       this.dimension
     )
@@ -105,13 +104,13 @@ export default class DeviceKinematics {
 
   get leverArmEffectMatrix() {
     const paddedJacobianWrtAlpha = this.leverArmEffectJacobian.wrtAlpha.pad({ top: 0, left: 9 })
-    const paddedJacobianWrtOmega = this.leverArmEffectJacobian.wrtOmega.pad({ top: 0, left: 6 })
+    const paddedJacobianWrtOmega = this.leverArmEffectJacobian.wrtOmega.pad({ top: 0, left: 9 })
     return paddedJacobianWrtAlpha.add(paddedJacobianWrtOmega)
   }
 
   get coriolisEffectMatrix() {
-    const paddedJacobianWrtV = this.coriolisEffectJacobian.wrtV.pad({ top: 0, left: 3 })
-    const paddedJacobianWrtOmega = this.coriolisEffectJacobian.wrtOmega.pad({ top: 0, left: 6 })
+    const paddedJacobianWrtV = this.coriolisEffectJacobian.wrtV.pad({ top: 0, left: 9 })
+    const paddedJacobianWrtOmega = this.coriolisEffectJacobian.wrtOmega.pad({ top: 0, left: 9 })
     return paddedJacobianWrtV.add(paddedJacobianWrtOmega)
   }
 

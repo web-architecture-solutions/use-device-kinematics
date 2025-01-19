@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-export default function useClock(startCondition, updateFrequency = 100) {
+export default function useClock(startCondition, updateFrequency = 1) {
   const [timestamps, setTimestamps] = useState({ current: null, previous: null })
 
   const startTime = useRef(null)
