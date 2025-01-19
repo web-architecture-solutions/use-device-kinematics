@@ -18,7 +18,7 @@ export default function useSensorData(config = {}) {
 
   const sensorData = useMemo(
     () => new SensorData(rawSensorData, previousRawSensorDataRef.current, previousDerivativesWrtTRef.current, timestamp, previousTimestamp),
-    [rawSensorData, timestamp, previousTimestamp]
+    [rawSensorData]
   )
 
   useEffect(() => {

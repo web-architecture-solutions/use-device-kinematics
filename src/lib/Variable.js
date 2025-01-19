@@ -29,7 +29,7 @@ export default class Variable extends Vector3 {
   }
 
   static get empty() {
-    return new Variable({}, {}, Vector3.empty, Variable, SensorData.empty)
+    return new Variable(Vector3.empty, Vector3.empty, Vector3.empty, Variable, SensorData.empty)
   }
 
   constructor(rawVariableState, previousRawVariableState, previousDerivativesWrtT, subclassConstructor, sensorData) {
@@ -45,9 +45,9 @@ export default class Variable extends Vector3 {
     this.#previousTimestamp = this.#sensorData?.previousTimestamp ?? null
     this.#deltaT = this.#timestamp - this.#previousTimestamp
 
-    this[0] = rawVariableState?.[0] ?? null
-    this[1] = rawVariableState?.[1] ?? null
-    this[2] = rawVariableState?.[2] ?? null
+    this[0] = rawVariableState[0] ?? null
+    this[1] = rawVariableState[1] ?? null
+    this[2] = rawVariableState[2] ?? null
 
     if (
       previousRawVariableState &&
@@ -56,7 +56,7 @@ export default class Variable extends Vector3 {
     ) {
       this.#previous = new this.#subclassConstructor(
         previousRawVariableState,
-        [null, null, null],
+        Vector3.empty,
         this.#previousDerivativesWrtT,
         this.#subclassConstructor,
         this.#sensorData
@@ -66,11 +66,11 @@ export default class Variable extends Vector3 {
         ? new this.#derivativeConstructor(
             this.constructor.calculateDerivativeWrtT(this, this.#deltaT),
             this.#previousDerivativesWrtT,
-            [null, null, null],
+            Vector3.empty,
             this.#derivativeConstructor,
             this.#sensorData
           )
-        : new Vector3(null, null, null)
+        : null
     }
   }
 

@@ -13,7 +13,7 @@ export default class SensorData {
   #previousDerivativesWrtT
 
   static get empty() {
-    return new SensorData({}, {}, Vector3.empty, null, null)
+    return new SensorData({}, {}, Variable.empty, null, null)
   }
 
   static transformVariable(variableName, variableState) {
@@ -29,13 +29,15 @@ export default class SensorData {
     }
 
     return variableState
-      ? Object.entries(variableState)
-          .map(([componentName, componentValue]) => {
-            return [renameComponent(variableName, componentName), handleAngularValues(variableName, componentValue)]
-          })
-          .toSorted(([componentName1], [componentName2]) => componentName1 > componentName2)
-          .map(([_, componentValue]) => componentValue)
-      : [null, null, null]
+      ? new Vector3(
+          ...Object.entries(variableState)
+            .map(([componentName, componentValue]) => {
+              return [renameComponent(variableName, componentName), handleAngularValues(variableName, componentValue)]
+            })
+            .toSorted(([componentName1], [componentName2]) => componentName1 > componentName2)
+            .map(([_, componentValue]) => componentValue)
+        )
+      : Vector3.empty
   }
 
   constructor(rawSensorData, previousRawSensorData, previousDerivativesWrtT, timestamp, previousTimestamp) {
@@ -45,12 +47,10 @@ export default class SensorData {
     this.#previousDerivativesWrtT = previousDerivativesWrtT
 
     Object.entries(rawSensorData).forEach(([variableName, rawVariableState]) => {
-      const previousRawVariableState = previousRawSensorData?.[variableName] ?? new Vector3(null, null, null)
-      const previousVariableDerivativesWrtT = previousDerivativesWrtT?.[variableName] ?? new Vector3(null, null, null)
-      const variableState =
-        rawVariableState && Object.keys(rawVariableState).length === 3 ? rawVariableState : new Vector3(null, null, null)
+      const previousRawVariableState = previousRawSensorData?.[variableName] ?? {}
+      const previousVariableDerivativesWrtT = previousDerivativesWrtT?.[variableName] ?? {}
 
-      const transformedVariableState = SensorData.transformVariable(variableName, variableState)
+      const transformedVariableState = SensorData.transformVariable(variableName, rawVariableState)
       const transformedPreviousVariableState = SensorData.transformVariable(variableName, previousRawVariableState)
 
       const constructor = SensorData.getVariableConstructorByName(variableName)

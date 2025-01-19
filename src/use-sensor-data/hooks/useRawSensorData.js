@@ -12,24 +12,24 @@ export default function useRawSensorData(config) {
   const rawSensorData = useMemo(
     () => ({
       position: {
-        latitude: geolocation.data?.latitude,
-        longitude: geolocation.data?.longitude,
-        altitude: geolocation.data?.altitude
+        latitude: geolocation.data?.latitude ?? null,
+        longitude: geolocation.data?.longitude ?? null,
+        altitude: geolocation.data?.altitude ?? null
       },
       acceleration: {
-        x: motion.data?.acceleration.x,
-        y: motion.data?.acceleration.y,
-        z: motion.data?.acceleration.z
+        x: motion.data?.acceleration.x ?? null,
+        y: motion.data?.acceleration.y ?? null,
+        z: motion.data?.acceleration.z ?? null
       },
       orientation: {
-        alpha: orientation.data?.alpha,
-        beta: orientation.data?.beta,
-        gamma: orientation.data?.gamma
+        alpha: orientation.data?.alpha ?? null,
+        beta: orientation.data?.beta ?? null,
+        gamma: orientation.data?.gamma ?? null
       },
       angularVelocity: {
-        alpha: motion.data?.rotationRate.alpha,
-        beta: motion.data?.rotationRate.beta,
-        gamma: motion.data?.rotationRate.gamma
+        alpha: motion.data?.rotationRate.alpha ?? null,
+        beta: motion.data?.rotationRate.beta ?? null,
+        gamma: motion.data?.rotationRate.gamma ?? null
       }
     }),
     [

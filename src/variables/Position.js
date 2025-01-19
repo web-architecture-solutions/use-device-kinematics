@@ -18,6 +18,6 @@ export default class Position extends Variable {
       const delta = geodeticDisplacement[index]
       return delta / deltaT
     }
-    return position.map?.(initializeComponentDerivative)
+    return position.map(initializeComponentDerivative)
   }
 }
