@@ -36,6 +36,7 @@ export default class DeviceKinematics {
   }
 
   get stateVector() {
+    return this.stateTransitionMatrix
     return [
       ...this.position,
       ...this.velocity,
@@ -93,9 +94,9 @@ export default class DeviceKinematics {
   get kinematicsMatrix() {
     return Matrix.blockDiagonal(
       [
-        [1, deltaT, 0.5 * Math.pow(deltaT, 2), (1 / 6) * Math.pow(deltaT, 3)], // Position
-        [0, 1, deltaT, 0.5 * Math.pow(deltaT, 2)], // Velocity
-        [0, 0, 1, deltaT], // Acceleration
+        [1, this.deltaT, 0.5 * Math.pow(this.deltaT, 2), (1 / 6) * Math.pow(this.deltaT, 3)], // Position
+        [0, 1, this.deltaT, 0.5 * Math.pow(this.deltaT, 2)], // Velocity
+        [0, 0, 1, this.deltaT], // Acceleration
         [0, 0, 0, 1] // Jerk (constant)
       ],
       this.dimension

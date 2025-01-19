@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-export default function useClock(startCondition, updateFrequency = 1) {
+export default function useClock(startCondition) {
   const [timestamps, setTimestamps] = useState({ current: null, previous: null })
 
   const startTime = useRef(null)
@@ -13,10 +13,10 @@ export default function useClock(startCondition, updateFrequency = 1) {
           const newTimestamp = performance.now() - startTime.current
           return { current: newTimestamp, previous: prev.current }
         })
-      }, updateFrequency)
+      }, 1) // Must be consistent with clock settings
       return () => clearInterval(intervalId)
     }
-  }, [startCondition, updateFrequency])
+  }, [startCondition])
 
   return { timestamp: timestamps.current, previousTimestamp: timestamps.previous }
 }

@@ -35,7 +35,7 @@ export default class SensorData {
   constructor(rawSensorData, previousRawSensorData, previousDerivativesWrtT, timestamp, previousTimestamp) {
     this.#timestamp = timestamp
     this.#previousTimestamp = previousTimestamp
-    this.#deltaT = timestamp - previousTimestamp
+    this.#deltaT = 1 // Must be consistent with clock settings
     this.#previousDerivativesWrtT = previousDerivativesWrtT
 
     Object.entries(rawSensorData).forEach(([variableName, rawVariableState]) => {
