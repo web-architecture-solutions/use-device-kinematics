@@ -1,10 +1,10 @@
 import Variable from '../lib/Variable'
 
-import { Dimension, VariableNames } from '../constants'
+import { Axis } from './constants'
 
 export default class Orientation extends Variable {
-  static name = VariableNames.ORIENTATION
+  static name = 'orientation'
   static initial = [null, null, null]
-  static renameComponents = { alpha: Dimension.z, beta: Dimension.x, gamma: Dimension.y }
+  static renameComponents = { alpha: Axis.z, beta: Axis.x, gamma: Axis.y }
   static useRadians = true
 }

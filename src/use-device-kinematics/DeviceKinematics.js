@@ -10,7 +10,7 @@ export default class DeviceKinematics {
     this.acceleration = sensorData.acceleration ?? new Vector3(null, null, null)
     this.angularVelocity = sensorData.angularVelocity ?? new Vector3(null, null, null)
     this.orientation = sensorData.orientation ?? new Vector3(null, null, null)
-    this.deltaT = sensorData.deltaT
+    this.deltaT = sensorData.deltaT ?? 0
   }
 
   get velocity() {

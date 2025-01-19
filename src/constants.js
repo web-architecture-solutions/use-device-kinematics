@@ -1,16 +1,19 @@
-export const Dimension = {
-  x: 'x',
-  y: 'y',
-  z: 'z'
-}
+import Position from './variables/Position'
+import Velocity from './variables/Velocity'
+import Acceleration from './variables/Acceleration'
+import Jerk from './variables/Jerk'
+import Orientation from './variables/Orientation'
+import AngularVelocity from './variables/AngularVelocity'
+import AngularAcceleration from './variables/AngularAcceleration'
+import AngularJerk from './variables/AngularJerk'
 
 export const VariableNames = {
-  POSITION: 'position',
-  VELOCITY: 'velocity',
-  ACCELERATION: 'acceleration',
-  JERK: 'jerk',
-  ORIENTATION: 'orientation',
-  ANGULAR_VELOCITY: 'angularVelocity',
-  ANGULAR_ACCELERATION: 'angularAcceleration',
-  ANGULAR_JERK: 'angularJerk'
+  POSITION: Position.name,
+  VELOCITY: Velocity.name,
+  ACCELERATION: Acceleration.name,
+  JERK: Jerk.name,
+  ORIENTATION: Orientation.name,
+  ANGULAR_VELOCITY: AngularVelocity.name,
+  ANGULAR_ACCELERATION: AngularAcceleration.name,
+  ANGULAR_JERK: AngularJerk.name
 }

@@ -2,15 +2,15 @@ import Variable from '../lib/Variable'
 
 import Velocity from './Velocity'
 
-import { Dimension, VariableNames } from '../constants'
+import { Axis } from './constants'
 
 import { calculateGeodeticDisplacement } from '../lib/physics'
 
 export default class Position extends Variable {
-  static name = VariableNames.POSITION
+  static name = 'position'
   static derivative = Velocity
   static initial = [null, null, null]
-  static renameComponents = { latitude: Dimension.y, longitude: Dimension.x, altitude: Dimension.z }
+  static renameComponents = { latitude: Axis.y, longitude: Axis.x, altitude: Axis.z }
 
   static calculateDerivativeWrtT(position, deltaT) {
     const geodeticDisplacement = calculateGeodeticDisplacement(position, position.previous)
