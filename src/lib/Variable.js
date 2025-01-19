@@ -64,7 +64,7 @@ export default class Variable extends Vector3 {
             this.#derivativeConstructor,
             this.#sensorData
           )
-        : [null, null, null]
+        : new Vector3(null, null, null)
     }
   }
 

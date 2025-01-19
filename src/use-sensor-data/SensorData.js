@@ -4,6 +4,8 @@ import { VariableConstructors } from './constants'
 
 import { toRadians } from '../lib/math'
 
+import Vector3 from '../lib/math/Vector3'
+
 export default class SensorData {
   #timestamp
   #previousTimestamp
@@ -39,10 +41,12 @@ export default class SensorData {
     this.#previousDerivativesWrtT = previousDerivativesWrtT
 
     Object.entries(rawSensorData).forEach(([variableName, rawVariableState]) => {
-      const previousRawVariableState = previousRawSensorData?.[variableName] ?? [null, null, null]
-      const previousVariableDerivativesWrtT = previousDerivativesWrtT?.[variableName] ?? [null, null, null]
+      const previousRawVariableState = previousRawSensorData?.[variableName] ?? new Vector3(null, null, null)
+      const previousVariableDerivativesWrtT = previousDerivativesWrtT?.[variableName] ?? new Vector3(null, null, null)
+      const variableState =
+        rawVariableState && Object.keys(rawVariableState).length === 3 ? rawVariableState : new Vector3(null, null, null)
 
-      const transformedVariableState = SensorData.transformVariable(variableName, rawVariableState)
+      const transformedVariableState = SensorData.transformVariable(variableName, variableState)
       const transformedPreviousVariableState = SensorData.transformVariable(variableName, previousRawVariableState)
 
       const constructor = SensorData.getVariableConstructorByName(variableName)

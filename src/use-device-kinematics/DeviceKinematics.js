@@ -6,11 +6,11 @@ export default class DeviceKinematics {
   dimension = 3
 
   constructor(sensorData) {
-    this.position = sensorData.position ?? new Vector3(null, null, null)
-    this.acceleration = sensorData.acceleration ?? new Vector3(null, null, null)
-    this.angularVelocity = sensorData.angularVelocity ?? new Vector3(null, null, null)
-    this.orientation = sensorData.orientation ?? new Vector3(null, null, null)
-    this.deltaT = sensorData.deltaT ?? 0
+    this.position = sensorData.position
+    this.acceleration = sensorData.acceleration
+    this.angularVelocity = sensorData.angularVelocity
+    this.orientation = sensorData.orientation
+    this.deltaT = sensorData.deltaT
   }
 
   get velocity() {
