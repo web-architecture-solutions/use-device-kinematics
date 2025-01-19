@@ -6,6 +6,8 @@ const featureDetectionError = 'DeviceOrientationEvent is not supported by this b
 
 const requestPermission = DeviceOrientationEvent?.requestPermission
 
+const initialOrientation = { alpha: null, beta: null, gamma: null }
+
 const listener = ({ absolute, alpha, beta, gamma }) => ({ absolute, alpha, beta, gamma })
 
 function handler(listener, setIsListening) {
@@ -28,7 +30,8 @@ const useDeviceOrientation = ({ debounce = 0 } = {}) =>
     listener,
     handler,
     debounce,
-    useEvent: true
+    useEvent: true,
+    initialData: initialOrientation
   })
 
 export default useDeviceOrientation

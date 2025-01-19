@@ -19,6 +19,8 @@ const requestPermission = async () => {
   })
 }
 
+const initialPosition = { latitude: null, longitude: null, altitude: null }
+
 const listener = ({ coords, timestamp }) => ({
   latitude: coords.latitude,
   longitude: coords.longitude,
@@ -36,7 +38,7 @@ function handlerFactory(options) {
     const watcherId = navigator.geolocation.watchPosition(listener, handleError, options)
 
     setIsListening(true)
-    
+
     return () => {
       navigator.geolocation.clearWatch(watcherId)
       setIsListening(false)
@@ -57,7 +59,8 @@ const useGeolocation = ({ enableHighAccuracy = false, timeout = Infinity, maximu
       maximumAge
     }),
     debounce,
-    useEvent: false
+    useEvent: false,
+    initialData: initialPosition
   })
 
 export default useGeolocation

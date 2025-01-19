@@ -6,6 +6,9 @@ const featureDetectionError = 'DeviceMotionEvent is not supported by this browse
 
 const requestPermission = DeviceMotionEvent?.requestPermission
 
+const initialAcceleration = { x: null, y: null, z: null }
+const initialRotationRate = { alpha: null, beta: null, gamma: null }
+
 const listener = ({ acceleration, accelerationIncludingGravity, rotationRate, interval }) => ({
   acceleration,
   accelerationIncludingGravity,
@@ -15,7 +18,7 @@ const listener = ({ acceleration, accelerationIncludingGravity, rotationRate, in
 
 function handler(listener, setIsListening) {
   window.addEventListener(listenerType, listener)
-  
+
   setIsListening(true)
 
   return () => {
@@ -33,7 +36,8 @@ const useDeviceMotion = ({ debounce = 0 } = {}) =>
     listener,
     handler,
     debounce,
-    useEvent: true
+    useEvent: true,
+    initialData: { acceleration: initialAcceleration, rotationRate: initialRotationRate }
   })
 
 export default useDeviceMotion

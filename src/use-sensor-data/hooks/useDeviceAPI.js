@@ -14,9 +14,10 @@ export default function useDeviceAPI({
   handler,
   debounce = 0,
   requestPermission,
-  useEvent: _useEvent = false
+  useEvent: _useEvent = false,
+  initialData = {}
 }) {
-  const [data, setData] = useState(null)
+  const [data, setData] = useState(initialData)
   const [permissionGranted, setPermissionGranted] = useState(false)
   const [isListening, setIsListening] = useState(false)
 
@@ -43,7 +44,7 @@ export default function useDeviceAPI({
       errors.add(listenerType, featureDetectionError)
       return
     }
-    
+
     if (!permissionGranted) return
 
     const debouncedListener = debounce > 0 ? useDebouncedCallback(stabilizedListener, debounce) : stabilizedListener
