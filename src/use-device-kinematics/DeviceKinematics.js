@@ -100,7 +100,7 @@ export default class DeviceKinematics {
       position: 1,
       velocity: this.deltaT,
       acceleration: 0.5 * Math.pow(this.deltaT, 2),
-      angularJerk: (1 / 6) * Math.pow(this.deltaT, 3)
+      jerk: (1 / 6) * Math.pow(this.deltaT, 3)
     })
   }
 
@@ -117,14 +117,14 @@ export default class DeviceKinematics {
     return DeviceKinematics.mapCoefficientsToStateEquationVector({
       position: 0,
       velocity: 0,
-      accelerationC: 1,
+      acceleration: 1,
       jerk: this.deltaT
     })
   }
 
   get generalizedJerkStateEquationVector() {
     return DeviceKinematics.mapCoefficientsToStateEquationVector({
-      positiont: 0,
+      position: 0,
       velocity: 0,
       acceleration: 0,
       jerk: 1
