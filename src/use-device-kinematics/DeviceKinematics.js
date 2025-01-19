@@ -2,6 +2,8 @@ import { Matrix } from '../lib/math'
 
 import Vector3 from '../lib/math/Vector3'
 
+import SensorData from '../use-sensor-data/SensorData'
+
 export default class DeviceKinematics {
   dimension = 3
 
@@ -13,20 +15,24 @@ export default class DeviceKinematics {
     this.deltaT = sensorData.deltaT
   }
 
+  static get empty() {
+    return new DeviceKinematics(SensorData.empty)
+  }
+
   get velocity() {
-    return this.position?.derivativeWrtT ?? new Vector3(null, null, null)
+    return this.position.derivativeWrtT ?? new Vector3(null, null, null)
   }
 
   get jerk() {
-    return this.acceleration?.derivativeWrtT ?? new Vector3(null, null, null)
+    return this.acceleration.derivativeWrtT ?? new Vector3(null, null, null)
   }
 
   get angularAcceleration() {
-    return this.angularVelocity?.derivativeWrtT ?? new Vector3(null, null, null)
+    return this.angularVelocity.derivativeWrtT ?? new Vector3(null, null, null)
   }
 
   get angularJerk() {
-    return this.angularAcceleration?.derivativeWrtT ?? new Vector3(null, null, null)
+    return this.angularAcceleration.derivativeWrtT ?? new Vector3(null, null, null)
   }
 
   get offset() {

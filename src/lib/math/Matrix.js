@@ -1,4 +1,8 @@
 export default class Matrix extends Array {
+  static get empty() {
+    return new Matrix([[]])
+  }
+
   constructor(m) {
     super()
     for (let i = 0; i < m.length; i++) {

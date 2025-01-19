@@ -1,3 +1,5 @@
+import SensorData from '../use-sensor-data/SensorData'
+
 import Vector3 from './math/Vector3'
 
 export default class Variable extends Vector3 {
@@ -24,6 +26,10 @@ export default class Variable extends Vector3 {
     return variableData1.every?.((componentValue, index) => {
       return variableData2?.[index] === componentValue
     })
+  }
+
+  static get empty() {
+    return new Variable({}, {}, Vector3.empty, Variable, SensorData.empty)
   }
 
   constructor(rawVariableState, previousRawVariableState, previousDerivativesWrtT, subclassConstructor, sensorData) {

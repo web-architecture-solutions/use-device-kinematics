@@ -1,4 +1,8 @@
 export default class Vector3 extends Array {
+  static get empty() {
+    return new Vector3(null, null, null)
+  }
+
   constructor(x, y, z) {
     super()
 

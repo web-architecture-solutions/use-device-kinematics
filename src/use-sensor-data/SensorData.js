@@ -12,6 +12,10 @@ export default class SensorData {
   #deltaT
   #previousDerivativesWrtT
 
+  static get empty() {
+    return new SensorData({}, {}, Vector3.empty, null, null)
+  }
+
   static transformVariable(variableName, variableState) {
     function renameComponent(variableName, componentName) {
       const renameComponents = SensorData.getRenameComponentsByVariableName(variableName)
