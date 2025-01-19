@@ -91,13 +91,53 @@ export default class DeviceKinematics {
     }
   }
 
+  static generalizedPositionStateEquationVector({ positionCoefficient, velocityCoefficient, accelerationCoefficient, jerkCoefficient }) {
+    return [positionCoefficient, velocityCoefficient, accelerationCoefficient, jerkCoefficient]
+  }
+
+  get generalizedPositionStateEquationVector() {
+    return DeviceKinematics.generalizedPositionStateEquationVector({
+      positionCoefficient: 1,
+      velocityCoefficient: this.deltaT,
+      accelerationCoefficient: 0.5 * Math.pow(this.deltaT, 2),
+      jerkCoefficient: (1 / 6) * Math.pow(this.deltaT, 3)
+    })
+  }
+
+  get generalizedVelocityStateEquationVector() {
+    return DeviceKinematics.generalizedPositionStateEquationVector({
+      positionCoefficient: 0,
+      velocityCoefficient: 1,
+      accelerationCoefficient: this.deltaT,
+      jerkCoefficient: 0.5 * Math.pow(this.deltaT, 2)
+    })
+  }
+
+  get generalizedAccelerationStateEquationVector() {
+    return DeviceKinematics.generalizedPositionStateEquationVector({
+      positionCoefficient: 0,
+      velocityCoefficient: 0,
+      accelerationCoefficient: 1,
+      jerkCoefficient: this.deltaT
+    })
+  }
+
+  get generalizedJerkStateEquationVector() {
+    return DeviceKinematics.generalizedPositionStateEquationVector({
+      positionCoefficient: 0,
+      velocityCoefficient: 0,
+      accelerationCoefficient: 0,
+      jerkCoefficient: 1
+    })
+  }
+
   get kinematicsMatrix() {
     return Matrix.blockDiagonal(
       [
-        [1, this.deltaT, 0.5 * Math.pow(this.deltaT, 2), (1 / 6) * Math.pow(this.deltaT, 3)], // Position
-        [0, 1, this.deltaT, 0.5 * Math.pow(this.deltaT, 2)], // Velocity
-        [0, 0, 1, this.deltaT], // Acceleration
-        [0, 0, 0, 1] // Jerk (constant)
+        this.generalizedPositionStateEquationVector,
+        this.generalizedVelocityStateEquationVector,
+        this.generalizedAccelerationStateEquationVector,
+        this.generalizedJerkStateEquationVector
       ],
       this.dimension
     )
