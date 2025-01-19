@@ -91,43 +91,43 @@ export default class DeviceKinematics {
     }
   }
 
-  static generalizedPositionStateEquationVector({ positionCoefficient, velocityCoefficient, accelerationCoefficient, jerkCoefficient }) {
-    return [positionCoefficient, velocityCoefficient, accelerationCoefficient, jerkCoefficient]
+  static mapCoefficientsToStateEquationVector({ position, velocity, acceleration, jerk }) {
+    return [position, velocity, acceleration, jerk]
   }
 
   get generalizedPositionStateEquationVector() {
-    return DeviceKinematics.generalizedPositionStateEquationVector({
-      positionCoefficient: 1,
-      velocityCoefficient: this.deltaT,
-      accelerationCoefficient: 0.5 * Math.pow(this.deltaT, 2),
-      jerkCoefficient: (1 / 6) * Math.pow(this.deltaT, 3)
+    return DeviceKinematics.mapCoefficientsToStateEquationVector({
+      position: 1,
+      velocity: this.deltaT,
+      acceleration: 0.5 * Math.pow(this.deltaT, 2),
+      angularJerk: (1 / 6) * Math.pow(this.deltaT, 3)
     })
   }
 
   get generalizedVelocityStateEquationVector() {
-    return DeviceKinematics.generalizedPositionStateEquationVector({
-      positionCoefficient: 0,
-      velocityCoefficient: 1,
-      accelerationCoefficient: this.deltaT,
-      jerkCoefficient: 0.5 * Math.pow(this.deltaT, 2)
+    return DeviceKinematics.mapCoefficientsToStateEquationVector({
+      position: 0,
+      velocity: 1,
+      acceleration: this.deltaT,
+      jerk: 0.5 * Math.pow(this.deltaT, 2)
     })
   }
 
   get generalizedAccelerationStateEquationVector() {
-    return DeviceKinematics.generalizedPositionStateEquationVector({
-      positionCoefficient: 0,
-      velocityCoefficient: 0,
-      accelerationCoefficient: 1,
-      jerkCoefficient: this.deltaT
+    return DeviceKinematics.mapCoefficientsToStateEquationVector({
+      position: 0,
+      velocity: 0,
+      accelerationC: 1,
+      jerk: this.deltaT
     })
   }
 
   get generalizedJerkStateEquationVector() {
-    return DeviceKinematics.generalizedPositionStateEquationVector({
-      positionCoefficient: 0,
-      velocityCoefficient: 0,
-      accelerationCoefficient: 0,
-      jerkCoefficient: 1
+    return DeviceKinematics.mapCoefficientsToStateEquationVector({
+      positiont: 0,
+      velocity: 0,
+      acceleration: 0,
+      jerk: 1
     })
   }
 
