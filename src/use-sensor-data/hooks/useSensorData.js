@@ -5,6 +5,8 @@ import useRawSensorData from './useRawSensorData'
 
 import SensorData from '../SensorData'
 
+import { toRadians } from '../../lib/math'
+
 export default function useSensorData(config = {}) {
   const [sensorDataIsReady, setSensorDataIsReady] = useState(false)
   const [derivativesWrtT, setDerivativesWrtT] = useState({})
@@ -21,9 +23,9 @@ export default function useSensorData(config = {}) {
       new SensorData(
         {
           position: {
-            latitude: rawSensorData.latitude,
-            longitude: rawSensorData.longitude,
-            altitude: rawSensorData.altitude
+            y: rawSensorData.latitude,
+            x: rawSensorData.longitude,
+            z: rawSensorData.altitude
           },
           acceleration: {
             x: rawSensorData.acceleration.x,
@@ -31,14 +33,14 @@ export default function useSensorData(config = {}) {
             z: rawSensorData.acceleration.z
           },
           orientation: {
-            alpha: rawSensorData.alpha,
-            beta: rawSensorData.beta,
-            gamma: rawSensorData.gamma
+            z: toRadians(rawSensorData.alpha),
+            x: toRadians(rawSensorData.beta),
+            y: toRadians(rawSensorData.gamma)
           },
           angularVelocity: {
-            alpha: rawSensorData.rotationRate.alpha,
-            beta: rawSensorData.rotationRate.beta,
-            gamma: rawSensorData.rotationRate.gamma
+            z: toRadians(rawSensorData.rotationRate.alpha),
+            x: toRadians(rawSensorData.rotationRate.beta),
+            y: toRadians(rawSensorData.rotationRate.gamma)
           }
         },
         previousRawSensorDataRef.current,

@@ -16,24 +16,10 @@ export default class SensorData {
     return new SensorData({}, {}, Variable.empty, null, null)
   }
 
-  static transformVariable(variableName, variableState) {
-    function renameComponent(variableName, componentName) {
-      const renameComponents = SensorData.getRenameComponentsByVariableName(variableName)
-      const shouldComponentBeRenamed = renameComponents && componentName in renameComponents
-      return shouldComponentBeRenamed ? renameComponents[componentName] : componentName
-    }
-
-    function handleAngularValues(variableName, componentValue) {
-      const useRadians = SensorData.getUseRadiansByVariableName(variableName)
-      return useRadians ? toRadians(componentValue) : componentValue
-    }
-
+  static transformVariable(variableState) {
     return variableState
       ? new Vector3(
           ...Object.entries(variableState)
-            .map(([componentName, componentValue]) => {
-              return [renameComponent(variableName, componentName), handleAngularValues(variableName, componentValue)]
-            })
             .toSorted(([componentName1], [componentName2]) => componentName1 > componentName2)
             .map(([_, componentValue]) => componentValue)
         )
@@ -50,8 +36,8 @@ export default class SensorData {
       const previousRawVariableState = previousRawSensorData?.[variableName] ?? {}
       const previousVariableDerivativesWrtT = previousDerivativesWrtT?.[variableName] ?? {}
 
-      const transformedVariableState = SensorData.transformVariable(variableName, rawVariableState)
-      const transformedPreviousVariableState = SensorData.transformVariable(variableName, previousRawVariableState)
+      const transformedVariableState = SensorData.transformVariable(rawVariableState)
+      const transformedPreviousVariableState = SensorData.transformVariable(previousRawVariableState)
 
       const constructor = SensorData.getVariableConstructorByName(variableName)
 
