@@ -21,3 +21,9 @@ export const VariableConstructors = {
   [VariableNames.ANGULAR_ACCELERATION]: AngularAcceleration,
   [VariableNames.ANGULAR_JERK]: AngularJerk
 }
+
+export const PartialDerivative = {
+  WRT_ALPHA: 'wrtAlpha',
+  WRT_V: 'wrtV',
+  WRT_OMEGA: 'wrtOmega'
+}

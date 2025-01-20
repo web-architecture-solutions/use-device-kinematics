@@ -1,5 +1,7 @@
 import { Matrix, Vector3 } from '../math'
 
+import { VariableNames, PartialDerivative } from '../constants'
+
 export default class DeviceKinematics {
   dimension = 3
 
@@ -24,7 +26,7 @@ export default class DeviceKinematics {
   }
 
   get angularJerk() {
-    return this.angularAcceleration.derivativeWrtT ?? new Vector3(null, null, null)
+    return this.angularVelocity.derivativeWrtT.derivativeWrtT ?? new Vector3(null, null, null)
   }
 
   get offset() {
@@ -34,7 +36,6 @@ export default class DeviceKinematics {
   }
 
   get stateVector() {
-    return this.stateTransitionMatrix
     return [
       ...this.position,
       ...this.velocity,
@@ -49,12 +50,12 @@ export default class DeviceKinematics {
 
   get leverArmEffectJacobian() {
     return {
-      wrtAlpha: new Matrix([
+      [PartialDerivative.WRT_ALPHA]: new Matrix([
         [0, -this.offset.z, this.offset.y],
         [this.offset.z, 0, -this.offset.x],
         [-this.offset.y, this.offset.x, 0]
       ]),
-      wrtOmega: new Matrix([
+      [PartialDerivative.WRT_OMEGA]: new Matrix([
         [
           0,
           -2 * this.angularVelocity.z * this.offset.z,
@@ -76,12 +77,12 @@ export default class DeviceKinematics {
 
   get coriolisEffectJacobian() {
     return {
-      wrtV: new Matrix([
+      [PartialDerivative.WRT_V]: new Matrix([
         [0, -2 * this.angularVelocity.z, 2 * this.angularVelocity.y],
         [2 * this.angularVelocity.z, 0, -2 * this.angularVelocity.x],
         [-2 * this.angularVelocity.y, 2 * this.angularVelocity.x, 0]
       ]),
-      wrtOmega: new Matrix([
+      [PartialDerivative.WRT_OMEGA]: new Matrix([
         [-2 * this.velocity.z, 2 * this.velocity.y, 0],
         [2 * this.velocity.z, -2 * this.velocity.x, 0],
         [0, 2 * this.velocity.x, -2 * this.velocity.y]
@@ -95,37 +96,37 @@ export default class DeviceKinematics {
 
   get generalizedPositionStateEquationVector() {
     return DeviceKinematics.mapCoefficientsToStateEquationVector({
-      position: 1,
-      velocity: this.deltaT,
-      acceleration: 0.5 * Math.pow(this.deltaT, 2),
-      jerk: (1 / 6) * Math.pow(this.deltaT, 3)
+      [VariableNames.POSITION]: 1,
+      [VariableNames.VELOCITY]: this.deltaT,
+      [VariableNames.ACCELERATION]: 0.5 * Math.pow(this.deltaT, 2),
+      [VariableNames.JERK]: (1 / 6) * Math.pow(this.deltaT, 3)
     })
   }
 
   get generalizedVelocityStateEquationVector() {
     return DeviceKinematics.mapCoefficientsToStateEquationVector({
-      position: 0,
-      velocity: 1,
-      acceleration: this.deltaT,
-      jerk: 0.5 * Math.pow(this.deltaT, 2)
+      [VariableNames.POSITION]: 0,
+      [VariableNames.VELOCITY]: 1,
+      [VariableNames.ACCELERATION]: this.deltaT,
+      [VariableNames.JERK]: 0.5 * Math.pow(this.deltaT, 2)
     })
   }
 
   get generalizedAccelerationStateEquationVector() {
     return DeviceKinematics.mapCoefficientsToStateEquationVector({
-      position: 0,
-      velocity: 0,
-      acceleration: 1,
-      jerk: this.deltaT
+      [VariableNames.POSITION]: 0,
+      [VariableNames.VELOCITY]: 0,
+      [VariableNames.ACCELERATION]: 1,
+      [VariableNames.JERK]: this.deltaT
     })
   }
 
   get generalizedJerkStateEquationVector() {
     return DeviceKinematics.mapCoefficientsToStateEquationVector({
-      position: 0,
-      velocity: 0,
-      acceleration: 0,
-      jerk: 1
+      [VariableNames.POSITION]: 0,
+      [VariableNames.VELOCITY]: 0,
+      [VariableNames.ACCELERATION]: 0,
+      [VariableNames.JERK]: 1
     })
   }
 

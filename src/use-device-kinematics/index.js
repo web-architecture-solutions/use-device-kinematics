@@ -5,8 +5,12 @@ import useSensorData from './hooks/useSensorData'
 
 export default function useDeviceKinematics(options) {
   const [stateVector, setStateVector] = useState([])
+  const [stateTransitionMatrix, setStateTransitionMatrix] = useState([[]])
   const { sensorData, errors, isListening, startListening } = useSensorData(options)
   const deviceKinematics = useMemo(() => new DeviceKinematics(sensorData), [sensorData])
-  useEffect(() => setStateVector(deviceKinematics.stateVector), [sensorData])
-  return { stateVector, sensorData, errors, isListening, startListening }
+  useEffect(() => {
+    setStateVector(deviceKinematics.stateVector)
+    setStateTransitionMatrix(deviceKinematics.stateTransitionMatrix)
+  }, [sensorData])
+  return { stateTransitionMatrix, stateVector, sensorData, errors, isListening, startListening }
 }
