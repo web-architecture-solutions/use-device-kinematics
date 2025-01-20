@@ -1,4 +1,4 @@
-import useDeviceAPI from './useDeviceAPI'
+import useDeviceAPI from '../../use-device-api'
 
 const listenerType = 'devicemotion'
 const isFeaturePresent = typeof window !== 'undefined' && window.DeviceMotionEvent && window.DeviceMotionEvent.requestPermission

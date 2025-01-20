@@ -1,4 +1,4 @@
-import useDeviceAPI from './useDeviceAPI'
+import useDeviceAPI from '../../use-device-api'
 
 const listenerType = 'geolocation'
 const isFeaturePresent = typeof navigator !== 'undefined' && navigator.geolocation

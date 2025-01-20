@@ -1,4 +1,4 @@
-import { Variable, calculateGeodeticDisplacement } from '../../physics'
+import { Variable, calculateGeodeticDisplacement } from '..'
 
 export class AngularJerk extends Variable {
   static name = 'angularJerk'

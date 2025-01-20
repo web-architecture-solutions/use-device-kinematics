@@ -1,4 +1,4 @@
-import useDeviceAPI from './useDeviceAPI'
+import useDeviceAPI from '../../use-device-api'
 
 const listenerType = 'deviceorientation'
 const isFeaturePresent = typeof window !== 'undefined' && window.DeviceOrientationEvent && window.DeviceOrientationEvent.requestPermission

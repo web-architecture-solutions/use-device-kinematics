@@ -23,8 +23,8 @@ export default class Variable extends Vector3 {
   }
 
   static isEqual(variableData1, variableData2) {
-    return variableData1?.every?.((componentValue, index) => {
-      return variableData2?.[index] === componentValue
+    return variableData1.every((componentValue, index) => {
+      return variableData2[index] === componentValue
     })
   }
 
