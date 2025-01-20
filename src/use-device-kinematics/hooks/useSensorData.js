@@ -50,16 +50,25 @@ export default function useSensorData(config = {}) {
     [rawSensorData]
   )
 
-  useEffect(() => {
-    if (sensorData.isReady && !sensorDataIsReady) {
+  const initializeSensorData = () => {
+    if (!sensorData.isReady && sensorDataIsReady) {
+      throw new Error('useSensorData: Clock started before sensor data was ready')
+    } else if (sensorData.isReady && !sensorDataIsReady) {
       setSensorDataIsReady(sensorData.isReady)
     }
+  }
 
+  const updateSensorData = () => {
     if (sensorData.isReady) {
       previousRawSensorDataRef.current = rawSensorData
       previousDerivativesWrtTRef.current = derivativesWrtT
       setDerivativesWrtT(sensorData.derivativesWrtT)
     }
+  }
+
+  useEffect(() => {
+    initializeSensorData()
+    updateSensorData()
   }, [sensorData])
 
   return {

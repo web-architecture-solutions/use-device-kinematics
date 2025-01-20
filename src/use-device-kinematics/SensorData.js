@@ -10,10 +10,6 @@ export default class SensorData {
 
   static deltaT = 1
 
-  static get empty() {
-    return new SensorData({}, {}, Variable.empty, null, null)
-  }
-
   constructor(rawSensorData, previousRawSensorData, previousDerivativesWrtT, timestamp, previousTimestamp) {
     this.#timestamp = timestamp
     this.#previousTimestamp = previousTimestamp
@@ -68,14 +64,6 @@ export default class SensorData {
 
   static getVariableConstructorByName(variableName) {
     return VariableConstructors[variableName]
-  }
-
-  static getRenameComponentsByVariableName(variableName) {
-    return VariableConstructors[variableName]?.renameComponents ?? null
-  }
-
-  static getUseRadiansByVariableName(variableName) {
-    return VariableConstructors[variableName]?.useRadians ?? false
   }
 
   static isEqual(sensorData1, sensorData2) {

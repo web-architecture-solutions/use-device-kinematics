@@ -1,7 +1,5 @@
 import { Matrix, Vector3 } from '../math'
 
-import SensorData from './SensorData'
-
 export default class DeviceKinematics {
   dimension = 3
 
@@ -11,10 +9,6 @@ export default class DeviceKinematics {
     this.angularVelocity = sensorData.angularVelocity
     this.orientation = sensorData.orientation
     this.deltaT = sensorData.deltaT
-  }
-
-  static get empty() {
-    return new DeviceKinematics(SensorData.empty)
   }
 
   get velocity() {
