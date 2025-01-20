@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from 'react'
 
-import useDeviceMotion from './useDeviceMotion'
-import useDeviceOrienation from './useDeviceOrientation'
-import useGeolocation from './useGeolocation'
+import useDeviceMotion from './hooks/useDeviceMotion'
+import useDeviceOrienation from './hooks/useDeviceOrientation'
+import useGeolocation from './hooks/useGeolocation'
 
 export default function useRawSensorData(config) {
   const motion = useMemo(() => useDeviceMotion(config), [config])

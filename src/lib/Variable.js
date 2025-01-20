@@ -1,4 +1,4 @@
-import SensorData from '../use-sensor-data/SensorData'
+import SensorData from '../use-device-kinematics/SensorData'
 
 import Vector3 from './math/Vector3'
 
@@ -13,6 +13,8 @@ export default class Variable extends Vector3 {
   #derivativeConstructor
   #derivativeName
   #sensorData
+
+  static preprocess = ({ x, y, z } = { x: null, y: null, z: null }) => new Vector3(x, y, z)
 
   static calculateDerivativeWrtT(variable, deltaT) {
     const initializeComponentDerivative = (componentValue, index) => {
@@ -64,7 +66,7 @@ export default class Variable extends Vector3 {
 
       this.#derivativeWrtT = this.#derivativeConstructor
         ? new this.#derivativeConstructor(
-            this.constructor.calculateDerivativeWrtT(this, this.#deltaT),
+            this.#subclassConstructor.calculateDerivativeWrtT(this, this.#deltaT),
             this.#previousDerivativesWrtT,
             Vector3.empty,
             this.#derivativeConstructor,

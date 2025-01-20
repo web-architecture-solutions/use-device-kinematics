@@ -1,8 +1,6 @@
 import Variable from '../lib/Variable'
 
-import { VariableConstructors } from './constants'
-
-import Vector3 from '../lib/math/Vector3'
+import { VariableConstructors } from '../lib/constants'
 
 export default class SensorData {
   #timestamp
@@ -16,29 +14,18 @@ export default class SensorData {
     return new SensorData({}, {}, Variable.empty, null, null)
   }
 
-  static transformVariable({ x, y, z } = { x: null, y: null, z: null }) {
-    return new Vector3(x, y, z)
-  }
-
   constructor(rawSensorData, previousRawSensorData, previousDerivativesWrtT, timestamp, previousTimestamp) {
     this.#timestamp = timestamp
     this.#previousTimestamp = previousTimestamp
     this.#deltaT = SensorData.deltaT
     this.#previousDerivativesWrtT = previousDerivativesWrtT
 
-    Object.entries(rawSensorData).forEach(([variableName, rawVariableState]) => {
-      const previousRawVariableState = previousRawSensorData?.[variableName] ?? {}
-      const previousVariableDerivativesWrtT = previousDerivativesWrtT?.[variableName] ?? {}
-
-      const transformedVariableState = SensorData.transformVariable(rawVariableState)
-      const transformedPreviousVariableState = SensorData.transformVariable(previousRawVariableState)
-
+    Object.entries(rawSensorData).forEach(([variableName, rawVariableData]) => {
       const constructor = SensorData.getVariableConstructorByName(variableName)
-
       this[variableName] = new constructor(
-        transformedVariableState,
-        transformedPreviousVariableState,
-        previousVariableDerivativesWrtT,
+        Variable.preprocess(rawVariableData),
+        Variable.preprocess(previousRawSensorData?.[variableName] ?? {}),
+        previousDerivativesWrtT?.[variableName] ?? {},
         constructor,
         this
       )

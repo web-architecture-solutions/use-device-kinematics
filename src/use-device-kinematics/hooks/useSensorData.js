@@ -1,22 +1,21 @@
 import { useRef, useState, useMemo, useEffect } from 'react'
 
 import useClock from './useClock'
-import useRawSensorData from './useRawSensorData'
-
-import SensorData from '../SensorData'
+import useRawSensorData from '../../use-raw-sensor-data'
 
 import { toRadians } from '../../lib/math'
+
+import SensorData from '../SensorData'
 
 export default function useSensorData(config = {}) {
   const [sensorDataIsReady, setSensorDataIsReady] = useState(false)
   const [derivativesWrtT, setDerivativesWrtT] = useState({})
 
+  const { timestamp, previousTimestamp } = useClock(SensorData.deltaT, sensorDataIsReady)
   const { rawSensorData, errors, isListening, startListening } = useRawSensorData(config)
 
-  const previousRawSensorDataRef = useRef(SensorData.initial)
+  const previousRawSensorDataRef = useRef(null)
   const previousDerivativesWrtTRef = useRef(null)
-
-  const { timestamp, previousTimestamp } = useClock(SensorData.deltaT, sensorDataIsReady)
 
   const sensorData = useMemo(
     () =>

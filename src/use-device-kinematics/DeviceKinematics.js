@@ -2,7 +2,7 @@ import { Matrix } from '../lib/math'
 
 import Vector3 from '../lib/math/Vector3'
 
-import SensorData from '../use-sensor-data/SensorData'
+import SensorData from './SensorData'
 
 export default class DeviceKinematics {
   dimension = 3
