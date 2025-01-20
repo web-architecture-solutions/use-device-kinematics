@@ -26,7 +26,7 @@ export default class DeviceKinematics {
   }
 
   get angularJerk() {
-    return this.angularVelocity.derivativeWrtT.derivativeWrtT ?? new Vector3(null, null, null)
+    return this.angularVelocity.derivativeWrtT?.derivativeWrtT ?? new Vector3(null, null, null)
   }
 
   get offset() {

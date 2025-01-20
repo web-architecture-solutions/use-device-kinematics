@@ -28,12 +28,33 @@ export default class SensorData {
     })
   }
 
+  static get #initial() {
+    return {
+      position: {
+        x: null,
+        y: null,
+        z: null
+      },
+      acceleration: {
+        x: null,
+        y: null,
+        z: null
+      },
+      orientation: {
+        x: null,
+        y: null,
+        z: null
+      },
+      angularVelocity: {
+        x: null,
+        y: null,
+        z: null
+      }
+    }
+  }
+
   static get initial() {
-    return Object.fromEntries(
-      Object.entries(VariableConstructors).map(([variableName, variableConstructor]) => {
-        return [variableName, variableConstructor.initial]
-      })
-    )
+    return new SensorData(this.#initial, this.#initial, null, 0, 0)
   }
 
   get isReady() {
