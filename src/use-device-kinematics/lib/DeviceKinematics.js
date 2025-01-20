@@ -1,6 +1,6 @@
-import { Matrix, Vector3 } from '../math'
+import { Matrix, Vector3 } from '../../math'
 
-import { VariableNames, PartialDerivative } from '../constants'
+import { VariableNames, PartialDerivative } from './constants'
 
 export default class DeviceKinematics {
   dimension = 3

@@ -1,4 +1,4 @@
-import { toRadians } from '../math'
+import { toRadians } from '../../math'
 
 const R_E = 6371000
 

@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 
-import DeviceKinematics from './DeviceKinematics'
+import DeviceKinematics from './lib/DeviceKinematics'
 import useSensorData from './hooks/useSensorData'
 
 export default function useDeviceKinematics(options) {
