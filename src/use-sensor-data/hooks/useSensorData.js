@@ -1,6 +1,6 @@
 import { useRef, useState, useMemo, useEffect } from 'react'
 
-import useClock from '../../hooks/useClock'
+import useClock from './useClock'
 import useRawSensorData from './useRawSensorData'
 
 import SensorData from '../SensorData'
@@ -13,18 +13,18 @@ export default function useSensorData(config = {}) {
 
   const { rawSensorData, errors, isListening, startListening } = useRawSensorData(config)
 
-  const previousRawSensorDataRef = useRef(null)
+  const previousRawSensorDataRef = useRef(SensorData.initial)
   const previousDerivativesWrtTRef = useRef(null)
 
-  const { timestamp, previousTimestamp } = useClock(sensorDataIsReady)
+  const { timestamp, previousTimestamp } = useClock(SensorData.deltaT, sensorDataIsReady)
 
   const sensorData = useMemo(
     () =>
       new SensorData(
         {
           position: {
-            y: rawSensorData.latitude,
             x: rawSensorData.longitude,
+            y: rawSensorData.latitude,
             z: rawSensorData.altitude
           },
           acceleration: {
@@ -33,14 +33,14 @@ export default function useSensorData(config = {}) {
             z: rawSensorData.acceleration.z
           },
           orientation: {
-            z: toRadians(rawSensorData.alpha),
             x: toRadians(rawSensorData.beta),
-            y: toRadians(rawSensorData.gamma)
+            y: toRadians(rawSensorData.gamma),
+            z: toRadians(rawSensorData.alpha)
           },
           angularVelocity: {
-            z: toRadians(rawSensorData.rotationRate.alpha),
             x: toRadians(rawSensorData.rotationRate.beta),
-            y: toRadians(rawSensorData.rotationRate.gamma)
+            y: toRadians(rawSensorData.rotationRate.gamma),
+            z: toRadians(rawSensorData.rotationRate.alpha)
           }
         },
         previousRawSensorDataRef.current,

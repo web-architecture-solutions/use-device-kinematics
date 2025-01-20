@@ -2,8 +2,6 @@ import Variable from '../lib/Variable'
 
 import { VariableConstructors } from './constants'
 
-import { toRadians } from '../lib/math'
-
 import Vector3 from '../lib/math/Vector3'
 
 export default class SensorData {
@@ -12,24 +10,20 @@ export default class SensorData {
   #deltaT
   #previousDerivativesWrtT
 
+  static deltaT = 1
+
   static get empty() {
     return new SensorData({}, {}, Variable.empty, null, null)
   }
 
-  static transformVariable(variableState) {
-    return variableState
-      ? new Vector3(
-          ...Object.entries(variableState)
-            .toSorted(([componentName1], [componentName2]) => componentName1 > componentName2)
-            .map(([_, componentValue]) => componentValue)
-        )
-      : Vector3.empty
+  static transformVariable({ x, y, z } = { x: null, y: null, z: null }) {
+    return new Vector3(x, y, z)
   }
 
   constructor(rawSensorData, previousRawSensorData, previousDerivativesWrtT, timestamp, previousTimestamp) {
     this.#timestamp = timestamp
     this.#previousTimestamp = previousTimestamp
-    this.#deltaT = 1 // Must be consistent with clock settings
+    this.#deltaT = SensorData.deltaT
     this.#previousDerivativesWrtT = previousDerivativesWrtT
 
     Object.entries(rawSensorData).forEach(([variableName, rawVariableState]) => {
@@ -75,12 +69,14 @@ export default class SensorData {
     return this.#deltaT
   }
 
-  get derivativesWrtT() {
-    const _derivativesWrtT = this.reduceEntriesToObject((derivatives, [_, variable]) => {
+  get #derivativesWrtT() {
+    return this.reduceEntriesToObject((derivatives, [_, variable]) => {
       return variable.hasDerivative ? [...derivatives, [variable.derivativeName, variable.derivativeWrtT]] : derivatives
     })
+  }
 
-    return new SensorData(_derivativesWrtT, this.#previousDerivativesWrtT, {}, this.#timestamp, this.#previousTimestamp)
+  get derivativesWrtT() {
+    return new SensorData(this.#derivativesWrtT, this.#previousDerivativesWrtT, {}, this.#timestamp, this.#previousTimestamp)
   }
 
   static getVariableConstructorByName(variableName) {

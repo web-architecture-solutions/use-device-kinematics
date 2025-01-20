@@ -5,9 +5,9 @@ import useDeviceOrienation from './useDeviceOrientation'
 import useGeolocation from './useGeolocation'
 
 export default function useRawSensorData(config) {
-  const motion = useDeviceMotion(config)
-  const orientation = useDeviceOrienation(config)
-  const geolocation = useGeolocation(config)
+  const motion = useMemo(() => useDeviceMotion(config), [config])
+  const orientation = useMemo(() => useDeviceOrienation(config), [config])
+  const geolocation = useMemo(() => useGeolocation(config), [config])
 
   const rawSensorData = useMemo(
     () => ({ ...geolocation.data, ...motion.data, ...orientation.data }),
