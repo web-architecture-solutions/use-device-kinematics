@@ -1,9 +1,15 @@
 import { Matrix, Vector3 } from '../../math'
 
+import SensorData from './SensorData'
+
 import { VariableNames, PartialDerivative } from './constants'
 
 export default class DeviceKinematics {
   dimension = 3
+
+  static initial() {
+    return new DeviceKinematics(SensorData.initial)
+  }
 
   constructor(sensorData) {
     this.position = sensorData.position
