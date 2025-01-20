@@ -1,6 +1,6 @@
 import SensorData from '../use-device-kinematics/SensorData'
 
-import Vector3 from './math/Vector3'
+import Vector3 from '../math/Vector3'
 
 export default class Variable extends Vector3 {
   #previous

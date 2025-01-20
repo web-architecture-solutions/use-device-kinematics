@@ -3,7 +3,7 @@ import { useRef, useState, useMemo, useEffect } from 'react'
 import useClock from './useClock'
 import useRawSensorData from '../../use-raw-sensor-data'
 
-import { toRadians } from '../../lib/math'
+import { toRadians } from '../../math'
 
 import SensorData from '../SensorData'
 

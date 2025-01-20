@@ -1,6 +1,4 @@
-import { Matrix } from '../lib/math'
-
-import Vector3 from '../lib/math/Vector3'
+import { Matrix, Vector3 } from '../math'
 
 import SensorData from './SensorData'
 

@@ -1,5 +1,7 @@
 export { default as Matrix } from './Matrix'
 
+export { default as Vector3 } from './Vector3'
+
 export const toRadians = (degrees) => degrees * (Math.PI / 180)
 
 export const sumSquares = (accumulator, component) => accumulator + Math.pow(component, 2)
