@@ -33,7 +33,8 @@ export default function useDeviceAPI({
         setRefreshRate(rate)
       }
 
-      lastUpdateTimeRef.current = now / setData(_listener(event))
+      lastUpdateTimeRef.current = now
+      setData(_listener(event))
     },
     [_listener]
   )
