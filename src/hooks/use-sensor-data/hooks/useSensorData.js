@@ -16,7 +16,7 @@ export default function useSensorData(config = {}) {
 
   useEffect(() => {
     setSensorData(
-      (previousRawSensorData) =>
+      (previousSensorData) =>
         new SensorData(
           {
             position: {
@@ -44,8 +44,7 @@ export default function useSensorData(config = {}) {
               timestamp: timestamp ?? null
             }
           },
-          previousRawSensorData,
-          previousRawSensorData?.derivativesWrtT ?? null,
+          previousSensorData,
           timestamp
         )
     )

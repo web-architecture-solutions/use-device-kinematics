@@ -9,4 +9,4 @@ export { Acceleration } from './variables'
 export { Velocity } from './variables'
 export { Position } from './variables'
 
-export { VariableNames, VariableConstructors } from './constants'
+export { calculateGeodeticDisplacement } from './formulae'

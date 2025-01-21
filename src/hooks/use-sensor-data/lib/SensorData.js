@@ -1,30 +1,18 @@
-import { Variable, VariableConstructors } from '../../../lib'
+import { Variable } from '../../../lib/physics'
+
+import { VariableConstructors } from '../../../lib/constants'
 
 export default class SensorData {
-  #timestamp
-  #previousTimestamp
-  #deltaT
-  #previousDerivativesWrtT
-
-  static deltaT = 1
-
-  constructor(rawSensorData, previousRawSensorData, previousDerivativesWrtT, timestamp, previousTimestamp) {
-    this.#timestamp = timestamp
-    this.#previousTimestamp = previousTimestamp
-    this.#deltaT = SensorData.deltaT
-    this.#previousDerivativesWrtT = previousDerivativesWrtT
-
+  constructor(rawSensorData, previousSensorData) {
     const nullOrUndefined = (x) => x === null || x === undefined
     const foo = (variable) => !nullOrUndefined(variable?.x) && !nullOrUndefined(variable?.y) && !nullOrUndefined(variable?.z)
 
     Object.entries(rawSensorData).forEach(([variableName, rawVariableData]) => {
       const constructor = SensorData.getVariableConstructorByName(variableName)
       this[variableName] = new constructor(
-        foo(rawVariableData) ? Variable.preprocess(rawVariableData) : previousRawSensorData?.[variableName] ?? {},
-        previousRawSensorData?.[variableName] ?? {},
-        previousDerivativesWrtT?.[variableName] ?? {},
+        foo(rawVariableData) ? Variable.preprocess(rawVariableData) : previousSensorData?.[variableName] ?? {},
+        previousSensorData?.[variableName] ?? {},
         constructor,
-        this,
         rawVariableData?.timestamp ?? null
       )
     })
@@ -32,26 +20,10 @@ export default class SensorData {
 
   static get #initial() {
     return {
-      position: {
-        x: null,
-        y: null,
-        z: null
-      },
-      acceleration: {
-        x: null,
-        y: null,
-        z: null
-      },
-      orientation: {
-        x: null,
-        y: null,
-        z: null
-      },
-      angularVelocity: {
-        x: null,
-        y: null,
-        z: null
-      }
+      position: Variable.initial,
+      acceleration: Variable.initial,
+      orientation: Variable.initial,
+      angularVelocity: Variable.initial
     }
   }
 
@@ -63,18 +35,6 @@ export default class SensorData {
     return !this.isEqual(SensorData.initial)
   }
 
-  get timestamp() {
-    return this.#timestamp
-  }
-
-  get previousTimestamp() {
-    return this.#previousTimestamp
-  }
-
-  get deltaT() {
-    return this.#deltaT
-  }
-
   get #derivativesWrtT() {
     return this.reduceEntriesToObject((derivatives, [_, variable]) => {
       return variable.hasDerivative ? [...derivatives, [variable.derivativeName, variable.derivativeWrtT]] : derivatives
@@ -82,7 +42,7 @@ export default class SensorData {
   }
 
   get derivativesWrtT() {
-    return new SensorData(this.#derivativesWrtT, this.#previousDerivativesWrtT, {}, this.#timestamp, this.#previousTimestamp)
+    return new SensorData(this.#derivativesWrtT, SensorData.initial)
   }
 
   static getVariableConstructorByName(variableName) {

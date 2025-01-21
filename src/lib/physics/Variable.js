@@ -1,23 +1,25 @@
-import { Vector3 } from '../math'
+import { Vector3, big } from '../math'
 
 export default class Variable extends Vector3 {
   #previous
   #timestamp
-  #previousTimestamp
+
   #deltaT
-  #previousDerivativesWrtT
   #subclassConstructor
   #derivativeWrtT
   #derivativeConstructor
   #derivativeName
-  #sensorData
+
+  static get initial() {
+    return new Variable({ x: null, y: null, z: null }, null, Variable, null)
+  }
 
   static preprocess = ({ x, y, z } = { x: null, y: null, z: null }) => new Vector3(x, y, z)
 
   static calculateDerivativeWrtT(variable) {
     const initializeComponentDerivative = (componentValue, index) => {
-      const delta = componentValue - variable.previous[index]
-      const deltaT = variable.timestamp - variable.previous.timestamp
+      const delta = big * componentValue - big * variable.previous[index]
+      const deltaT = big * variable.timestamp - big * variable.previous.timestamp
       return delta / deltaT
     }
     return variable.map(initializeComponentDerivative)
@@ -29,44 +31,33 @@ export default class Variable extends Vector3 {
     })
   }
 
-  constructor(rawVariableState, previousRawVariableState, previousDerivativesWrtT, subclassConstructor, sensorData, timestamp) {
+  constructor(rawVariableData, previousVariable, subclassConstructor, timestamp) {
     super()
 
-    this.#previous = previousRawVariableState
-    this.#previousDerivativesWrtT = previousDerivativesWrtT
+    this.#previous = previousVariable
     this.#subclassConstructor = subclassConstructor
     this.#derivativeConstructor = subclassConstructor?.derivative ?? null
     this.#derivativeName = this.#derivativeConstructor?.name ?? null
-    this.#sensorData = sensorData
     this.#timestamp = timestamp ?? null
-    this.#previousTimestamp = this.#sensorData?.previousTimestamp ?? null
-    this.#deltaT = this.#timestamp - this.#previousTimestamp
 
-    this[0] = rawVariableState[0] ?? null
-    this[1] = rawVariableState[1] ?? null
-    this[2] = rawVariableState[2] ?? null
+    this[0] = rawVariableData[0] ?? null
+    this[1] = rawVariableData[1] ?? null
+    this[2] = rawVariableData[2] ?? null
 
-    if (
-      previousRawVariableState &&
-      previousRawVariableState.length === 3 &&
-      !Variable.isEqual(rawVariableState, previousRawVariableState)
-    ) {
+    if (previousVariable && previousVariable.length === 3 && !Variable.isEqual(rawVariableData, previousVariable)) {
       this.#previous = new this.#subclassConstructor(
-        previousRawVariableState,
-        Vector3.empty,
-        this.#previousDerivativesWrtT,
+        previousVariable,
+        Variable.initial,
         this.#subclassConstructor,
-        this.#sensorData,
-        previousRawVariableState?.timestamp ?? null
+        previousVariable?.timestamp ?? null
       )
 
       this.#derivativeWrtT = this.#derivativeConstructor
         ? new this.#derivativeConstructor(
             this.#subclassConstructor.calculateDerivativeWrtT(this, this.#deltaT),
-            this.#previousDerivativesWrtT,
-            Vector3.empty,
+            this.#previous.derivativesWrtT,
+            Variable.initial,
             this.#derivativeConstructor,
-            this.#sensorData,
             this.timestamp
           )
         : null

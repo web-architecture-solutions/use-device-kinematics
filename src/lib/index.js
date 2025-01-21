@@ -10,6 +10,5 @@ export {
   Acceleration,
   Velocity,
   Position,
-  VariableNames,
-  VariableConstructors
+  calculateGeodeticDisplacement
 } from './physics'

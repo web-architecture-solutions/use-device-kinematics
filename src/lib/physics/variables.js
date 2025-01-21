@@ -1,5 +1,7 @@
 import Variable from './Variable'
 
+import { big } from '../math'
+
 import { calculateGeodeticDisplacement } from './formulae'
 
 export class AngularJerk extends Variable {
@@ -38,10 +40,10 @@ export class Position extends Variable {
   static derivative = Velocity
 
   static calculateDerivativeWrtT(position) {
-    const geodeticDisplacement = calculateGeodeticDisplacement(position, position.previous)
+    const geodeticDisplacement = calculateGeodeticDisplacement(position, position.previous, true)
     const initializeComponentDerivative = (_, index) => {
       const delta = geodeticDisplacement[index]
-      const deltaT = position.timestamp - position.previous.timestamp
+      const deltaT = big * position.timestamp - big * position.previous.timestamp
       return delta / deltaT
     }
     return position.map(initializeComponentDerivative)

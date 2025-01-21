@@ -1,4 +1,6 @@
-import { Matrix, Vector3, VariableNames } from '../../../lib'
+import { Matrix, Vector3 } from '../../../lib'
+
+import { VariableNames } from '../../../lib/constants'
 
 import { SensorData } from '../../use-sensor-data'
 
