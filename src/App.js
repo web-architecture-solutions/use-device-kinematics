@@ -1,4 +1,4 @@
-import useDeviceKinematics from './use-device-kinematics/'
+import useDeviceKinematics from './hooks/use-device-kinematics/'
 
 const big = 1000000000000000
 
@@ -23,7 +23,7 @@ export default function App() {
 
       <h3>Data</h3>
 
-      {isListening ? <pre>{JSON.stringify(refreshRates, null, 2)}</pre> : <p>Click button to start.</p>}
+      {isListening ? <pre>{JSON.stringify(sensorData, null, 2)}</pre> : <p>Click button to start.</p>}
     </div>
   )
 }

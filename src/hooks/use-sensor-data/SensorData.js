@@ -1,6 +1,6 @@
-import { Variable } from '../../physics'
+import { Variable } from '../../lib/physics'
 
-import { VariableConstructors } from './constants'
+import { VariableConstructors } from '../../constants'
 
 export default class SensorData {
   #timestamp
