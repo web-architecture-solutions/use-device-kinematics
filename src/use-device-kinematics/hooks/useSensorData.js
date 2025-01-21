@@ -14,30 +14,34 @@ export default function useSensorData(config = {}) {
   const { timestamp, previousTimestamp } = useClock(SensorData.deltaT, sensorDataIsReady)
   const { rawSensorData, errors, isListening, startListening } = useRawSensorData(config)
 
-  useEffect(
-    (previousRawSensorData) => {
-      setSensorData(
+  useEffect(() => {
+    setSensorData(
+      (previousRawSensorData) =>
         new SensorData(
           {
             position: {
               x: rawSensorData.longitude,
               y: rawSensorData.latitude,
-              z: rawSensorData.altitude
+              z: rawSensorData.altitude,
+              timestamp: timestamp ?? null
             },
             acceleration: {
               x: rawSensorData.acceleration.x,
               y: rawSensorData.acceleration.y,
-              z: rawSensorData.acceleration.z
+              z: rawSensorData.acceleration.z,
+              timestamp: timestamp ?? null
             },
             orientation: {
               x: toRadians(rawSensorData.beta),
               y: toRadians(rawSensorData.gamma),
-              z: toRadians(rawSensorData.alpha)
+              z: toRadians(rawSensorData.alpha),
+              timestamp: timestamp ?? null
             },
             angularVelocity: {
               x: toRadians(rawSensorData.rotationRate.beta),
               y: toRadians(rawSensorData.rotationRate.gamma),
-              z: toRadians(rawSensorData.rotationRate.alpha)
+              z: toRadians(rawSensorData.rotationRate.alpha),
+              timestamp: timestamp ?? null
             }
           },
           previousRawSensorData,
@@ -45,10 +49,8 @@ export default function useSensorData(config = {}) {
           timestamp,
           previousTimestamp
         )
-      )
-    },
-    [rawSensorData]
-  )
+    )
+  }, [timestamp])
 
   useEffect(() => {
     if (!sensorData.isReady && sensorDataIsReady) {

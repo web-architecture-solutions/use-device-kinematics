@@ -16,14 +16,18 @@ export default class SensorData {
     this.#deltaT = SensorData.deltaT
     this.#previousDerivativesWrtT = previousDerivativesWrtT
 
+    const nullOrUndefined = (x) => x === null || x === undefined
+    const foo = (variable) => !nullOrUndefined(variable?.x) && !nullOrUndefined(variable?.y) && !nullOrUndefined(variable?.z)
+
     Object.entries(rawSensorData).forEach(([variableName, rawVariableData]) => {
       const constructor = SensorData.getVariableConstructorByName(variableName)
       this[variableName] = new constructor(
-        Variable.preprocess(rawVariableData),
-        Variable.preprocess(previousRawSensorData?.[variableName] ?? {}),
+        foo(rawVariableData) ? Variable.preprocess(rawVariableData) : previousRawSensorData?.[variableName] ?? {},
+        previousRawSensorData?.[variableName] ?? {},
         previousDerivativesWrtT?.[variableName] ?? {},
         constructor,
-        this
+        this,
+        rawVariableData?.timestamp ?? null
       )
     })
   }

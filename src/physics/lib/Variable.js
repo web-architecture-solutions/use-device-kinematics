@@ -14,9 +14,10 @@ export default class Variable extends Vector3 {
 
   static preprocess = ({ x, y, z } = { x: null, y: null, z: null }) => new Vector3(x, y, z)
 
-  static calculateDerivativeWrtT(variable, deltaT) {
+  static calculateDerivativeWrtT(variable) {
     const initializeComponentDerivative = (componentValue, index) => {
       const delta = componentValue - variable.previous[index]
+      const deltaT = variable.timestamp - variable.previous.timestamp
       return delta / deltaT
     }
     return variable.map(initializeComponentDerivative)
@@ -28,7 +29,7 @@ export default class Variable extends Vector3 {
     })
   }
 
-  constructor(rawVariableState, previousRawVariableState, previousDerivativesWrtT, subclassConstructor, sensorData) {
+  constructor(rawVariableState, previousRawVariableState, previousDerivativesWrtT, subclassConstructor, sensorData, timestamp) {
     super()
 
     this.#previous = previousRawVariableState
@@ -37,7 +38,7 @@ export default class Variable extends Vector3 {
     this.#derivativeConstructor = subclassConstructor?.derivative ?? null
     this.#derivativeName = this.#derivativeConstructor?.name ?? null
     this.#sensorData = sensorData
-    this.#timestamp = this.#sensorData?.timestamp ?? null
+    this.#timestamp = timestamp ?? null
     this.#previousTimestamp = this.#sensorData?.previousTimestamp ?? null
     this.#deltaT = this.#timestamp - this.#previousTimestamp
 
@@ -55,7 +56,8 @@ export default class Variable extends Vector3 {
         Vector3.empty,
         this.#previousDerivativesWrtT,
         this.#subclassConstructor,
-        this.#sensorData
+        this.#sensorData,
+        previousRawVariableState?.timestamp ?? null
       )
 
       this.#derivativeWrtT = this.#derivativeConstructor
@@ -64,7 +66,8 @@ export default class Variable extends Vector3 {
             this.#previousDerivativesWrtT,
             Vector3.empty,
             this.#derivativeConstructor,
-            this.#sensorData
+            this.#sensorData,
+            this.timestamp
           )
         : null
     }
@@ -84,6 +87,10 @@ export default class Variable extends Vector3 {
 
   get derivativeWrtT() {
     return this.#derivativeWrtT
+  }
+
+  get timestamp() {
+    return this.#timestamp
   }
 
   isEqual(variable) {

@@ -35,10 +35,11 @@ export class Position extends Variable {
   static name = 'position'
   static derivative = Velocity
 
-  static calculateDerivativeWrtT(position, deltaT) {
+  static calculateDerivativeWrtT(position) {
     const geodeticDisplacement = calculateGeodeticDisplacement(position, position.previous)
     const initializeComponentDerivative = (_, index) => {
       const delta = geodeticDisplacement[index]
+      const deltaT = position.timestamp - position.previous.timestamp
       return delta / deltaT
     }
     return position.map(initializeComponentDerivative)
