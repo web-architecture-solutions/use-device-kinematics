@@ -1,4 +1,4 @@
-import { Vector3 } from '../../math'
+import { Vector3 } from '../math'
 
 export default class Variable extends Vector3 {
   #previous

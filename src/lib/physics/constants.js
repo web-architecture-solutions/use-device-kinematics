@@ -1,4 +1,4 @@
-import { Position, Velocity, Acceleration, Jerk, Orientation, AngularVelocity, AngularAcceleration, AngularJerk } from './lib/physics'
+import { Position, Velocity, Acceleration, Jerk, Orientation, AngularVelocity, AngularAcceleration, AngularJerk } from '.'
 
 export const VariableNames = {
   POSITION: Position.name,
@@ -20,10 +20,4 @@ export const VariableConstructors = {
   [VariableNames.ANGULAR_VELOCITY]: AngularVelocity,
   [VariableNames.ANGULAR_ACCELERATION]: AngularAcceleration,
   [VariableNames.ANGULAR_JERK]: AngularJerk
-}
-
-export const PartialDerivative = {
-  WRT_ALPHA: 'wrtAlpha',
-  WRT_V: 'wrtV',
-  WRT_OMEGA: 'wrtOmega'
 }
