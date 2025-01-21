@@ -24,12 +24,22 @@ export default function useRawSensorData(config) {
     [motion.isListening, orientation.isListening, geolocation.isListening]
   )
 
+  const refreshRates = useMemo(
+    () => ({
+      geolocation: geolocation.refreshRate,
+      motion: motion.refreshRate,
+      orientation: orientation.refreshRate
+    }),
+    [geolocation]
+  )
+
   const startListening = useCallback(async () => {
     await Promise.all([motion.startListening(), orientation.startListening(), geolocation.startListening()])
   }, [motion.startListening, orientation.startListening, geolocation.startListening])
 
   return {
     rawSensorData,
+    refreshRates,
     errors,
     isListening,
     startListening

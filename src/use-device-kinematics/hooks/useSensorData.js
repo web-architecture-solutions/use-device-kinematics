@@ -11,8 +11,8 @@ export default function useSensorData(config = {}) {
   const [sensorData, setSensorData] = useState(SensorData.initial)
   const [sensorDataIsReady, setSensorDataIsReady] = useState(false)
 
-  const { timestamp, previousTimestamp } = useClock(SensorData.deltaT, sensorDataIsReady)
-  const { rawSensorData, errors, isListening, startListening } = useRawSensorData(config)
+  const { timestamp } = useClock(SensorData.deltaT, sensorDataIsReady)
+  const { refreshRates, rawSensorData, errors, isListening, startListening } = useRawSensorData(config)
 
   useEffect(() => {
     setSensorData(
@@ -46,11 +46,10 @@ export default function useSensorData(config = {}) {
           },
           previousRawSensorData,
           previousRawSensorData?.derivativesWrtT ?? null,
-          timestamp,
-          previousTimestamp
+          timestamp
         )
     )
-  }, [timestamp])
+  }, [rawSensorData, timestamp])
 
   useEffect(() => {
     if (!sensorData.isReady && sensorDataIsReady) {
@@ -62,6 +61,7 @@ export default function useSensorData(config = {}) {
 
   return {
     sensorData,
+    refreshRates, 
     errors,
     isListening,
     startListening
