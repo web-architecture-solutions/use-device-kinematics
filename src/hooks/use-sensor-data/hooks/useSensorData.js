@@ -5,7 +5,7 @@ import useRawSensorData from '../../use-raw-sensor-data'
 
 import { toRadians } from '../../../lib/math'
 
-import SensorData from '../SensorData'
+import SensorData from '../lib/SensorData'
 
 export default function useSensorData(config = {}) {
   const [sensorData, setSensorData] = useState(SensorData.initial)

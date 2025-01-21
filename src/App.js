@@ -1,5 +1,4 @@
-import useDeviceKinematics from './hooks/use-device-kinematics/'
-
+import { useDeviceKinematics } from './hooks'
 
 export default function App() {
   const { stateTransitionMatrix, stateVector, sensorData, refreshRates, errors, isListening, startListening } = useDeviceKinematics({

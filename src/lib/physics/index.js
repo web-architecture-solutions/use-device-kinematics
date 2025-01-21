@@ -1,5 +1,3 @@
-export { calculateGeodeticDisplacement } from './formulae'
-
 export { default as Variable } from './Variable'
 
 export { AngularJerk } from './variables'

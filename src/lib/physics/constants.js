@@ -1,4 +1,4 @@
-import { Position, Velocity, Acceleration, Jerk, Orientation, AngularVelocity, AngularAcceleration, AngularJerk } from '.'
+import { Position, Velocity, Acceleration, Jerk, Orientation, AngularVelocity, AngularAcceleration, AngularJerk } from './variables'
 
 export const VariableNames = {
   POSITION: Position.name,

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import DeviceKinematics from '../DeviceKinematics'
+import DeviceKinematics from '../lib/DeviceKinematics'
 import { useSensorData } from '../../use-sensor-data'
 
 export default function useDeviceKinematics(options) {

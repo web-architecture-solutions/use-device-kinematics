@@ -1,8 +1,6 @@
-import { Matrix, Vector3 } from '../../lib/math'
+import { Matrix, Vector3, VariableNames } from '../../../lib'
 
-import SensorData from '../use-sensor-data/SensorData'
-
-import { VariableNames } from '../../lib/physics'
+import { SensorData } from '../../use-sensor-data'
 
 import { PartialDerivative } from './constants'
 
