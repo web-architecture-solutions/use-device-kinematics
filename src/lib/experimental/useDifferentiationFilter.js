@@ -7,44 +7,38 @@ const finiteDifference = (data, deltaTime) => {
   return derivative
 }
 
-// Function to create an IIR Differentiation filter
-const createDifferentiationFilter = (context, sampleRate) => {
-  const feedforward = [1, -1] // First-order difference
-  const feedback = [1, -0.95] // Feedback for stability (adjust as needed)
-  return context.createIIRFilter(feedforward, feedback)
+class DifferentiationFilter {
+  static sampleRate = 44100
+  static feedforward = [1, -1]
+  static feedback = [1, -0.95]
+
+  static create = (context) => {
+    return context.createIIRFilter(DifferentiationFilter.feedforward, DifferentiationFilter.feedback)
+  }
+
+  static async apply(data) {
+    const offlineContext = new OfflineAudioContext(1, data.length, DifferentiationFilter.sampleRate)
+    const buffer = offlineContext.createBuffer(1, data.length, DifferentiationFilter.sampleRate)
+    const channelData = buffer.getChannelData(0)
+    data.forEach((value, i) => (channelData[i] = value))
+    const filter = DifferentiationFilter.create(offlineContext)
+    const source = offlineContext.createBufferSource()
+    source.buffer = buffer
+    source.connect(filter)
+    filter.connect(offlineContext.destination)
+    source.start()
+    const renderedBuffer = await offlineContext.startRendering()
+    const output = renderedBuffer.getChannelData(0)
+    return output
+  }
 }
 
-// Function to apply the IIR Differentiation filter and return the result
-const applyDifferentiationFilter = async (data) => {
-  const sampleRate = 44100 // Standard sample rate
-  const offlineContext = new OfflineAudioContext(1, data.length, sampleRate)
+const deltaT = 1
 
-  const buffer = offlineContext.createBuffer(1, data.length, sampleRate)
-  const channelData = buffer.getChannelData(0)
-  data.forEach((value, i) => {
-    channelData[i] = value
-  })
-
-  const filter = createDifferentiationFilter(offlineContext, sampleRate)
-  const source = offlineContext.createBufferSource()
-  source.buffer = buffer
-
-  source.connect(filter)
-  filter.connect(offlineContext.destination)
-
-  source.start()
-
-  const renderedBuffer = await offlineContext.startRendering()
-  const output = renderedBuffer.getChannelData(0)
-  return output
-}
-
-// React Component with updated differentiation filter logic
 const App = () => {
   const [dataPoints, setDataPoints] = useState([{ x: 0, y: 0, z: 0 }])
   const [derivativeFiniteDifference, setDerivativeFiniteDifference] = useState(null)
   const [derivativeDifferentiation, setDerivativeDifferentiation] = useState(null)
-  const [deltaTime, setDeltaTime] = useState(0.1) // Time step
 
   const handleDataChange = (index, axis, value) => {
     const newData = [...dataPoints]
@@ -66,16 +60,16 @@ const App = () => {
     const zData = dataPoints.map((point) => point.z)
 
     // Finite difference method
-    const dxFinite = finiteDifference(xData, deltaTime)
-    const dyFinite = finiteDifference(yData, deltaTime)
-    const dzFinite = finiteDifference(zData, deltaTime)
+    const dxFinite = finiteDifference(xData, deltaT)
+    const dyFinite = finiteDifference(yData, deltaT)
+    const dzFinite = finiteDifference(zData, deltaT)
 
     setDerivativeFiniteDifference({ x: dxFinite, y: dyFinite, z: dzFinite })
 
     // Differentiation filter method
-    const diffX = await applyDifferentiationFilter(xData)
-    const diffY = await applyDifferentiationFilter(yData)
-    const diffZ = await applyDifferentiationFilter(zData)
+    const diffX = await DifferentiationFilter.apply(xData)
+    const diffY = await DifferentiationFilter.apply(yData)
+    const diffZ = await DifferentiationFilter.apply(zData)
 
     setDerivativeDifferentiation({ x: diffX[diffX.length - 1], y: diffY[diffY.length - 1], z: diffZ[diffZ.length - 1] })
   }
@@ -97,15 +91,7 @@ const App = () => {
         <button onClick={addDataPoint}>Add Data Point</button>
       </div>
 
-      <div>
-        <h2>Settings</h2>
-        <label>
-          Delta Time (s):
-          <input type="number" value={deltaTime} onChange={(e) => setDeltaTime(parseFloat(e.target.value))} step="0.01" />
-        </label>
-        <br />
-        <button onClick={calculateDerivatives}>Calculate Derivatives</button>
-      </div>
+      <button onClick={calculateDerivatives}>Calculate Derivatives</button>
 
       <div>
         <h2>Results</h2>
