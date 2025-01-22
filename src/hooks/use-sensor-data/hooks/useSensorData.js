@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react'
 
 import useClock from './useClock'
-import useRawSensorData from '../../use-raw-sensor-data'
 
 import { toRadians } from '../../../lib/math'
 
 import SensorData from '../lib/SensorData'
+import useRawSensorData from '../../use-raw-sensor-data'
 
 export default function useSensorData(config = {}) {
   const [sensorData, setSensorData] = useState(SensorData.initial)
-  const [sensorDataIsReady, setSensorDataIsReady] = useState(false)
 
-  const { timestamp } = useClock(SensorData.deltaT, sensorDataIsReady)
+  const { timestamp } = useClock(SensorData.deltaT, sensorData.isReady)
   const { refreshRates, rawSensorData, errors, isListening, startListening } = useRawSensorData(config)
 
   useEffect(() => {
