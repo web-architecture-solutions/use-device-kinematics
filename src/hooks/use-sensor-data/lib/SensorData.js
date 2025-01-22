@@ -20,13 +20,14 @@ export default class SensorData {
   }
 
   static isEqual(sensorData1, sensorData2) {
-    return sensorData1.everyEntry(([variableName, variableData]) => {
-      return Variable.isEqual(variableData, sensorData2?.[variableName])
+    return Object.entries(sensorData1).every(([variableName, variableData]) => {
+      return Variable.isEqual(variableData, sensorData2[variableName])
     })
   }
 
   constructor(rawSensorData, previousSensorData) {
     const nullOrUndefined = (x) => x === null || x === undefined
+    // TODO: Rename
     const foo = (variable) => !nullOrUndefined(variable?.x) && !nullOrUndefined(variable?.y) && !nullOrUndefined(variable?.z)
 
     Object.entries(rawSensorData).forEach(([variableName, rawVariableData]) => {
@@ -54,6 +55,7 @@ export default class SensorData {
     return new SensorData(this.#derivativesWrtT, SensorData.initial)
   }
 
+  // BUG
   everyEntry(callback) {
     Object.entries(this).every(callback)
   }

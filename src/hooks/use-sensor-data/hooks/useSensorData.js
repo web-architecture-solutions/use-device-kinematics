@@ -9,12 +9,14 @@ import useRawSensorData from '../../use-raw-sensor-data'
 
 export default function useSensorData(config = {}) {
   const [sensorData, setSensorData] = useState(SensorData.initial)
+  const [startClock, setStartClock] = useState(false)
 
-  const { timestamp } = useClock(SensorData.deltaT, sensorData.isReady)
+  const { timestamp } = useClock(4, startClock)
   const { refreshRates, rawSensorData, errors, isListening, startListening } = useRawSensorData(config)
 
   useEffect(() => {
-    if (sensorData.isReady) {
+    if (isListening) {
+      if (!startClock) setStartClock(true)
       setSensorData(
         (previousSensorData) =>
           new SensorData(

@@ -13,7 +13,7 @@ export default function useClock(deltaT, startCondition) {
           const newTimestamp = performance.now() - startTime.current
           return { current: newTimestamp, previous: prev.current }
         })
-      }, 4)
+      }, deltaT)
       return () => clearInterval(intervalId)
     }
   }, [startCondition])
