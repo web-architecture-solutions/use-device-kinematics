@@ -3,6 +3,28 @@ import { Variable } from '../../../lib/physics'
 import { VariableConstructors } from '../../../lib/constants'
 
 export default class SensorData {
+  static initialData = {
+    position: Variable.initialData,
+    acceleration: Variable.initialData,
+    orientation: Variable.initialData,
+    angularVelocity: Variable.initialData
+  }
+
+  static get initial() {
+    return new SensorData(this.initialData, null)
+  }
+
+  // TODO: Lift into useSensorData and pass constructors to SensorData
+  static getVariableConstructorByName(variableName) {
+    return VariableConstructors[variableName]
+  }
+
+  static isEqual(sensorData1, sensorData2) {
+    return sensorData1.everyEntry(([variableName, variableData]) => {
+      return Variable.isEqual(variableData, sensorData2?.[variableName])
+    })
+  }
+
   constructor(rawSensorData, previousSensorData) {
     const nullOrUndefined = (x) => x === null || x === undefined
     const foo = (variable) => !nullOrUndefined(variable?.x) && !nullOrUndefined(variable?.y) && !nullOrUndefined(variable?.z)
@@ -18,19 +40,6 @@ export default class SensorData {
     })
   }
 
-  static get #initial() {
-    return {
-      position: Variable.initial,
-      acceleration: Variable.initial,
-      orientation: Variable.initial,
-      angularVelocity: Variable.initial
-    }
-  }
-
-  static get initial() {
-    return new SensorData(this.#initial, this.#initial, null, 0, 0)
-  }
-
   get isReady() {
     return !this.isEqual(SensorData.initial)
   }
@@ -43,16 +52,6 @@ export default class SensorData {
 
   get derivativesWrtT() {
     return new SensorData(this.#derivativesWrtT, SensorData.initial)
-  }
-
-  static getVariableConstructorByName(variableName) {
-    return VariableConstructors[variableName]
-  }
-
-  static isEqual(sensorData1, sensorData2) {
-    return sensorData1.everyEntry(([variableName, variableData]) => {
-      return Variable.isEqual(variableData, sensorData2?.[variableName])
-    })
   }
 
   everyEntry(callback) {

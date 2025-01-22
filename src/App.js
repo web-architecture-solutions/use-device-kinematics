@@ -1,9 +1,17 @@
-import { useDeviceKinematics } from './hooks'
+//import { useDeviceKinematics } from './hooks'
+
+import { useRawSensorData } from './hooks/use-raw-sensor-data'
 
 export default function App() {
+  /*
   const { stateTransitionMatrix, stateVector, sensorData, refreshRates, errors, isListening, startListening } = useDeviceKinematics({
     enableHighAccuracy: true
   })
+  */
+
+  const { rawSensorData, errors, isListening, startListening } = useRawSensorData({ enableHighAccuracy: true })
+
+  console.log(rawSensorData === null)
 
   return (
     <div>
@@ -21,7 +29,7 @@ export default function App() {
 
       <h3>Data</h3>
 
-      {isListening ? <pre>{JSON.stringify(sensorData, null, 2)}</pre> : <p>Click button to start.</p>}
+      {isListening ? <pre>{JSON.stringify(rawSensorData === undefined, null, 2)}</pre> : <p>Click button to start.</p>}
     </div>
   )
 }

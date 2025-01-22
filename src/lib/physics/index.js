@@ -1,3 +1,5 @@
+export { R_E } from './constants'
+
 export { default as Variable } from './Variable'
 
 export { AngularJerk } from './variables'

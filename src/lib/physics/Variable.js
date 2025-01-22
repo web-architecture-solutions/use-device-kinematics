@@ -10,9 +10,7 @@ export default class Variable extends Vector3 {
   #derivativeConstructor
   #derivativeName
 
-  static get initial() {
-    return new Variable({ x: null, y: null, z: null }, null, Variable, null)
-  }
+  static initialData = { x: null, y: null, z: null }
 
   static preprocess = ({ x, y, z } = { x: null, y: null, z: null }) => new Vector3(x, y, z)
 
