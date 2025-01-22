@@ -1,7 +1,7 @@
 import useDeviceAPI from '../../use-device-api'
 
 const listenerType = 'devicemotion'
-const isFeaturePresent = typeof window !== 'undefined' && window.DeviceMotionEvent && window.DeviceMotionEvent.requestPermission
+const isFeaturePresent = Boolean(typeof window !== 'undefined' && window.DeviceMotionEvent && window.DeviceMotionEvent.requestPermission)
 const featureDetectionError = 'DeviceMotionEvent is not supported by this browser.'
 
 const requestPermission = DeviceMotionEvent?.requestPermission

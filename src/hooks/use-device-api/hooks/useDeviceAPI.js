@@ -25,7 +25,7 @@ export default function useDeviceAPI({
 
   const listener = useCallback(
     (event) => {
-      const now = Date.now()
+      const now = performance.now()
 
       if (lastUpdateTimeRef.current !== null) {
         const deltaTime = now - lastUpdateTimeRef.current
@@ -42,7 +42,7 @@ export default function useDeviceAPI({
   const stabilizedListener = _useEvent ? useEvent(listener) : listener
 
   const startListening = useCallback(async () => {
-    if (typeof requestPermission === 'function') {
+    if (isFeaturePresent && !permissionGranted && !isListening && typeof requestPermission === 'function') {
       try {
         const permission = await requestPermission()
         if (permission === 'granted') {
@@ -53,12 +53,19 @@ export default function useDeviceAPI({
       } catch ({ message }) {
         errors.add(listenerType, message)
       }
-    } else if (isFeaturePresent) {
+    } else if (isFeaturePresent && !permissionGranted && !isListening && typeof requestPermission !== 'function') {
       throw new Error('requestPermission must be a function')
+    } else if (isFeaturePresent && !permissionGranted && isListening) {
+      throw new Error('useDeviceAPI: Should not be listening before permission has been granted')
+    } else {
+      setPermissionGranted(false)
+      setData(initialData)
+      setIsListening(false)
     }
-  }, [isFeaturePresent, requestPermission, errors, listenerType])
+  }, [isFeaturePresent, permissionGranted, requestPermission, errors, listenerType])
 
   useEffect(() => {
+    console.log(isFeaturePresent, permissionGranted, isListening)
     if (!isFeaturePresent) {
       errors.add(listenerType, featureDetectionError)
       return
@@ -70,7 +77,7 @@ export default function useDeviceAPI({
     const cleanup = handler(debouncedListener, setIsListening, errors)
 
     return cleanup && typeof cleanup === 'function' ? cleanup : () => null
-  }, [stabilizedListener, handler, isFeaturePresent, permissionGranted, debounce, setIsListening])
+  }, [stabilizedListener, isFeaturePresent, permissionGranted, debounce, setIsListening])
 
   return { data, refreshRate, errors, startListening, isListening }
 }

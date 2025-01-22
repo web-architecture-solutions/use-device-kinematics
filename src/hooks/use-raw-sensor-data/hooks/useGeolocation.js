@@ -1,7 +1,7 @@
 import useDeviceAPI from '../../use-device-api'
 
 const listenerType = 'geolocation'
-const isFeaturePresent = typeof navigator !== 'undefined' && navigator.geolocation
+const isFeaturePresent = Boolean(typeof navigator !== 'undefined' && navigator.geolocation)
 const featureDetectionError = 'Geolocation is not supported by this browser.'
 
 const requestPermission = async () => {

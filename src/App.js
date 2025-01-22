@@ -11,15 +11,11 @@ export default function App() {
 
   const { rawSensorData, errors, isListening, startListening } = useRawSensorData({ enableHighAccuracy: true })
 
-  console.log(rawSensorData === null)
-
   return (
     <div>
       <h1>Sensor Data</h1>
 
-      <button onClick={startListening} disabled={isListening}>
-        {isListening ? 'Listening...' : 'Start Listening'}
-      </button>
+      <button onClick={startListening}>{isListening ? 'Listening...' : 'Start Listening'}</button>
 
       <h2>Data</h2>
 
@@ -29,7 +25,7 @@ export default function App() {
 
       <h3>Data</h3>
 
-      {isListening ? <pre>{JSON.stringify(rawSensorData === undefined, null, 2)}</pre> : <p>Click button to start.</p>}
+      {isListening ? <pre>{JSON.stringify({ rawSensorData: rawSensorData }, null, 2)}</pre> : <p>Click button to start.</p>}
     </div>
   )
 }
