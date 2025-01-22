@@ -1,6 +1,6 @@
 //import { useDeviceKinematics } from './hooks'
 
-import { useRawSensorData } from './hooks/use-raw-sensor-data'
+import { useSensorData } from './hooks/use-sensor-data'
 
 export default function App() {
   /*
@@ -9,13 +9,15 @@ export default function App() {
   })
   */
 
-  const { rawSensorData, errors, isListening, startListening } = useRawSensorData({ enableHighAccuracy: true })
+  const { sensorData, errors, isListening, startListening } = useSensorData({ enableHighAccuracy: true })
+
+  console.log('foo')
 
   return (
     <div>
       <h1>Sensor Data</h1>
 
-      <button onClick={startListening}>{isListening ? 'Listening...' : 'Start Listening'}</button>
+      <button onClick={startListening}>{isListening ? 'Stop' : 'Start'}</button>
 
       <h2>Data</h2>
 
@@ -25,7 +27,7 @@ export default function App() {
 
       <h3>Data</h3>
 
-      {isListening ? <pre>{JSON.stringify({ rawSensorData: rawSensorData }, null, 2)}</pre> : <p>Click button to start.</p>}
+      {isListening ? <pre>{JSON.stringify({ sensorData: sensorData }, null, 2)}</pre> : <p>Click button to start.</p>}
     </div>
   )
 }

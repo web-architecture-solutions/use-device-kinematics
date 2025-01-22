@@ -65,7 +65,6 @@ export default function useDeviceAPI({
   }, [isFeaturePresent, permissionGranted, requestPermission, errors, listenerType])
 
   useEffect(() => {
-    console.log(isFeaturePresent, permissionGranted, isListening)
     if (!isFeaturePresent) {
       errors.add(listenerType, featureDetectionError)
       return
