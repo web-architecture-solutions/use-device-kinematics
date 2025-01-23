@@ -27,13 +27,12 @@ export default class SensorData {
 
   constructor(rawSensorData, previousSensorData) {
     const nullOrUndefined = (x) => x === null || x === undefined
-    // TODO: Rename
-    const foo = (variable) => !nullOrUndefined(variable?.x) && !nullOrUndefined(variable?.y) && !nullOrUndefined(variable?.z)
+    const isVariableNull = (variable) => !nullOrUndefined(variable?.x) && !nullOrUndefined(variable?.y) && !nullOrUndefined(variable?.z)
 
     Object.entries(rawSensorData).forEach(([variableName, rawVariableData]) => {
       const constructor = SensorData.getVariableConstructorByName(variableName)
       this[variableName] = new constructor(
-        foo(rawVariableData) ? Variable.preprocess(rawVariableData) : previousSensorData?.[variableName] ?? {},
+        isVariableNull(rawVariableData) ? [...Variable.preprocess(rawVariableData)] : previousSensorData?.[variableName] ?? [],
         previousSensorData?.[variableName] ?? {},
         constructor,
         rawVariableData?.timestamp ?? null

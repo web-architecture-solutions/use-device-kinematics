@@ -1,10 +1,33 @@
 import { Vector3, big } from '../math'
 
+class DifferentiationFilter {
+  constructor(feedforward, feedback, sampleRate) {
+    this.feedforward = feedforward
+    this.feedback = feedback
+    this.sampleRate = sampleRate
+  }
+
+  async calculate(current, previous) {
+    const offlineContext = new OfflineAudioContext(1, 2, this.sampleRate)
+    const buffer = offlineContext.createBuffer(1, 2, this.sampleRate)
+    const channelData = buffer.getChannelData(0)
+    channelData[0] = current
+    channelData[1] = previous
+    const filter = offlineContext.createIIRFilter(this.feedforward, this.feedback)
+    const source = offlineContext.createBufferSource()
+    source.buffer = buffer
+    source.connect(filter)
+    filter.connect(offlineContext.destination)
+    source.start()
+    const renderedBuffer = await offlineContext.startRendering()
+    const output = renderedBuffer.getChannelData(0)
+    return output
+  }
+}
+
 export default class Variable extends Vector3 {
   #previous
   #timestamp
-
-  #deltaT
   #subclassConstructor
   #derivativeWrtT
   #derivativeConstructor
@@ -15,10 +38,17 @@ export default class Variable extends Vector3 {
   static preprocess = ({ x, y, z } = { x: null, y: null, z: null }) => new Vector3(x, y, z)
 
   static calculateDerivativeWrtT(variable) {
+    const feedforward = [1, -1]
+    const feedback = [1, -1]
+    const sampleRate = 44100
+    const differentiationFilter = new DifferentiationFilter(feedforward, feedback, sampleRate)
+
     const initializeComponentDerivative = (componentValue, index) => {
-      const delta = big * componentValue - big * variable.previous[index]
-      const deltaT = big * variable.timestamp - big * variable.previous.timestamp
-      return delta / deltaT
+      return differentiationFilter.calculate(componentValue, variable.previous[index])
+
+      //const delta = big * componentValue - big * variable.previous[index]
+      //const deltaT = big * variable.timestamp - big * variable.previous.timestamp
+      //return delta / deltaT
     }
     return variable.map(initializeComponentDerivative)
   }
@@ -42,7 +72,7 @@ export default class Variable extends Vector3 {
     this[1] = rawVariableData[1] ?? null
     this[2] = rawVariableData[2] ?? null
 
-    if (previousVariable && previousVariable.length === 3 && !Variable.isEqual(rawVariableData, previousVariable)) {
+    if (previousVariable) {
       this.#previous = new this.#subclassConstructor(
         previousVariable,
         Variable.initial,
@@ -52,7 +82,7 @@ export default class Variable extends Vector3 {
 
       this.#derivativeWrtT = this.#derivativeConstructor
         ? new this.#derivativeConstructor(
-            this.#subclassConstructor.calculateDerivativeWrtT(this, this.#deltaT),
+            this.#subclassConstructor.calculateDerivativeWrtT(this),
             this.#previous.derivativesWrtT,
             Variable.initial,
             this.#derivativeConstructor,
