@@ -1,51 +1,48 @@
-import Variable from './Variable'
-
-import { DifferentiationFilter } from '../math'
+import { big } from '../math'
 
 import { calculateGeodeticDisplacement } from './formulae'
 
-export class AngularJerk extends Variable {
-  static name = 'angularJerk'
+export const AngularJerk = {
+  name: 'angularJerk'
 }
 
-export class AngularAcceleration extends Variable {
-  static name = 'angularAcceleration'
-  static derivative = AngularJerk
+export const AngularAcceleration = {
+  name: 'angularAcceleration',
+  derivative: AngularJerk
 }
 
-export class AngularVelocity extends Variable {
-  static name = 'angularVelocity'
-  static derivative = AngularAcceleration
+export const AngularVelocity = {
+  name: 'angularVelocity',
+  derivative: AngularAcceleration
 }
 
-export class Orientation extends Variable {
-  static name = 'orientation'
+export const Orientation = {
+  name: 'orientation'
 }
 
-export class Jerk extends Variable {
-  static name = 'jerk'
+export const Jerk = {
+  name: 'jerk'
 }
 
-export class Acceleration extends Variable {
-  static name = 'acceleration'
-  static derivative = Jerk
+export const Acceleration = {
+  name: 'acceleration',
+  derivative: Jerk
 }
 
-export class Velocity extends Variable {
-  static name = 'velocity'
+export const Velocity = {
+  name: 'velocity'
 }
 
-export class Position extends Variable {
-  static name = 'position'
-  static derivative = Velocity
-
-  static calculateDerivativeWrtT(position) {
+export const Position = {
+  name: 'position',
+  derivative: Velocity,
+  calculateDerivativeWrtT: (position) => {
     const geodeticDisplacement = calculateGeodeticDisplacement(position, position.previous)
 
-    const deltaT = position.timestamp - position.previous.timestamp
+    const deltaT = big * position.timestamp - big * position.previous.timestamp
     const calculateComponentDerivativeWrtT = (_, index) => {
       const delta = geodeticDisplacement[index]
-      return delta / (1000 * deltaT)
+      return delta / deltaT
     }
     return position.map(calculateComponentDerivativeWrtT)
   }

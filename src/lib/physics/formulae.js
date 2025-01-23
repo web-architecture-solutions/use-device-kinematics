@@ -1,8 +1,8 @@
-import { toRadians } from '../math'
+import { toRadians, big } from '../math'
 
 import { R_E } from './constants'
 
-export function calculateGeodeticDisplacement(currentPosition, previousPosition, useBig = false) {
+export function calculateGeodeticDisplacement(currentPosition, previousPosition) {
   const [previousLongitude, previousLatitude, previousAltitude] = previousPosition
   const [currentLongitude, currentLatitude, currentAltitude] = currentPosition
 
@@ -11,14 +11,11 @@ export function calculateGeodeticDisplacement(currentPosition, previousPosition,
   const currentLatitudeRadians = toRadians(currentLatitude)
   const currentLongitudeRadians = toRadians(currentLongitude)
 
-  const longitudeDifferenceRadians = useBig
-    ? big * currentLongitudeRadians - big * previousLongitudeRadians
-    : currentLongitudeRadians - previousLongitudeRadians
+  const longitudeDifferenceRadians = big * currentLongitudeRadians - big * previousLongitudeRadians
 
   const eastwardDisplacement = R_E * Math.cos(currentLatitudeRadians) * longitudeDifferenceRadians
-  const northwardDisplacement =
-    R_E * (useBig ? big * currentLatitudeRadians - big * previousLatitudeRadians : currentLatitudeRadians - previousLatitudeRadians)
-  const verticalDisplacement = useBig ? big * currentAltitude - big * previousAltitude : currentAltitude - previousAltitude
+  const northwardDisplacement = R_E * (big * currentLatitudeRadians - big * previousLatitudeRadians)
+  const verticalDisplacement = big * currentAltitude - big * previousAltitude
 
   return [eastwardDisplacement, northwardDisplacement, verticalDisplacement]
 }

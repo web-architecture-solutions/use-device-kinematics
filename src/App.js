@@ -37,10 +37,11 @@ export default function App() {
                 timestamp: variable.timestamp,
                 previousTimestamp: variable.previous.timestamp,
                 areTimestampsEqual: variable.timestamp === variable.previous.timestamp,
-                derivativeWrtT1: variable.derivativeWrtT,
-                derivativeWrtT2: calculateDerivativeWrtT(variable)
+                derivativeWrtT1: variable.derivativeWrtT.derivativeWrtT,
+                derivativeWrtT2: calculateDerivativeWrtT(variable),
+                previousDerivativeWrtT: variable.previous.derivativeWrtT
               }
-            })(sensorData.acceleration),
+            })(sensorData.angularVelocity),
             null,
             2
           )}
