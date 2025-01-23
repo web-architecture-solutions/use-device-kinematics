@@ -1,29 +1,6 @@
-import { Vector3, big } from '../math'
+import { Vector3 } from '../math'
 
-class DifferentiationFilter {
-  constructor(feedforward, feedback, sampleRate) {
-    this.feedforward = feedforward
-    this.feedback = feedback
-    this.sampleRate = sampleRate
-  }
-
-  async calculate(current, previous) {
-    const offlineContext = new OfflineAudioContext(1, 2, this.sampleRate)
-    const buffer = offlineContext.createBuffer(1, 2, this.sampleRate)
-    const channelData = buffer.getChannelData(0)
-    channelData[0] = current
-    channelData[1] = previous
-    const filter = offlineContext.createIIRFilter(this.feedforward, this.feedback)
-    const source = offlineContext.createBufferSource()
-    source.buffer = buffer
-    source.connect(filter)
-    filter.connect(offlineContext.destination)
-    source.start()
-    const renderedBuffer = await offlineContext.startRendering()
-    const output = renderedBuffer.getChannelData(0)
-    return output
-  }
-}
+import { DifferentiationFilter } from '../math'
 
 export default class Variable extends Vector3 {
   #previous
@@ -45,10 +22,6 @@ export default class Variable extends Vector3 {
 
     const initializeComponentDerivative = (componentValue, index) => {
       return differentiationFilter.calculate(componentValue, variable.previous[index])
-
-      //const delta = big * componentValue - big * variable.previous[index]
-      //const deltaT = big * variable.timestamp - big * variable.previous.timestamp
-      //return delta / deltaT
     }
     return variable.map(initializeComponentDerivative)
   }
