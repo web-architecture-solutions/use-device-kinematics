@@ -1,14 +1,5 @@
 import { useSensorData } from './hooks/use-sensor-data'
 
-function calculateDerivativeWrtT(variable) {
-  const deltaT = variable.timestamp - variable.previous.timestamp
-  const calculateComponentDerivativeWrtT = (componentValue, index) => {
-    const delta = componentValue - variable.previous[index]
-    return delta / deltaT
-  }
-  return variable.map(calculateComponentDerivativeWrtT)
-}
-
 export default function App() {
   const { sensorData, errors, isListening, startListening } = useSensorData({ enableHighAccuracy: true })
 
@@ -37,8 +28,7 @@ export default function App() {
                 timestamp: variable.timestamp,
                 previousTimestamp: variable.previous.timestamp,
                 areTimestampsEqual: variable.timestamp === variable.previous.timestamp,
-                derivativeWrtT1: variable.derivativeWrtT.derivativeWrtT,
-                derivativeWrtT2: calculateDerivativeWrtT(variable),
+                derivativeWrtT: variable.derivativeWrtT.derivativeWrtT,
                 previousDerivativeWrtT: variable.previous.derivativeWrtT
               }
             })(sensorData.angularVelocity),

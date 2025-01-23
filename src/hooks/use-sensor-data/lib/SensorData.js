@@ -1,6 +1,6 @@
 import { Variable } from '../../../lib/physics'
 
-import { VariableConstructors } from '../../../lib/constants'
+import { variableSchemata } from '../../../lib/physics'
 
 export default class SensorData {
   static initialData = {
@@ -14,11 +14,6 @@ export default class SensorData {
     return new SensorData(this.initialData, null)
   }
 
-  // TODO: Lift into useSensorData and pass constructors to SensorData
-  static getVariableConstructorByName(variableName) {
-    return VariableConstructors[variableName]
-  }
-
   static isEqual(sensorData1, sensorData2) {
     return Object.entries(sensorData1).every(([variableName, variableData]) => {
       return Variable.isEqual(variableData, sensorData2[variableName])
@@ -30,11 +25,10 @@ export default class SensorData {
     //const isVariableNull = (variable) => !nullOrUndefined(variable?.x) && !nullOrUndefined(variable?.y) && !nullOrUndefined(variable?.z)
 
     Object.entries(rawSensorData).forEach(([variableName, rawVariableData]) => {
-      const schema = SensorData.getVariableConstructorByName(variableName)
       this[variableName] = new Variable(
         Variable.preprocess(rawVariableData),
         previousSensorData?.[variableName] ?? Variable.initial,
-        schema,
+        variableSchemata[variableName] ?? null,
         rawVariableData.timestamp
       )
     })

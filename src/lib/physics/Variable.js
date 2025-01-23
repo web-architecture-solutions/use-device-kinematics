@@ -4,15 +4,20 @@ export default class Variable extends Vector3 {
   #previous
   #timestamp
   #schema
+  #name
   #derivativeSchema
   #derivativeName
 
   static initialData = { x: null, y: null, z: null }
 
-  static preprocess = ({ x, y, z } = { x: null, y: null, z: null }) => new Vector3(x, y, z)
-
   static get initial() {
     return new Variable(this.initialData, null, Variable, null)
+  }
+
+  static preprocess = ({ x, y, z } = { x: null, y: null, z: null }) => new Vector3(x, y, z)
+
+  static isEqual(variable1, variable2) {
+    return variable1.every((component, index) => component === variable2[index])
   }
 
   constructor(rawVariableData, previousVariable, schema, timestamp) {
@@ -24,7 +29,8 @@ export default class Variable extends Vector3 {
 
     this.#previous = previousVariable
     this.#schema = schema
-    this.#derivativeSchema = schema?.derivative ?? null
+    this.#name = schema.name
+    this.#derivativeSchema = this.#schema?.derivativeSchema ?? null
     this.#derivativeName = this.#derivativeSchema?.name ?? null
     this.#timestamp = timestamp ?? null
   }
@@ -33,12 +39,12 @@ export default class Variable extends Vector3 {
     return this.#previous
   }
 
-  get schema() {
-    return this.#schema
-  }
-
   get hasDerivative() {
     return this.#derivativeSchema ? true : false
+  }
+
+  get name() {
+    return this.#name
   }
 
   get derivativeName() {
@@ -46,8 +52,8 @@ export default class Variable extends Vector3 {
   }
 
   get derivativeWrtT() {
-    if (this.schema.calculateDerivativeWrtT) {
-      return this.schema.calculateDerivativeWrtT(this)
+    if (this.#schema?.calculateDerivativeWrtT) {
+      return this.#schema.calculateDerivativeWrtT(this)
     }
     const deltaT = big * this.timestamp - big * this?.previous?.timestamp ?? null
     const calculateComponentDerivativeWrtT = (componentValue, index) => {
@@ -64,10 +70,6 @@ export default class Variable extends Vector3 {
 
   get timestamp() {
     return this.#timestamp
-  }
-
-  static isEqual(variable1, variable2) {
-    return variable1.every((component, index) => component === variable2[index])
   }
 
   isEqual(variable) {
