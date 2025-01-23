@@ -11,4 +11,4 @@ export { Acceleration } from './variables'
 export { Velocity } from './variables'
 export { Position } from './variables'
 
-export { calculateGeodeticDisplacement } from './formulae'
+export { correctGeodeticPosition } from './formulae'
