@@ -2,7 +2,7 @@ import Variable from './Variable'
 
 import { DifferentiationFilter } from '../math'
 
-import { correctGeodeticPosition } from './formulae'
+import { calculateGeodeticDisplacement } from './formulae'
 
 export class AngularJerk extends Variable {
   static name = 'angularJerk'
@@ -40,14 +40,13 @@ export class Position extends Variable {
   static derivative = Velocity
 
   static calculateDerivativeWrtT(position) {
-    const feedforward = [1, -1]
-    const feedback = [1, -1]
-    const sampleRate = 44100
-    const differentiationFilter = new DifferentiationFilter(feedforward, feedback, sampleRate)
-    const correctedGeodeticPosition = correctGeodeticPosition(position, position.previous, true)
-    const initializeComponentDerivative = ({ current, previous }) => {
-      return differentiationFilter.calculate(current, previous)
+    const geodeticDisplacement = calculateGeodeticDisplacement(position, position.previous)
+
+    const deltaT = position.timestamp - position.previous.timestamp
+    const calculateComponentDerivativeWrtT = (_, index) => {
+      const delta = geodeticDisplacement[index]
+      return delta / (1000 * deltaT)
     }
-    return correctedGeodeticPosition.map(initializeComponentDerivative)
+    return position.map(calculateComponentDerivativeWrtT)
   }
 }

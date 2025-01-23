@@ -1,6 +1,4 @@
-import { Vector3 } from '../math'
-
-import { DifferentiationFilter } from '../math'
+import { Vector3, big } from '../math'
 
 export default class Variable extends Vector3 {
   #previous
@@ -15,21 +13,12 @@ export default class Variable extends Vector3 {
   static preprocess = ({ x, y, z } = { x: null, y: null, z: null }) => new Vector3(x, y, z)
 
   static calculateDerivativeWrtT(variable) {
-    const feedforward = [1, -1]
-    const feedback = [1, -1]
-    const sampleRate = 44100
-    const differentiationFilter = new DifferentiationFilter(feedforward, feedback, sampleRate)
-
-    const initializeComponentDerivative = (componentValue, index) => {
-      return differentiationFilter.calculate(componentValue, variable.previous[index])
+    const deltaT = big * variable.timestamp - big * variable.previous.timestamp
+    const calculateComponentDerivativeWrtT = (componentValue, index) => {
+      const delta = big * componentValue - big * variable.previous[index]
+      return delta / deltaT
     }
-    return variable.map(initializeComponentDerivative)
-  }
-
-  static isEqual(variableData1, variableData2) {
-    return variableData1.every((componentValue, index) => {
-      return variableData2[index] === componentValue
-    })
+    return variable.map(calculateComponentDerivativeWrtT)
   }
 
   constructor(rawVariableData, previousVariable, subclassConstructor, timestamp) {
@@ -83,6 +72,10 @@ export default class Variable extends Vector3 {
 
   get timestamp() {
     return this.#timestamp
+  }
+
+  static isEqual(variable1, variable2) {
+    return variable1.every((component, index) => component === variable2[index])
   }
 
   isEqual(variable) {

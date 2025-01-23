@@ -48,7 +48,7 @@ export default function useIIRFilter(rawSensorData, isListening) {
           )
       )
     }
-  }, [rawSensorData, timestamp])
+  }, [rawSensorData])
 
   return sensorData
 }

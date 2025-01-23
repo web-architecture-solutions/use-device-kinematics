@@ -39,6 +39,10 @@ export default class Vector3 extends Array {
     return new Vector3(this.x - v.x, this.y - v.y, this.z - v.z)
   }
 
+  map(callback) {
+    return new Vector3(...[...this].map(callback))
+  }
+
   dot(v) {
     return this.x * v.x + this.y * v.y + this.z * v.z
   }

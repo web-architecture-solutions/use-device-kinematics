@@ -7,6 +7,7 @@ export default function useSensorData(config = {}) {
   const sensorData = useIIRFilter(rawSensorData, isListening)
 
   return {
+    rawSensorData,
     sensorData,
     refreshRates,
     errors,

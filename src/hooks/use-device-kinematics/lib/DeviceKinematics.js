@@ -106,8 +106,8 @@ export default class DeviceKinematics {
     return DeviceKinematics.mapCoefficientsToStateEquationVector({
       [VariableNames.POSITION]: 1,
       [VariableNames.VELOCITY]: this.deltaT,
-      [VariableNames.ACCELERATION]: 0.5 * Math.pow(this.deltaT, 2),
-      [VariableNames.JERK]: (1 / 6) * Math.pow(this.deltaT, 3)
+      [VariableNames.ACCELERATION]: Math.pow(this.deltaT, 2) / 2,
+      [VariableNames.JERK]: Math.pow(this.deltaT, 3) / 6
     })
   }
 
@@ -116,7 +116,7 @@ export default class DeviceKinematics {
       [VariableNames.POSITION]: 0,
       [VariableNames.VELOCITY]: 1,
       [VariableNames.ACCELERATION]: this.deltaT,
-      [VariableNames.JERK]: 0.5 * Math.pow(this.deltaT, 2)
+      [VariableNames.JERK]: Math.pow(this.deltaT, 2) / 2
     })
   }
 
