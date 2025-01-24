@@ -1,6 +1,6 @@
-import { Vector3, big } from '../math'
+import { Vector3, big } from '../../../lib/math'
 
-export default class Variable extends Vector3 {
+export default class IIRFVariable extends Vector3 {
   #previous
   #timestamp
   #schema
@@ -11,7 +11,7 @@ export default class Variable extends Vector3 {
   static initialData = { x: null, y: null, z: null }
 
   static get initial() {
-    return new Variable(this.initialData, null, Variable, null)
+    return new IIRFVariable(this.initialData, null, IIRFVariable, null)
   }
 
   static preprocess = ({ x, y, z } = { x: null, y: null, z: null }) => new Vector3(x, y, z)
@@ -55,17 +55,20 @@ export default class Variable extends Vector3 {
     if (this.#schema?.calculateDerivativeWrtT) {
       return this.#schema.calculateDerivativeWrtT(this)
     }
-    const deltaT = big * this.timestamp - big * this?.previous?.timestamp ?? null
-    const calculateComponentDerivativeWrtT = (componentValue, index) => {
-      const delta = big * componentValue - big * this?.previous?.[index] ?? null
-      return delta / deltaT
+    if (this.previous) {
+      const deltaT = big * this.timestamp - big * this.previous.timestamp
+      const calculateComponentDerivativeWrtT = (componentValue, index) => {
+        const delta = big * componentValue - big * this.previous[index]
+        return delta / deltaT
+      }
+      return new IIRFVariable(
+        this.map(calculateComponentDerivativeWrtT),
+        this.#previous.derivativeWrtT ?? IIRFVariable.initial,
+        this.#schema,
+        this.#timestamp
+      )
     }
-    return new Variable(
-      this.map(calculateComponentDerivativeWrtT),
-      this.#previous?.derivativeWrtT ?? Variable.initial,
-      this.#schema,
-      this.#timestamp
-    )
+    return null
   }
 
   get timestamp() {
@@ -73,6 +76,6 @@ export default class Variable extends Vector3 {
   }
 
   isEqual(variable) {
-    return Variable.isEqual(this, variable)
+    return IIRFVariable.isEqual(this, variable)
   }
 }

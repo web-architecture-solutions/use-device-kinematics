@@ -1,7 +1,7 @@
-import { useSensorData } from './hooks/use-sensor-data'
+import { useIIRFData } from './hooks/use-iirf-data'
 
 export default function App() {
-  const { sensorData, errors, isListening, startListening } = useSensorData({ enableHighAccuracy: true })
+  const { iirfData, errors, isListening, startListening } = useIIRFData({ enableHighAccuracy: true })
 
   return (
     <div>
@@ -28,10 +28,10 @@ export default function App() {
                 timestamp: variable.timestamp,
                 previousTimestamp: variable.previous.timestamp,
                 areTimestampsEqual: variable.timestamp === variable.previous.timestamp,
-                derivativeWrtT: variable.derivativeWrtT.derivativeWrtT,
+                secondDerivativeWrtT: variable.derivativeWrtT.derivativeWrtT,
                 previousDerivativeWrtT: variable.previous.derivativeWrtT
               }
-            })(sensorData.angularVelocity),
+            })(iirfData.angularVelocity),
             null,
             2
           )}

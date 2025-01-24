@@ -1,15 +1,18 @@
-import { big } from '../math'
+import { big } from '../../../lib/math'
 
-import { calculateGeodeticDisplacement } from './formulae'
+import { calculateGeodeticDisplacement } from '../../../lib/physics/formulae'
 
 function calculatePositionDerivativeWrtT(position) {
-  const geodeticDisplacement = calculateGeodeticDisplacement(position, position.previous)
-  const deltaT = big * position.timestamp - big * position.previous.timestamp
-  const calculateComponentDerivativeWrtT = (_, index) => {
-    const delta = geodeticDisplacement[index]
-    return delta / deltaT
+  if (position.previous) {
+    const geodeticDisplacement = calculateGeodeticDisplacement(position, position.previous)
+    const deltaT = big * position.timestamp - big * position.previous.timestamp
+    const calculateComponentDerivativeWrtT = (_, index) => {
+      const delta = geodeticDisplacement[index]
+      return delta / deltaT
+    }
+    return position.map(calculateComponentDerivativeWrtT)
   }
-  return position.map(calculateComponentDerivativeWrtT)
+  return null
 }
 
 const angularJerkSchema = {

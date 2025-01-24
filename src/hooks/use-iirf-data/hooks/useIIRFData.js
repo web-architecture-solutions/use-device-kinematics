@@ -1,14 +1,15 @@
 import useRawSensorData from '../../use-raw-sensor-data'
+
 import useIIRFilter from './useIIRFilter'
 
 export default function useSensorData(config = {}) {
-  const { refreshRates, rawSensorData, errors, isListening, startListening } = useRawSensorData(config)
+  const { rawSensorData, refreshRates, errors, isListening, startListening } = useRawSensorData(config)
 
-  const sensorData = useIIRFilter(rawSensorData, isListening)
+  const iirfData = useIIRFilter(rawSensorData, isListening)
 
   return {
+    iirfData,
     rawSensorData,
-    sensorData,
     refreshRates,
     errors,
     isListening,
