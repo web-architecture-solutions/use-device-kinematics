@@ -82,7 +82,7 @@ export default class IIRFVariable extends Vector3 {
       return this.#schema.calculateDerivativeWrtT(this)
     }
     if (this.previous) {
-      const deltaT = big * this.timestamp - big * this.previous.timestamp
+      const deltaT = (big * this.timestamp - big * this.previous.timestamp) / 1000
       const calculateComponentDerivativeWrtT = (componentValue, index) => {
         const delta = big * componentValue - big * this.previous[index]
         return delta / deltaT

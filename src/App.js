@@ -1,7 +1,9 @@
 import useDeviceKinematics from './hooks/use-device-kinematics'
 
 export default function App() {
-  const { deviceKinematics, errors, isListening, startListening } = useDeviceKinematics({ enableHighAccuracy: true })
+  const { deviceKinematics, iirfData, rawSensorData, refreshRates, errors, isListening, startListening } = useDeviceKinematics({
+    enableHighAccuracy: true
+  })
 
   return (
     <div>
@@ -17,7 +19,7 @@ export default function App() {
 
       <h3>Data</h3>
 
-      {isListening ? <pre>{JSON.stringify(deviceKinematics, null, 2)}</pre> : <p>Click button to start.</p>}
+      {isListening ? <pre>{JSON.stringify(iirfData.derivativesWrtT, null, 2)}</pre> : <p>Click button to start.</p>}
     </div>
   )
 }

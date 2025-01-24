@@ -7,7 +7,7 @@ import { IIRFData } from '../../use-iirf-data'
 import { PartialDerivative } from './constants'
 
 export default class DeviceKinematics {
-  dimension = 3
+  static dimension = 3
 
   static initial() {
     return new DeviceKinematics(IIRFData.initial)
@@ -18,23 +18,22 @@ export default class DeviceKinematics {
     this.acceleration = sensorData.acceleration
     this.angularVelocity = sensorData.angularVelocity
     this.orientation = sensorData.orientation
-    this.deltaT = sensorData.deltaT
   }
 
   get velocity() {
-    return this.position.derivativeWrtT ?? new Vector3(null, null, null)
+    return this.position.derivativeWrtT
   }
 
   get jerk() {
-    return this.acceleration.derivativeWrtT ?? new Vector3(null, null, null)
+    return this.acceleration.derivativeWrtT
   }
 
   get angularAcceleration() {
-    return this.angularVelocity.derivativeWrtT ?? new Vector3(null, null, null)
+    return this.angularVelocity.derivativeWrtT
   }
 
   get angularJerk() {
-    return this.angularVelocity.derivativeWrtT?.derivativeWrtT ?? new Vector3(null, null, null)
+    return this.angularVelocity.derivativeWrtT.derivativeWrtT
   }
 
   get offset() {
@@ -146,7 +145,7 @@ export default class DeviceKinematics {
         this.generalizedAccelerationStateEquationVector,
         this.generalizedJerkStateEquationVector
       ],
-      this.dimension
+      this.constructor.dimension
     )
   }
 

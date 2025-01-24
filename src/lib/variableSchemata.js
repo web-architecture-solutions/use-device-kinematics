@@ -5,7 +5,7 @@ import { calculateGeodeticDisplacement } from './physics/formulae'
 function calculatePositionDerivativeWrtT(position) {
   if (position.previous) {
     const geodeticDisplacement = calculateGeodeticDisplacement(position, position.previous)
-    const deltaT = big * position.timestamp - big * position.previous.timestamp
+    const deltaT = (big * position.timestamp - big * position.previous.timestamp) / 1000
     const calculateComponentDerivativeWrtT = (_, index) => {
       const delta = geodeticDisplacement[index]
       return delta / deltaT

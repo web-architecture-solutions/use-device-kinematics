@@ -50,7 +50,7 @@ export default class IIRFData {
   }
 
   get derivativesWrtT() {
-    return new IIRFData(this.#derivativesWrtT, this.#previous.derivativesWrtT)
+    return new IIRFData(this.#derivativesWrtT, this.#previous?.derivativesWrtT)
   }
 
   isEqual(iirfData) {
