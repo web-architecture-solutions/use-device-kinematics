@@ -1,6 +1,6 @@
-import { big } from '../../../lib/math'
+import { big } from './math'
 
-import { calculateGeodeticDisplacement } from '../../../lib/physics/formulae'
+import { calculateGeodeticDisplacement } from './physics/formulae'
 
 function calculatePositionDerivativeWrtT(position) {
   if (position.previous) {

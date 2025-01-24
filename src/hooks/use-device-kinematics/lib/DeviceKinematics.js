@@ -2,7 +2,7 @@ import { Matrix, Vector3 } from '../../../lib'
 
 import { VariableNames } from '../../../lib/constants'
 
-import { SensorData } from '../../use-sensor-data'
+import { IIRFData } from '../../use-iirf-data'
 
 import { PartialDerivative } from './constants'
 
@@ -10,7 +10,7 @@ export default class DeviceKinematics {
   dimension = 3
 
   static initial() {
-    return new DeviceKinematics(SensorData.initial)
+    return new DeviceKinematics(IIRFData.initial)
   }
 
   constructor(sensorData) {

@@ -1,6 +1,6 @@
 import IIRFVariable from './IIRFVariable'
 
-import variableSchemata from './variableSchemata'
+import variableSchemata from '../../../lib/variableSchemata'
 
 export default class IIRFData {
   #previous
@@ -26,17 +26,17 @@ export default class IIRFData {
     return variable.hasDerivative ? [...derivatives, [variable.derivativeName, variable.derivativeWrtT]] : derivatives
   }
 
-  constructor(rawSensorData, previousIIRFData) {
+  constructor(preprocessedSensorData, previousIIRFData) {
     this.#previous = previousIIRFData
 
-    Object.entries(rawSensorData).forEach(([variableName, rawVariableData]) => {
+    Object.entries(preprocessedSensorData).forEach(([variableName, preprocessedVariableData]) => {
       const previousVariableData = previousIIRFData?.[variableName] ?? IIRFVariable.initial
 
       this[variableName] = new IIRFVariable(
-        !IIRFVariable.isNullOrUndefined(rawVariableData) ? IIRFVariable.preprocess(rawVariableData) : previousVariableData,
+        !IIRFVariable.isNullOrUndefined(preprocessedVariableData) ? IIRFVariable.prepare(preprocessedVariableData) : previousVariableData,
         previousVariableData,
         variableSchemata[variableName],
-        rawVariableData.timestamp
+        preprocessedVariableData.timestamp
       )
     })
   }

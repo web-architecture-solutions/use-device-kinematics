@@ -1,7 +1,7 @@
-import { useIIRFData } from './hooks/use-iirf-data'
+import useDeviceKinematics from './hooks/use-device-kinematics'
 
 export default function App() {
-  const { iirfData, errors, isListening, startListening } = useIIRFData({ enableHighAccuracy: true })
+  const { deviceKinematics, errors, isListening, startListening } = useDeviceKinematics({ enableHighAccuracy: true })
 
   return (
     <div>
@@ -17,28 +17,7 @@ export default function App() {
 
       <h3>Data</h3>
 
-      {isListening ? (
-        <pre>
-          {JSON.stringify(
-            ((variable) => {
-              return {
-                current: variable,
-                previous: variable.previous,
-                areEqual: variable.isEqual(variable.previous),
-                timestamp: variable.timestamp,
-                previousTimestamp: variable.previous.timestamp,
-                areTimestampsEqual: variable.timestamp === variable.previous.timestamp,
-                secondDerivativeWrtT: variable.derivativeWrtT.derivativeWrtT,
-                previousDerivativeWrtT: variable.previous.derivativeWrtT
-              }
-            })(iirfData.angularVelocity),
-            null,
-            2
-          )}
-        </pre>
-      ) : (
-        <p>Click button to start.</p>
-      )}
+      {isListening ? <pre>{JSON.stringify(deviceKinematics, null, 2)}</pre> : <p>Click button to start.</p>}
     </div>
   )
 }

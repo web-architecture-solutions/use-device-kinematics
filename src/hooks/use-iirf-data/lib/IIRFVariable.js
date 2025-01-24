@@ -16,15 +16,15 @@ export default class IIRFVariable extends Vector3 {
 
   static componentIsNullOrUndefined = (x) => x === null || x === undefined
 
-  static isNullOrUndefined(rawVariableData) {
+  static isNullOrUndefined(preprocessedVariableData) {
     return (
-      IIRFVariable.componentIsNullOrUndefined(rawVariableData.x) ||
-      IIRFVariable.componentIsNullOrUndefined(rawVariableData.y) ||
-      IIRFVariable.componentIsNullOrUndefined(rawVariableData.z)
+      IIRFVariable.componentIsNullOrUndefined(preprocessedVariableData.x) ||
+      IIRFVariable.componentIsNullOrUndefined(preprocessedVariableData.y) ||
+      IIRFVariable.componentIsNullOrUndefined(preprocessedVariableData.z)
     )
   }
 
-  static preprocess = ({ x, y, z } = { x: null, y: null, z: null }) => new Vector3(x, y, z)
+  static prepare = ({ x, y, z } = { x: null, y: null, z: null }) => new Vector3(x, y, z)
 
   static isEqual(variable1, variable2) {
     return variable1.every((component, index) => component === variable2[index])
