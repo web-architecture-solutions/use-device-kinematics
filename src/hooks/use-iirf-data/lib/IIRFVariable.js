@@ -18,34 +18,28 @@ export default class IIRFVariable extends Vector3 {
 
   static isNullOrUndefined(preprocessedVariableData) {
     return (
-      IIRFVariable.componentIsNullOrUndefined(preprocessedVariableData.x) ||
-      IIRFVariable.componentIsNullOrUndefined(preprocessedVariableData.y) ||
-      IIRFVariable.componentIsNullOrUndefined(preprocessedVariableData.z)
+      IIRFVariable.componentIsNullOrUndefined(preprocessedVariableData?.x) ||
+      IIRFVariable.componentIsNullOrUndefined(preprocessedVariableData?.y) ||
+      IIRFVariable.componentIsNullOrUndefined(preprocessedVariableData?.z)
     )
   }
 
   static prepare = ({ x, y, z } = { x: null, y: null, z: null }) => new Vector3(x, y, z)
 
-  static isEqual(variable1, variable2) {
-    return variable1.every((component, index) => component === variable2[index])
-  }
-
   constructor(rawVariableData, previousVariable, schema, timestamp) {
     super()
 
-    this[0] = rawVariableData[0]
-    this[1] = rawVariableData[1]
-    this[2] = rawVariableData[2]
+    this[0] = rawVariableData?.[0] ?? null
+    this[1] = rawVariableData?.[1] ?? null
+    this[2] = rawVariableData?.[2] ?? null
 
     this.#schema = schema
     this.#name = this.#schema.name
     this.#derivativeSchema = this.#schema?.derivativeSchema ?? null
     this.#derivativeName = this.#derivativeSchema?.name ?? null
-    this.#timestamp = timestamp ?? null
+    this.#timestamp = timestamp
 
-    this.#previous = previousVariable
-      ? new IIRFVariable(new Vector3(...previousVariable), null, this.#schema, previousVariable.timestamp)
-      : null
+    this.#previous = previousVariable ? new IIRFVariable(previousVariable, null, this.#schema, previousVariable.timestamp) : null
   }
 
   get name() {
@@ -92,15 +86,11 @@ export default class IIRFVariable extends Vector3 {
       }
       return new IIRFVariable(
         this.map(calculateComponentDerivativeWrtT),
-        this.#previous.derivativeWrtT ?? IIRFVariable.initial,
+        this.#previous?.derivativeWrtT ?? null,
         this.#schema,
         this.#timestamp
       )
     }
     return null
-  }
-
-  isEqual(variable) {
-    return IIRFVariable.isEqual(this, variable)
   }
 }

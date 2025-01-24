@@ -16,12 +16,6 @@ export default class IIRFData {
     return new IIRFData(this.initialData, null)
   }
 
-  static isEqual(iirfData1, iirfData2) {
-    return Object.entries(iirfData1).every(([variableName, variableData]) => {
-      return IIRFVariable.isEqual(variableData, iirfData2[variableName])
-    })
-  }
-
   static variableToDerivativeEntries(derivatives, [_, variable]) {
     return variable.hasDerivative ? [...derivatives, [variable.derivativeName, variable.derivativeWrtT]] : derivatives
   }
@@ -30,19 +24,15 @@ export default class IIRFData {
     this.#previous = previousIIRFData
 
     Object.entries(preprocessedSensorData).forEach(([variableName, preprocessedVariableData]) => {
-      const previousVariableData = previousIIRFData?.[variableName] ?? IIRFVariable.initial
+      const previousVariableData = previousIIRFData?.[variableName] ?? null
 
       this[variableName] = new IIRFVariable(
         !IIRFVariable.isNullOrUndefined(preprocessedVariableData) ? IIRFVariable.prepare(preprocessedVariableData) : previousVariableData,
         previousVariableData,
         variableSchemata[variableName],
-        preprocessedVariableData.timestamp
+        preprocessedVariableData?.timestamp ?? null
       )
     })
-  }
-
-  get isReady() {
-    return !this.isEqual(IIRFData.initial)
   }
 
   get #derivativesWrtT() {
@@ -51,9 +41,5 @@ export default class IIRFData {
 
   get derivativesWrtT() {
     return new IIRFData(this.#derivativesWrtT, this.#previous?.derivativesWrtT)
-  }
-
-  isEqual(iirfData) {
-    return IIRFData.isEqual(this, iirfData)
   }
 }
