@@ -2,10 +2,9 @@ import IIRFVariable from './IIRFVariable'
 
 import variableSchemata from './variableSchemata'
 
-const nullOrUndefined = (x) => x === null || x === undefined
-const isVariableNullOrUndefined = (variable) => nullOrUndefined(variable?.x) || nullOrUndefined(variable?.y) || nullOrUndefined(variable?.z)
-
 export default class IIRFData {
+  #previous
+
   static initialData = {
     position: IIRFVariable.initialData,
     acceleration: IIRFVariable.initialData,
@@ -17,19 +16,26 @@ export default class IIRFData {
     return new IIRFData(this.initialData, null)
   }
 
-  static isEqual(sensorData1, sensorData2) {
-    return Object.entries(sensorData1).every(([variableName, variableData]) => {
-      return IIRFVariable.isEqual(variableData, sensorData2[variableName])
+  static isEqual(iirfData1, iirfData2) {
+    return Object.entries(iirfData1).every(([variableName, variableData]) => {
+      return IIRFVariable.isEqual(variableData, iirfData2[variableName])
     })
   }
 
-  constructor(rawSensorData, previousSensorData) {
+  static variableToDerivativeEntries(derivatives, [_, variable]) {
+    return variable.hasDerivative ? [...derivatives, [variable.derivativeName, variable.derivativeWrtT]] : derivatives
+  }
+
+  constructor(rawSensorData, previousIIRFData) {
+    this.#previous = previousIIRFData
+
     Object.entries(rawSensorData).forEach(([variableName, rawVariableData]) => {
-      const previousVariableData = previousSensorData?.[variableName] ?? IIRFVariable.initial
+      const previousVariableData = previousIIRFData?.[variableName] ?? IIRFVariable.initial
+
       this[variableName] = new IIRFVariable(
-        isVariableNullOrUndefined ? IIRFVariable.preprocess(rawVariableData) : previousVariableData,
+        !IIRFVariable.isNullOrUndefined(rawVariableData) ? IIRFVariable.preprocess(rawVariableData) : previousVariableData,
         previousVariableData,
-        variableSchemata[variableName] ?? null,
+        variableSchemata[variableName],
         rawVariableData.timestamp
       )
     })
@@ -40,22 +46,11 @@ export default class IIRFData {
   }
 
   get #derivativesWrtT() {
-    return this.reduceEntriesToObject((derivatives, [_, variable]) => {
-      return variable.hasDerivative ? [...derivatives, [variable.derivativeName, variable.derivativeWrtT]] : derivatives
-    })
+    return Object.fromEntries(Object.entries(this).reduce(IIRFData.variableToDerivativeEntries, []))
   }
 
   get derivativesWrtT() {
-    return new IIRFData(this.#derivativesWrtT, IIRFData.initial)
-  }
-
-  // BUG
-  everyEntry(callback) {
-    Object.entries(this).every(callback)
-  }
-
-  reduceEntriesToObject(reducer) {
-    return Object.fromEntries(Object.entries(this).reduce(reducer, []))
+    return new IIRFData(this.#derivativesWrtT, this.#previous.derivativesWrtT)
   }
 
   isEqual(iirfData) {

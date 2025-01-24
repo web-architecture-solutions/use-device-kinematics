@@ -14,6 +14,16 @@ export default class IIRFVariable extends Vector3 {
     return new IIRFVariable(this.initialData, null, IIRFVariable, null)
   }
 
+  static componentIsNullOrUndefined = (x) => x === null || x === undefined
+
+  static isNullOrUndefined(rawVariableData) {
+    return (
+      IIRFVariable.componentIsNullOrUndefined(rawVariableData.x) ||
+      IIRFVariable.componentIsNullOrUndefined(rawVariableData.y) ||
+      IIRFVariable.componentIsNullOrUndefined(rawVariableData.z)
+    )
+  }
+
   static preprocess = ({ x, y, z } = { x: null, y: null, z: null }) => new Vector3(x, y, z)
 
   static isEqual(variable1, variable2) {
@@ -29,10 +39,30 @@ export default class IIRFVariable extends Vector3 {
 
     this.#previous = previousVariable
     this.#schema = schema
-    this.#name = schema.name
+    this.#name = this.#schema.name
     this.#derivativeSchema = this.#schema?.derivativeSchema ?? null
     this.#derivativeName = this.#derivativeSchema?.name ?? null
     this.#timestamp = timestamp ?? null
+  }
+
+  get name() {
+    return this.#name
+  }
+
+  get x() {
+    return this[0]
+  }
+
+  get y() {
+    return this[1]
+  }
+
+  get z() {
+    return this[2]
+  }
+
+  get timestamp() {
+    return this.#timestamp
   }
 
   get previous() {
@@ -41,10 +71,6 @@ export default class IIRFVariable extends Vector3 {
 
   get hasDerivative() {
     return this.#derivativeSchema ? true : false
-  }
-
-  get name() {
-    return this.#name
   }
 
   get derivativeName() {
@@ -69,10 +95,6 @@ export default class IIRFVariable extends Vector3 {
       )
     }
     return null
-  }
-
-  get timestamp() {
-    return this.#timestamp
   }
 
   isEqual(variable) {
