@@ -37,12 +37,15 @@ export default class IIRFVariable extends Vector3 {
     this[1] = rawVariableData[1]
     this[2] = rawVariableData[2]
 
-    this.#previous = previousVariable
     this.#schema = schema
     this.#name = this.#schema.name
     this.#derivativeSchema = this.#schema?.derivativeSchema ?? null
     this.#derivativeName = this.#derivativeSchema?.name ?? null
     this.#timestamp = timestamp ?? null
+
+    this.#previous = previousVariable
+      ? new IIRFVariable(new Vector3(...previousVariable), null, this.#schema, previousVariable.timestamp)
+      : null
   }
 
   get name() {
