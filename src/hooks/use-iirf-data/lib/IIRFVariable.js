@@ -154,7 +154,6 @@ export default class IIRFVariable extends Vector3 {
       previousY: this.previous?.y,
       previousZ: this.previous?.z,
       previousTimestamp: this.previous?.timestamp,
-      previousDerivativeWrtT: this.previous?.derivativeWrtT,
       areComponentsEqualToPrevious: this.areComponentsEqualToPrevious,
       isTimestampEqualToPrevious: this.isTimestampEqualToPrevious,
       isEqualToPrevious: this.isEqualToPrevious
