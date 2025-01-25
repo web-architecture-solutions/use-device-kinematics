@@ -23,19 +23,19 @@ export default class DeviceKinematics {
   }
 
   get velocity() {
-    return this.position.derivativeWrtT ?? IIRFVariable.initial
+    return this.position.derivativeWrtT
   }
 
   get jerk() {
-    return this.acceleration.derivativeWrtT ?? IIRFVariable.initial
+    return this.acceleration.derivativeWrtT
   }
 
   get angularAcceleration() {
-    return this.angularVelocity.derivativeWrtT ?? IIRFVariable.initial
+    return this.angularVelocity.derivativeWrtT
   }
 
   get angularJerk() {
-    return this.angularVelocity.derivativeWrtT?.derivativeWrtT
+    return this.angularVelocity.derivativeWrtT.derivativeWrtT
   }
 
   get offset() {
@@ -99,8 +99,13 @@ export default class DeviceKinematics {
     }
   }
 
-  static mapCoefficientsToStateEquationVector({ position, velocity, acceleration, jerk }) {
-    return [position, velocity, acceleration, jerk]
+  static mapCoefficientsToStateEquationVector(coefficients) {
+    return [
+      coefficients[VariableNames.POSITION],
+      coefficients[VariableNames.VELOCITY],
+      coefficients[VariableNames.ACCELERATION],
+      coefficients[VariableNames.JERK]
+    ]
   }
 
   get generalizedPositionStateEquationVector() {
