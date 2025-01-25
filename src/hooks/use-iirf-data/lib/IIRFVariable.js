@@ -1,5 +1,10 @@
 import { Vector3, big } from '../../../lib/math'
 
+function formatNumber(number, length) {
+  if (!number) return number
+  return number > 0 ? `+${number.toFixed(length)}` : number === 0 ? `0${number.toFixed(length)}` : number.toFixed(length)
+}
+
 export default class IIRFVariable extends Vector3 {
   #previous
   #timestamp
@@ -145,15 +150,15 @@ export default class IIRFVariable extends Vector3 {
   get json() {
     return {
       name: this.name,
-      x: this.x,
-      y: this.y,
-      z: this.z,
-      timestamp: this.timestamp,
-      derivativeWrtT: this.derivativeWrtT,
-      previousX: this.previous?.x,
-      previousY: this.previous?.y,
-      previousZ: this.previous?.z,
-      previousTimestamp: this.previous?.timestamp,
+      x: formatNumber(this.x, 10),
+      y: formatNumber(this.y, 10),
+      z: formatNumber(this.z, 10),
+      timestamp: formatNumber(this.timestamp, 10),
+      previousX: formatNumber(this.previous?.x, 10),
+      previousY: formatNumber(this.previous?.y, 10),
+      previousZ: formatNumber(this.previous?.z, 10),
+      previousTimestamp: formatNumber(this.previous?.timestamp, 10),
+      derivativeWrtT: this.derivativeWrtT?.map((component) => formatNumber(component, 10)),
       areComponentsEqualToPrevious: this.areComponentsEqualToPrevious,
       isTimestampEqualToPrevious: this.isTimestampEqualToPrevious,
       isEqualToPrevious: this.isEqualToPrevious
