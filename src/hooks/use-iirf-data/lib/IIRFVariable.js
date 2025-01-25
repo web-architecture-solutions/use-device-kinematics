@@ -4,7 +4,6 @@ import { formatNumber, isNullOrUndefined } from './util'
 
 export default class IIRFVariable extends Vector3 {
   #previous
-  #timestamp
   #deltaT
   #schema
   #name
@@ -27,7 +26,7 @@ export default class IIRFVariable extends Vector3 {
 
   static prepare = ({ x, y, z } = { x: null, y: null, z: null }) => new Vector3(x, y, z)
 
-  constructor(rawVariableData, previousVariable, schema, timestamp, deltaT) {
+  constructor(rawVariableData, previousVariable, schema, deltaT) {
     super()
 
     this[0] = rawVariableData?.[0] ?? null
@@ -38,10 +37,9 @@ export default class IIRFVariable extends Vector3 {
     this.#name = this.#schema.name
     this.#derivativeSchema = this.#schema?.derivativeSchema ?? null
     this.#derivativeName = this.#derivativeSchema?.name ?? null
-    this.#timestamp = timestamp
     this.#deltaT = deltaT
 
-    this.#previous = previousVariable ? new IIRFVariable(previousVariable, null, this.#schema, previousVariable.timestamp, deltaT) : null
+    this.#previous = previousVariable ? new IIRFVariable(previousVariable, null, this.#schema, deltaT) : null
   }
 
   get name() {
@@ -58,10 +56,6 @@ export default class IIRFVariable extends Vector3 {
 
   get z() {
     return this[2]
-  }
-
-  get timestamp() {
-    return this.#timestamp
   }
 
   get deltaT() {
@@ -91,61 +85,11 @@ export default class IIRFVariable extends Vector3 {
     if (this.previous) {
       const calculateComponentDerivativeWrtT = (componentValue, index) => {
         const delta = big * componentValue - big * this.previous[index]
-        return delta / (big * this.deltaT)
+        return delta / (big * (this.deltaT / 1000))
       }
-      return new IIRFVariable(
-        this.map(calculateComponentDerivativeWrtT),
-        this.previous?.derivativeWrtT ?? null,
-        this.schema,
-        this.timestamp,
-        this.deltaT
-      )
+      return new IIRFVariable(this.map(calculateComponentDerivativeWrtT), this.previous?.derivativeWrtT ?? null, this.schema, this.deltaT)
     }
     return null
-  }
-
-  static areComponentsEqual(variable1, variable2) {
-    if (!variable1 && !variable2) return true
-    if (!variable1 || !variable2) return false
-    if (!variable1.x && !variable1.y && !variable1.z && !variable2.x && !variable2.y && !variable2.z) return true
-    if (!variable1.x || !variable1.y || !variable1.z || !variable2.x || !variable2.y || !variable2.z) return false
-    return variable1.x === variable2.x && variable1.y === variable2.y && variable1.z === variable2.z
-  }
-
-  static areTimestampsEqual(variable1, variable2) {
-    if (!variable1 && !variable2) return true
-    if (!variable1 || !variable2) return false
-    if (!variable1?.timestamp && !variable2?.timestamp) return true
-    if (!variable1?.timestamp || !variable2?.timestamp) return false
-    return variable1.timestamp === variable2.timestamp
-  }
-
-  static isEqual(variable1, variable2) {
-    return IIRFVariable.areComponentsEqual(variable1, variable2) && IIRFVariable.areTimestampsEqual(variable1, variable2)
-  }
-
-  areComponentsEqual(variable) {
-    return IIRFVariable.areComponentsEqual(this, variable)
-  }
-
-  areTimestampsEqual(variable) {
-    return IIRFVariable.areTimestampsEqual(this, variable)
-  }
-
-  isEqual(variable) {
-    return IIRFVariable.isEqual(this, variable)
-  }
-
-  get areComponentsEqualToPrevious() {
-    return this.areComponentsEqual(this.previous)
-  }
-
-  get isTimestampEqualToPrevious() {
-    return this.areTimestampsEqual(this.previous)
-  }
-
-  get isEqualToPrevious() {
-    return this.isEqual(this.previous)
   }
 
   get json() {
@@ -154,19 +98,29 @@ export default class IIRFVariable extends Vector3 {
       x: this.x,
       y: this.y,
       z: this.z,
-      timestamp: this.timestamp,
+      deltaT: this.deltaT,
       previousX: this.previous?.x,
       previousY: this.previous?.y,
       previousZ: this.previous?.z,
-      previousTimestamp: this.previous?.timestamp,
+      previousDeltaT: this.previous?.deltaT,
       derivativeWrtT: this.derivativeWrtT,
-      areComponentsEqualToPrevious: this.areComponentsEqualToPrevious,
-      isTimestampEqualToPrevious: this.isTimestampEqualToPrevious,
-      isEqualToPrevious: this.isEqualToPrevious
+      isEqualToPrevious: this.isEqual(this.previous)
     }
   }
 
   get toString() {
     return JSON.stringify(this.json, null, 2)
+  }
+
+  static isEqual(variable1, variable2) {
+    if (!variable1 && !variable2) return true
+    if (!variable1 || !variable2) return false
+    if (!variable1.x && !variable1.y && !variable1.z && !variable2.x && !variable2.y && !variable2.z) return true
+    if (!variable1.x || !variable1.y || !variable1.z || !variable2.x || !variable2.y || !variable2.z) return false
+    return variable1.x === variable2.x && variable1.y === variable2.y && variable1.z === variable2.z
+  }
+
+  isEqual(variable) {
+    return IIRFVariable.isEqual(this, variable)
   }
 }

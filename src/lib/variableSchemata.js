@@ -9,13 +9,12 @@ function calculatePositionDerivativeWrtT(position) {
     const geodeticDisplacement = calculateGeodeticDisplacement(position, position.previous)
     const calculateComponentDerivativeWrtT = (_, index) => {
       const delta = geodeticDisplacement[index]
-      return delta / (big * position.deltaT)
+      return delta / (big * (position.deltaT / 1000))
     }
     return new IIRFVariable(
       position.map(calculateComponentDerivativeWrtT),
       position.previous?.derivativeWrtT ?? null,
       position.schema,
-      position.timestamp,
       position.deltaT
     )
   }
