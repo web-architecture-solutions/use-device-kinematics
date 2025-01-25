@@ -1,13 +1,11 @@
 import { Vector3, big } from '../../../lib/math'
 
-function formatNumber(number, length) {
-  if (!number) return number
-  return number > 0 ? `+${number.toFixed(length)}` : number === 0 ? `0${number.toFixed(length)}` : number.toFixed(length)
-}
+import { formatNumber, isNullOrUndefined } from './util'
 
 export default class IIRFVariable extends Vector3 {
   #previous
   #timestamp
+  #deltaT
   #schema
   #name
   #derivativeSchema
@@ -19,19 +17,17 @@ export default class IIRFVariable extends Vector3 {
     return new IIRFVariable(this.initialData, null, IIRFVariable, null)
   }
 
-  static componentIsNullOrUndefined = (x) => x === null || x === undefined
-
   static isNullOrUndefined(preprocessedVariableData) {
     return (
-      IIRFVariable.componentIsNullOrUndefined(preprocessedVariableData?.x) ||
-      IIRFVariable.componentIsNullOrUndefined(preprocessedVariableData?.y) ||
-      IIRFVariable.componentIsNullOrUndefined(preprocessedVariableData?.z)
+      isNullOrUndefined(preprocessedVariableData?.x) ||
+      isNullOrUndefined(preprocessedVariableData?.y) ||
+      isNullOrUndefined(preprocessedVariableData?.z)
     )
   }
 
   static prepare = ({ x, y, z } = { x: null, y: null, z: null }) => new Vector3(x, y, z)
 
-  constructor(rawVariableData, previousVariable, schema, timestamp) {
+  constructor(rawVariableData, previousVariable, schema, timestamp, deltaT) {
     super()
 
     this[0] = rawVariableData?.[0] ?? null
@@ -43,8 +39,9 @@ export default class IIRFVariable extends Vector3 {
     this.#derivativeSchema = this.#schema?.derivativeSchema ?? null
     this.#derivativeName = this.#derivativeSchema?.name ?? null
     this.#timestamp = timestamp
+    this.#deltaT = deltaT
 
-    this.#previous = previousVariable ? new IIRFVariable(previousVariable, null, this.#schema, previousVariable.timestamp) : null
+    this.#previous = previousVariable ? new IIRFVariable(previousVariable, null, this.#schema, previousVariable.timestamp, deltaT) : null
   }
 
   get name() {
@@ -65,6 +62,10 @@ export default class IIRFVariable extends Vector3 {
 
   get timestamp() {
     return this.#timestamp
+  }
+
+  get deltaT() {
+    return this.#deltaT
   }
 
   get previous() {
@@ -88,16 +89,16 @@ export default class IIRFVariable extends Vector3 {
       return this.schema.calculateDerivativeWrtT(this)
     }
     if (this.previous) {
-      const deltaT = (big * this.timestamp - big * this.previous.timestamp) / 1000
       const calculateComponentDerivativeWrtT = (componentValue, index) => {
         const delta = big * componentValue - big * this.previous[index]
-        return delta / deltaT
+        return delta / (big * this.deltaT)
       }
       return new IIRFVariable(
         this.map(calculateComponentDerivativeWrtT),
         this.previous?.derivativeWrtT ?? null,
         this.schema,
-        this.timestamp
+        this.timestamp,
+        this.deltaT
       )
     }
     return null
@@ -150,18 +151,22 @@ export default class IIRFVariable extends Vector3 {
   get json() {
     return {
       name: this.name,
-      x: formatNumber(this.x, 10),
-      y: formatNumber(this.y, 10),
-      z: formatNumber(this.z, 10),
-      timestamp: formatNumber(this.timestamp, 10),
-      previousX: formatNumber(this.previous?.x, 10),
-      previousY: formatNumber(this.previous?.y, 10),
-      previousZ: formatNumber(this.previous?.z, 10),
-      previousTimestamp: formatNumber(this.previous?.timestamp, 10),
-      derivativeWrtT: this.derivativeWrtT?.map((component) => formatNumber(component, 10)),
+      x: this.x,
+      y: this.y,
+      z: this.z,
+      timestamp: this.timestamp,
+      previousX: this.previous?.x,
+      previousY: this.previous?.y,
+      previousZ: this.previous?.z,
+      previousTimestamp: this.previous?.timestamp,
+      derivativeWrtT: this.derivativeWrtT,
       areComponentsEqualToPrevious: this.areComponentsEqualToPrevious,
       isTimestampEqualToPrevious: this.isTimestampEqualToPrevious,
       isEqualToPrevious: this.isEqualToPrevious
     }
+  }
+
+  get toString() {
+    return JSON.stringify(this.json, null, 2)
   }
 }

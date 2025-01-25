@@ -20,7 +20,7 @@ export default class IIRFData {
     return variable.hasDerivative ? [...derivatives, [variable.derivativeName, variable.derivativeWrtT]] : derivatives
   }
 
-  constructor(preprocessedSensorData, previousIIRFData) {
+  constructor(preprocessedSensorData, previousIIRFData, deltaT) {
     this.#previous = previousIIRFData
 
     Object.entries(preprocessedSensorData).forEach(([variableName, preprocessedVariableData]) => {
@@ -30,7 +30,8 @@ export default class IIRFData {
         !IIRFVariable.isNullOrUndefined(preprocessedVariableData) ? IIRFVariable.prepare(preprocessedVariableData) : previousVariableData,
         previousVariableData,
         variableSchemata[variableName],
-        preprocessedVariableData?.timestamp ?? null
+        preprocessedVariableData?.timestamp ?? null,
+        deltaT
       )
     })
   }
@@ -43,15 +44,15 @@ export default class IIRFData {
     return new IIRFData(this.#derivativesWrtT, this.#previous?.derivativesWrtT)
   }
 
-  get toString() {
-    return JSON.stringify(
-      Object.fromEntries(
-        Object.entries(this).map(([variableName, variable]) => {
-          return [variableName, variable.json]
-        })
-      ),
-      null,
-      2
+  get json() {
+    return Object.fromEntries(
+      Object.entries(this).map(([variableName, variable]) => {
+        return [variableName, variable.json]
+      })
     )
+  }
+
+  get toString() {
+    return JSON.stringify(this.json, null, 2)
   }
 }

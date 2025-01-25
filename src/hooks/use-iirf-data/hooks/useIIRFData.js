@@ -8,13 +8,10 @@ export default function useIIRFData(config = {}) {
   const { rawSensorData, refreshRates, errors, isListening, startListening } = useRawSensorData(config)
 
   const [refreshRate, setRefreshRate] = useState(null)
-
-  useEffect(() => setRefreshRate(Math.max(...Object.values(refreshRates))), [refreshRates])
-
-  const iirfData = useIIRFilter(refreshRate, isListening, rawSensorData)
+  useEffect(() => setRefreshRate(Math.ceil(Math.max(...Object.values(refreshRates)))), [refreshRates])
 
   return {
-    iirfData,
+    iirfData: useIIRFilter(refreshRate, isListening, rawSensorData),
     rawSensorData,
     refreshRates,
     errors,

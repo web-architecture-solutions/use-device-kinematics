@@ -1,3 +1,5 @@
+import IIRFVariable from '../hooks/use-iirf-data/lib/IIRFVariable'
+
 import { big } from './math'
 
 import { calculateGeodeticDisplacement } from './physics/formulae'
@@ -5,12 +7,17 @@ import { calculateGeodeticDisplacement } from './physics/formulae'
 function calculatePositionDerivativeWrtT(position) {
   if (position.previous) {
     const geodeticDisplacement = calculateGeodeticDisplacement(position, position.previous)
-    const deltaT = (big * position.timestamp - big * position.previous.timestamp) / 1000
     const calculateComponentDerivativeWrtT = (_, index) => {
       const delta = geodeticDisplacement[index]
-      return delta / deltaT
+      return delta / (big * position.deltaT)
     }
-    return position.map(calculateComponentDerivativeWrtT)
+    return new IIRFVariable(
+      position.map(calculateComponentDerivativeWrtT),
+      position.previous?.derivativeWrtT ?? null,
+      position.schema,
+      position.timestamp,
+      position.deltaT
+    )
   }
   return null
 }
