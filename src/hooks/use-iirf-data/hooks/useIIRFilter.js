@@ -6,19 +6,15 @@ import { toRadians } from '../../../lib/math'
 
 import IIRFData from '../lib/IIRFData'
 
-//const refreshRate = 60
-
 export default function useIIRFilter(refreshRate, isListening, rawSensorData) {
-  const [startClock, setStartClock] = useState(false)
+  const [isClockRunning, setIsClockRunning] = useState(false)
   const [iirfData, setIIRFData] = useState(IIRFData.initial)
-
   const clockDelay = useMemo(() => 1000 / refreshRate, [refreshRate])
   const deltaT = useMemo(() => 1 / refreshRate, [refreshRate])
-
-  const timestamp = useClock(clockDelay, startClock)
-
+  const timestamp = useClock(clockDelay, isClockRunning)
   useEffect(() => {
-    if (isListening && !startClock) setStartClock(true)
+    if (!isListening && isClockRunning) setIsClockRunning(false)
+    if (isListening && !isClockRunning) setIsClockRunning(true)
     if (isListening) {
       setIIRFData((previousIIRFData) => {
         return new IIRFData(
@@ -53,6 +49,5 @@ export default function useIIRFilter(refreshRate, isListening, rawSensorData) {
       })
     }
   }, [isListening, timestamp])
-
   return iirfData
 }

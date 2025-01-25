@@ -1,15 +1,13 @@
 import { useEffect, useRef } from 'react'
 
-export default function useClock(delay, startCondition) {
+export default function useClock(delay, isClockRunning) {
   const timestampRef = useRef(null)
   const startTimeRef = useRef(null)
-
   const updateTimestamp = () => {
     timestampRef.current = performance.now() - startTimeRef.current
   }
-
   useEffect(() => {
-    if (startCondition) {
+    if (isClockRunning) {
       startTimeRef.current = performance.now()
       const intervalId = setInterval(updateTimestamp, delay)
       return () => clearInterval(intervalId)
@@ -17,7 +15,6 @@ export default function useClock(delay, startCondition) {
       timestampRef.current = null
       startTimeRef.current = null
     }
-  }, [startCondition, delay])
-
+  }, [isClockRunning, delay])
   return timestampRef.current
 }

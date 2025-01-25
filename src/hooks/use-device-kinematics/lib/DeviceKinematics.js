@@ -1,4 +1,4 @@
-import { Matrix, Vector3 } from '../../../lib'
+import { Matrix } from '../../../lib'
 
 import { VariableNames } from '../../../lib/constants'
 
