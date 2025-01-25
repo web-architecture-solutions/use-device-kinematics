@@ -42,4 +42,16 @@ export default class IIRFData {
   get derivativesWrtT() {
     return new IIRFData(this.#derivativesWrtT, this.#previous?.derivativesWrtT)
   }
+
+  get toString() {
+    return JSON.stringify(
+      Object.fromEntries(
+        Object.entries(this).map(([variableName, variable]) => {
+          return [variableName, variable.json]
+        })
+      ),
+      null,
+      2
+    )
+  }
 }

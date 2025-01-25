@@ -66,6 +66,10 @@ export default class IIRFVariable extends Vector3 {
     return this.#previous
   }
 
+  get schema() {
+    return this.#schema
+  }
+
   get hasDerivative() {
     return this.#derivativeSchema ? true : false
   }
@@ -75,8 +79,8 @@ export default class IIRFVariable extends Vector3 {
   }
 
   get derivativeWrtT() {
-    if (this.#schema?.calculateDerivativeWrtT) {
-      return this.#schema.calculateDerivativeWrtT(this)
+    if (this.schema?.calculateDerivativeWrtT) {
+      return this.schema.calculateDerivativeWrtT(this)
     }
     if (this.previous) {
       const deltaT = (big * this.timestamp - big * this.previous.timestamp) / 1000
@@ -86,11 +90,74 @@ export default class IIRFVariable extends Vector3 {
       }
       return new IIRFVariable(
         this.map(calculateComponentDerivativeWrtT),
-        this.#previous?.derivativeWrtT ?? null,
-        this.#schema,
-        this.#timestamp
+        this.previous?.derivativeWrtT ?? null,
+        this.schema,
+        this.timestamp
       )
     }
     return null
+  }
+
+  static areComponentsEqual(variable1, variable2) {
+    if (!variable1 && !variable2) return true
+    if (!variable1 || !variable2) return false
+    if (!variable1.x && !variable1.y && !variable1.z && !variable2.x && !variable2.y && !variable2.z) return true
+    if (!variable1.x || !variable1.y || !variable1.z || !variable2.x || !variable2.y || !variable2.z) return false
+    return variable1.x === variable2.x && variable1.y === variable2.y && variable1.z === variable2.z
+  }
+
+  static areTimestampsEqual(variable1, variable2) {
+    if (!variable1 && !variable2) return true
+    if (!variable1 || !variable2) return false
+    if (!variable1?.timestamp && !variable2?.timestamp) return true
+    if (!variable1?.timestamp || !variable2?.timestamp) return false
+    return variable1.timestamp === variable2.timestamp
+  }
+
+  static isEqual(variable1, variable2) {
+    return IIRFVariable.areComponentsEqual(variable1, variable2) && IIRFVariable.areTimestampsEqual(variable1, variable2)
+  }
+
+  areComponentsEqual(variable) {
+    return IIRFVariable.areComponentsEqual(this, variable)
+  }
+
+  areTimestampsEqual(variable) {
+    return IIRFVariable.areTimestampsEqual(this, variable)
+  }
+
+  isEqual(variable) {
+    return IIRFVariable.isEqual(this, variable)
+  }
+
+  get areComponentsEqualToPrevious() {
+    return this.areComponentsEqual(this.previous)
+  }
+
+  get isTimestampEqualToPrevious() {
+    return this.areTimestampsEqual(this.previous)
+  }
+
+  get isEqualToPrevious() {
+    return this.isEqual(this.previous)
+  }
+
+  get json() {
+    return {
+      name: this.name,
+      x: this.x,
+      y: this.y,
+      z: this.z,
+      timestamp: this.timestamp,
+      derivativeWrtT: this.derivativeWrtT,
+      previousX: this.previous?.x,
+      previousY: this.previous?.y,
+      previousZ: this.previous?.z,
+      previousTimestamp: this.previous?.timestamp,
+      previousDerivativeWrtT: this.previous?.derivativeWrtT,
+      areComponentsEqualToPrevious: this.areComponentsEqualToPrevious,
+      isTimestampEqualToPrevious: this.isTimestampEqualToPrevious,
+      isEqualToPrevious: this.isEqualToPrevious
+    }
   }
 }
