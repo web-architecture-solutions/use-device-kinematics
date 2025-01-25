@@ -10,6 +10,8 @@ import { useRadialMousePosition, useMouseVelocity } from './hooks'
 
 import styles from './style.module.css'
 
+const hue = Math.random() * 360
+
 export default function App() {
   const { theta } = useRadialMousePosition()
 
@@ -19,8 +21,8 @@ export default function App() {
     <div className={styles.App}>
       <Container>
         <Frame>
-          <Canvas camera={camera} className={styles.Canvas} style={{ filter: `hue-rotate(${theta}deg)` }}>
-            <Scene mouseVelocity={mouseVelocity} trapTriggered={trapTriggered} setTrapTriggered={setTrapTriggered} theta={theta} />
+          <Canvas camera={camera} className={styles.Canvas} style={{ filter: `hue-rotate(${hue}deg)` }}>
+            <Scene mouseVelocity={mouseVelocity} trapTriggered={trapTriggered} setTrapTriggered={setTrapTriggered} theta={0} />
           </Canvas>
         </Frame>
       </Container>
