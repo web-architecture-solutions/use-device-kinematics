@@ -1,1 +1,1 @@
-export const big = 1000000000000000
+export const S = 1000000000000000

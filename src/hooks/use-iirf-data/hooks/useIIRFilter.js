@@ -44,7 +44,8 @@ export default function useIIRFilter(refreshRate, isListening, rawSensorData) {
               deltaT
             }
           },
-          previousIIRFData
+          previousIIRFData,
+          deltaT
         )
       })
     }

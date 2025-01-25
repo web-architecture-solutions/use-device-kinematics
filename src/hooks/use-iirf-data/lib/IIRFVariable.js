@@ -1,6 +1,4 @@
-import { Vector3, big } from '../../../lib/math'
-
-import { formatNumber, isNullOrUndefined } from './util'
+import { Vector3, S } from '../../../lib/math'
 
 export default class IIRFVariable extends Vector3 {
   #previous
@@ -13,14 +11,16 @@ export default class IIRFVariable extends Vector3 {
   static initialData = { x: null, y: null, z: null }
 
   static get initial() {
-    return new IIRFVariable(this.initialData, null, IIRFVariable, null)
+    return new IIRFVariable(this.initialData, null, {}, null)
   }
 
-  static isNullOrUndefined(preprocessedVariableData) {
+  static componentIsNullOrUndefined = (x) => x === null || x === undefined
+
+  static isNullOrUndefined(normalizedVariableData) {
     return (
-      isNullOrUndefined(preprocessedVariableData?.x) ||
-      isNullOrUndefined(preprocessedVariableData?.y) ||
-      isNullOrUndefined(preprocessedVariableData?.z)
+      IIRFVariable.componentIsNullOrUndefined(normalizedVariableData?.x) ||
+      IIRFVariable.componentIsNullOrUndefined(normalizedVariableData?.y) ||
+      IIRFVariable.componentIsNullOrUndefined(normalizedVariableData?.z)
     )
   }
 
@@ -39,7 +39,7 @@ export default class IIRFVariable extends Vector3 {
     this.#derivativeName = this.#derivativeSchema?.name ?? null
     this.#deltaT = deltaT
 
-    this.#previous = previousVariable ? new IIRFVariable(previousVariable, null, this.#schema, deltaT) : null
+    this.#previous = previousVariable
   }
 
   get name() {
@@ -71,7 +71,7 @@ export default class IIRFVariable extends Vector3 {
   }
 
   get hasDerivative() {
-    return this.#derivativeSchema ? true : false
+    return Boolean(this.#derivativeSchema)
   }
 
   get derivativeName() {
@@ -84,12 +84,12 @@ export default class IIRFVariable extends Vector3 {
     }
     if (this.previous) {
       const calculateComponentDerivativeWrtT = (componentValue, index) => {
-        const delta = big * componentValue - big * this.previous[index]
-        return delta / (big * (this.deltaT / 1000))
+        const delta = S * componentValue - S * this.previous[index]
+        return delta / (S * this.deltaT)
       }
-      return new IIRFVariable(this.map(calculateComponentDerivativeWrtT), this.previous?.derivativeWrtT ?? null, this.schema, this.deltaT)
+      return new IIRFVariable(this.map(calculateComponentDerivativeWrtT), this.previous.derivativeWrtT, this.schema, this.deltaT)
     }
-    return null
+    return IIRFVariable.initial
   }
 
   get json() {
@@ -99,10 +99,10 @@ export default class IIRFVariable extends Vector3 {
       y: this.y,
       z: this.z,
       deltaT: this.deltaT,
-      previousX: this.previous?.x,
-      previousY: this.previous?.y,
-      previousZ: this.previous?.z,
-      previousDeltaT: this.previous?.deltaT,
+      previousX: this.previous?.x ?? null,
+      previousY: this.previous?.y ?? null,
+      previousZ: this.previous?.z ?? null,
+      previousDeltaT: this.previous?.deltaT ?? null,
       derivativeWrtT: this.derivativeWrtT,
       isEqualToPrevious: this.isEqual(this.previous)
     }

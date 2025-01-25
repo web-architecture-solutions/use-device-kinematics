@@ -1,9 +1,10 @@
 import IIRFVariable from './IIRFVariable'
 
-import variableSchemata from '../../../lib/variableSchemata'
+import { variableSchemata } from '../../../lib'
 
 export default class IIRFData {
   #previous
+  #deltaT
 
   static initialData = {
     position: IIRFVariable.initialData,
@@ -13,26 +14,31 @@ export default class IIRFData {
   }
 
   static get initial() {
-    return new IIRFData(this.initialData, null)
+    return new IIRFData(this.initialData, null, null)
   }
 
   static variableToDerivativeEntries(derivatives, [_, variable]) {
     return variable.hasDerivative ? [...derivatives, [variable.derivativeName, variable.derivativeWrtT]] : derivatives
   }
 
-  constructor(preprocessedSensorData, previousIIRFData) {
+  constructor(normalizedSensorData, previousIIRFData, deltaT) {
     this.#previous = previousIIRFData
+    this.#deltaT = deltaT
 
-    Object.entries(preprocessedSensorData).forEach(([variableName, preprocessedVariableData]) => {
-      const previousVariableData = previousIIRFData?.[variableName] ?? null
+    Object.entries(normalizedSensorData).forEach(([variableName, normalizedVariableData]) => {
+      const previousVariable = previousIIRFData?.[variableName] ?? IIRFVariable.initial
 
       this[variableName] = new IIRFVariable(
-        !IIRFVariable.isNullOrUndefined(preprocessedVariableData) ? IIRFVariable.prepare(preprocessedVariableData) : previousVariableData,
-        previousVariableData,
+        !IIRFVariable.isNullOrUndefined(normalizedVariableData) ? IIRFVariable.prepare(normalizedVariableData) : previousVariable,
+        previousVariable,
         variableSchemata[variableName],
-        preprocessedVariableData?.deltaT ?? null
+        normalizedVariableData.deltaT
       )
     })
+  }
+
+  get deltaT() {
+    return this.#deltaT
   }
 
   get #derivativesWrtT() {

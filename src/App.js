@@ -19,7 +19,7 @@ export default function App() {
 
       <h3>Data</h3>
 
-      {isListening ? <pre>{iirfData.toString}</pre> : <p>Click button to start.</p>}
+      {isListening ? <pre>{JSON.stringify(deviceKinematics.stateVector, null, 2)}</pre> : <p>Click button to start.</p>}
     </div>
   )
 }

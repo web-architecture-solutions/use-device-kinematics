@@ -3,6 +3,7 @@ import { Matrix } from '../../../lib'
 import { VariableNames } from '../../../lib/constants'
 
 import { IIRFData } from '../../use-iirf-data'
+import IIRFVariable from '../../use-iirf-data/lib/IIRFVariable'
 
 import { PartialDerivative } from './constants'
 
@@ -13,27 +14,28 @@ export default class DeviceKinematics {
     return new DeviceKinematics(IIRFData.initial)
   }
 
-  constructor(sensorData) {
-    this.position = sensorData.position
-    this.acceleration = sensorData.acceleration
-    this.angularVelocity = sensorData.angularVelocity
-    this.orientation = sensorData.orientation
+  constructor(iirfData) {
+    this.position = iirfData.position
+    this.acceleration = iirfData.acceleration
+    this.angularVelocity = iirfData.angularVelocity
+    this.orientation = iirfData.orientation
+    this.deltaT = iirfData.deltaT
   }
 
   get velocity() {
-    return this.position.derivativeWrtT
+    return this.position.derivativeWrtT ?? IIRFVariable.initial
   }
 
   get jerk() {
-    return this.acceleration.derivativeWrtT
+    return this.acceleration.derivativeWrtT ?? IIRFVariable.initial
   }
 
   get angularAcceleration() {
-    return this.angularVelocity.derivativeWrtT
+    return this.angularVelocity.derivativeWrtT ?? IIRFVariable.initial
   }
 
   get angularJerk() {
-    return this.angularVelocity.derivativeWrtT.derivativeWrtT
+    return this.angularVelocity.derivativeWrtT?.derivativeWrtT
   }
 
   get offset() {
