@@ -66,10 +66,6 @@ export default class DeviceKinematics {
     ]
   }
 
-  get variableIndices() {
-    return Object.fromEntries(this.variables.map((variable, index) => [variable.name, index]))
-  }
-
   get stateVector() {
     return this.variables.flat()
   }
@@ -173,10 +169,10 @@ export default class DeviceKinematics {
 
   get observationMatrix() {
     return Matrix.block([
-      [this.getVariableObservationMatrixByIndex(this.variableIndices[VariableNames.POSITION])],
-      [this.getVariableObservationMatrixByIndex(this.variableIndices[VariableNames.ACCELERATION])],
-      [this.getVariableObservationMatrixByIndex(this.variableIndices[VariableNames.ORIENTATION])],
-      [this.getVariableObservationMatrixByIndex(this.variableIndices[VariableNames.ANGULAR_VELOCITY])]
+      [this.getVariableObservationMatrix(this.position)],
+      [this.getVariableObservationMatrix(this.acceleration)],
+      [this.getVariableObservationMatrix(this.orientation)],
+      [this.getVariableObservationMatrix(this.angularVelocity)]
     ])
   }
 
@@ -192,7 +188,10 @@ export default class DeviceKinematics {
     )
   }
 
-  getVariableObservationMatrixByIndex(index) {
-    return Matrix.identity(this.dimension).pad({ left: index * this.dimension, right: (8 - index - 1) * this.dimension })
+  getVariableObservationMatrix(variable) {
+    const index = this.variables.indexOf(variable)
+    const left = index * this.dimension
+    const right = (8 - index - 1) * this.dimension
+    return Matrix.identity(this.dimension).pad({ left, right })
   }
 }
