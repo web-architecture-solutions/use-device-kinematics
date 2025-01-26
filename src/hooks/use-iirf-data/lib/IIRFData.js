@@ -5,6 +5,7 @@ import { variableSchemata } from '../../../lib'
 export default class IIRFData {
   #previous
   #deltaT
+  #refreshRates
 
   static initialData = {
     position: IIRFVariable.initialData,
@@ -21,9 +22,10 @@ export default class IIRFData {
     return variable.hasDerivative ? [...derivatives, [variable.derivativeName, variable.derivativeWrtT]] : derivatives
   }
 
-  constructor(normalizedSensorData, previousIIRFData, deltaT) {
+  constructor(normalizedSensorData, previousIIRFData, deltaT, refreshRates) {
     this.#previous = previousIIRFData
     this.#deltaT = deltaT
+    this.#refreshRates = refreshRates
 
     Object.entries(normalizedSensorData).forEach(([variableName, normalizedVariableData]) => {
       const previousVariable = previousIIRFData?.[variableName] ?? IIRFVariable.initial
@@ -32,13 +34,17 @@ export default class IIRFData {
         !IIRFVariable.isNullOrUndefined(normalizedVariableData) ? IIRFVariable.prepare(normalizedVariableData) : previousVariable,
         previousVariable,
         variableSchemata[variableName],
-        normalizedVariableData.deltaT
+        this.#deltaT
       )
     })
   }
 
   get deltaT() {
     return this.#deltaT
+  }
+
+  get refreshRates() {
+    return this.#refreshRates
   }
 
   get #derivativesWrtT() {

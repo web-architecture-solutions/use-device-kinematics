@@ -19,7 +19,7 @@ export default function App() {
 
       <h3>Data</h3>
 
-      {isListening ? <pre>{JSON.stringify(deviceKinematics.stateTransitionMatrix, null, 2)}</pre> : <p>Click button to start.</p>}
+      {isListening ? <pre>{deviceKinematics.toString}</pre> : <p>Click button to start.</p>}
     </div>
   )
 }

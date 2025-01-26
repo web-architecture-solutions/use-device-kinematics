@@ -3,7 +3,6 @@ import { Matrix } from '../../../lib'
 import { VariableNames } from '../../../lib/constants'
 
 import { IIRFData } from '../../use-iirf-data'
-import IIRFVariable from '../../use-iirf-data/lib/IIRFVariable'
 
 import { PartialDerivative } from './constants'
 
@@ -20,6 +19,7 @@ export default class DeviceKinematics {
     this.angularVelocity = iirfData.angularVelocity
     this.orientation = iirfData.orientation
     this.deltaT = iirfData.deltaT
+    this.refreshRates = iirfData.refreshRates
   }
 
   get velocity() {
@@ -173,5 +173,16 @@ export default class DeviceKinematics {
       [this.kinematicsMatrix, this.leverArmEffectMatrix],
       [this.coriolisEffectMatrix, this.kinematicsMatrix]
     ])
+  }
+
+  get toString() {
+    return JSON.stringify(
+      {
+        stateVector: this.stateVector,
+        stateTransitionMatrix: this.stateTransitionMatrix
+      },
+      null,
+      2
+    )
   }
 }
