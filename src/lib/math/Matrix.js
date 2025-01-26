@@ -47,7 +47,7 @@ export default class Matrix extends Array {
   }
 
   static identity(dimension) {
-    return Matrix.diagonal(dimension, 1)
+    return Matrix.diagonal(1, dimension)
   }
 
   static diagonal(element, dimension) {

@@ -7,10 +7,19 @@ import { IIRFData } from '../../use-iirf-data'
 import { PartialDerivative } from './constants'
 
 export default class DeviceKinematics {
-  static dimension = 3
+  dimension = 3
 
   static initial() {
     return new DeviceKinematics(IIRFData.initial)
+  }
+
+  static mapCoefficientsToStateEquationVector(coefficients) {
+    return [
+      coefficients[VariableNames.POSITION],
+      coefficients[VariableNames.VELOCITY],
+      coefficients[VariableNames.ACCELERATION],
+      coefficients[VariableNames.JERK]
+    ]
   }
 
   constructor(iirfData) {
@@ -35,7 +44,7 @@ export default class DeviceKinematics {
   }
 
   get angularJerk() {
-    return this.angularVelocity.derivativeWrtT.derivativeWrtT
+    return this.angularAcceleration.derivativeWrtT
   }
 
   get offset() {
@@ -99,60 +108,39 @@ export default class DeviceKinematics {
     }
   }
 
-  static mapCoefficientsToStateEquationVector(coefficients) {
-    return [
-      coefficients[VariableNames.POSITION],
-      coefficients[VariableNames.VELOCITY],
-      coefficients[VariableNames.ACCELERATION],
-      coefficients[VariableNames.JERK]
-    ]
-  }
-
-  get generalizedPositionStateEquationVector() {
-    return DeviceKinematics.mapCoefficientsToStateEquationVector({
-      [VariableNames.POSITION]: 1,
-      [VariableNames.VELOCITY]: this.deltaT,
-      [VariableNames.ACCELERATION]: Math.pow(this.deltaT, 2) / 2,
-      [VariableNames.JERK]: Math.pow(this.deltaT, 3) / 6
-    })
-  }
-
-  get generalizedVelocityStateEquationVector() {
-    return DeviceKinematics.mapCoefficientsToStateEquationVector({
-      [VariableNames.POSITION]: 0,
-      [VariableNames.VELOCITY]: 1,
-      [VariableNames.ACCELERATION]: this.deltaT,
-      [VariableNames.JERK]: Math.pow(this.deltaT, 2) / 2
-    })
-  }
-
-  get generalizedAccelerationStateEquationVector() {
-    return DeviceKinematics.mapCoefficientsToStateEquationVector({
-      [VariableNames.POSITION]: 0,
-      [VariableNames.VELOCITY]: 0,
-      [VariableNames.ACCELERATION]: 1,
-      [VariableNames.JERK]: this.deltaT
-    })
-  }
-
-  get generalizedJerkStateEquationVector() {
-    return DeviceKinematics.mapCoefficientsToStateEquationVector({
-      [VariableNames.POSITION]: 0,
-      [VariableNames.VELOCITY]: 0,
-      [VariableNames.ACCELERATION]: 0,
-      [VariableNames.JERK]: 1
-    })
-  }
-
   get kinematicsMatrix() {
     return Matrix.blockDiagonal(
       [
-        this.generalizedPositionStateEquationVector,
-        this.generalizedVelocityStateEquationVector,
-        this.generalizedAccelerationStateEquationVector,
-        this.generalizedJerkStateEquationVector
+        // Generalized position state Equation vector
+        DeviceKinematics.mapCoefficientsToStateEquationVector({
+          [VariableNames.POSITION]: 1,
+          [VariableNames.VELOCITY]: this.deltaT,
+          [VariableNames.ACCELERATION]: Math.pow(this.deltaT, 2) / 2,
+          [VariableNames.JERK]: Math.pow(this.deltaT, 3) / 6
+        }),
+        // Generalized velocity state Equation vector
+        DeviceKinematics.mapCoefficientsToStateEquationVector({
+          [VariableNames.POSITION]: 0,
+          [VariableNames.VELOCITY]: 1,
+          [VariableNames.ACCELERATION]: this.deltaT,
+          [VariableNames.JERK]: Math.pow(this.deltaT, 2) / 2
+        }),
+        // Generalized acceleration state Equation vector
+        DeviceKinematics.mapCoefficientsToStateEquationVector({
+          [VariableNames.POSITION]: 0,
+          [VariableNames.VELOCITY]: 0,
+          [VariableNames.ACCELERATION]: 1,
+          [VariableNames.JERK]: this.deltaT
+        }),
+        // Generalized jerk state Equation vector
+        DeviceKinematics.mapCoefficientsToStateEquationVector({
+          [VariableNames.POSITION]: 0,
+          [VariableNames.VELOCITY]: 0,
+          [VariableNames.ACCELERATION]: 0,
+          [VariableNames.JERK]: 1
+        })
       ],
-      this.constructor.dimension
+      this.dimension
     )
   }
 
@@ -175,14 +163,28 @@ export default class DeviceKinematics {
     ])
   }
 
+  get observationMatrix() {
+    return Matrix.block([
+      [this.getVariableObservationMatrixByIndex(0)], // Position
+      [this.getVariableObservationMatrixByIndex(2)], // Acceleration
+      [this.getVariableObservationMatrixByIndex(4)], // Orientation
+      [this.getVariableObservationMatrixByIndex(5)] // Angular Velocity
+    ])
+  }
+
   get toString() {
     return JSON.stringify(
       {
         stateVector: this.stateVector,
-        stateTransitionMatrix: this.stateTransitionMatrix
+        stateTransitionMatrix: this.stateTransitionMatrix,
+        observationMatrix: this.observationMatrix
       },
       null,
       2
     )
+  }
+
+  getVariableObservationMatrixByIndex(index) {
+    return Matrix.identity(this.dimension).pad({ left: index * this.dimension, right: (8 - index - 1) * this.dimension })
   }
 }
