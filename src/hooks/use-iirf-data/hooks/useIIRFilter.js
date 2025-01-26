@@ -6,6 +6,8 @@ import { toRadians } from '../../../lib/math'
 
 import IIRFData from '../lib/IIRFData'
 
+import { VariableNames } from '../../../lib/constants'
+
 const refreshRate = 250
 
 export default function useIIRFilter(isListening, rawSensorData, refreshRates) {
@@ -20,22 +22,22 @@ export default function useIIRFilter(isListening, rawSensorData, refreshRates) {
       setIIRFData((previousIIRFData) => {
         return new IIRFData(
           {
-            position: {
+            [VariableNames.POSITION]: {
               x: rawSensorData.longitude,
               y: rawSensorData.latitude,
               z: rawSensorData.altitude
             },
-            acceleration: {
+            [VariableNames.ACCELERATION]: {
               x: rawSensorData.acceleration.x,
               y: rawSensorData.acceleration.y,
               z: rawSensorData.acceleration.z
             },
-            orientation: {
+            [VariableNames.ORIENTATION]: {
               x: toRadians(rawSensorData.beta),
               y: toRadians(rawSensorData.gamma),
               z: toRadians(rawSensorData.alpha)
             },
-            angularVelocity: {
+            [VariableNames.ANGULAR_VELOCITY]: {
               x: toRadians(rawSensorData.rotationRate.beta),
               y: toRadians(rawSensorData.rotationRate.gamma),
               z: toRadians(rawSensorData.rotationRate.alpha)

@@ -1,3 +1,10 @@
-import variableSchemata from './variableSchemata'
-
-export const VariableNames = Object.keys(variableSchemata)
+export const VariableNames = {
+  POSITION: 'POSITION',
+  VELOCITY: 'VELOCITY',
+  ACCELERATION: 'ACCELERATION',
+  JERK: 'JERK',
+  ORIENTATION: 'ORIENTATION',
+  ANGULAR_VELOCITY: 'ANGULAR_VELOCITY',
+  ANGULAR_ACCELERATION: 'ANGULAR_ACCELERATION',
+  ANGULAR_JERK: 'ANGULAR_JERK'
+}

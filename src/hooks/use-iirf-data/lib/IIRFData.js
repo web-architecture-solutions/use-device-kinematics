@@ -2,16 +2,18 @@ import IIRFVariable from './IIRFVariable'
 
 import { variableSchemata } from '../../../lib'
 
+import { VariableNames } from '../../../lib/constants'
+
 export default class IIRFData {
   #previous
   #deltaT
   #refreshRates
 
   static initialData = {
-    position: IIRFVariable.initialData,
-    acceleration: IIRFVariable.initialData,
-    orientation: IIRFVariable.initialData,
-    angularVelocity: IIRFVariable.initialData
+    [VariableNames.POSITION]: IIRFVariable.initialData,
+    [VariableNames.ACCELERATION]: IIRFVariable.initialData,
+    [VariableNames.ORIENTATION]: IIRFVariable.initialData,
+    [VariableNames.ANGULAR_VELOCITY]: IIRFVariable.initialData
   }
 
   static get initial() {

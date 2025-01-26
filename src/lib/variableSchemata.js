@@ -4,6 +4,8 @@ import { S } from './math'
 
 import { calculateGeodeticDisplacement } from './physics/formulae'
 
+import { VariableNames } from './constants'
+
 function calculatePositionDerivativeWrtT(position) {
   if (position.previous) {
     const geodeticDisplacement = calculateGeodeticDisplacement(position, position.previous)
@@ -22,51 +24,51 @@ function calculatePositionDerivativeWrtT(position) {
 }
 
 const angularJerkSchema = {
-  name: 'angularJerk'
+  name: VariableNames.ANGULAR_JERK
 }
 
 const angularAccelerationSchema = {
-  name: 'angularAcceleration',
+  name: VariableNames.ANGULAR_ACCELERATION,
   derivativeSchema: angularJerkSchema
 }
 
 const angularVelocitySchema = {
-  name: 'angularVelocity',
+  name: VariableNames.ANGULAR_VELOCITY,
   derivativeSchema: angularAccelerationSchema
 }
 
 const orientationSchema = {
-  name: 'orientation'
+  name: VariableNames.ORIENTATION
 }
 
 const jerkSchema = {
-  name: 'jerk'
+  name: VariableNames.JERK
 }
 
 const accelerationSchema = {
-  name: 'acceleration',
+  name: VariableNames.ACCELERATION,
   derivativeSchema: jerkSchema
 }
 
 const velocitySchema = {
-  name: 'velocity'
+  name: VariableNames.VELOCITY
 }
 
 const positionSchema = {
-  name: 'position',
+  name: VariableNames.POSITION,
   derivativeSchema: velocitySchema,
   calculateDerivativeWrtT: calculatePositionDerivativeWrtT
 }
 
 const variableSchemata = {
-  [angularJerkSchema.name]: angularJerkSchema,
-  [angularAccelerationSchema.name]: angularAccelerationSchema,
-  [angularVelocitySchema.name]: angularVelocitySchema,
-  [orientationSchema.name]: orientationSchema,
-  [jerkSchema.name]: jerkSchema,
-  [accelerationSchema.name]: accelerationSchema,
-  [velocitySchema.name]: velocitySchema,
-  [positionSchema.name]: positionSchema
+  [VariableNames.ANGULAR_JERK]: angularJerkSchema,
+  [VariableNames.ANGULAR_ACCELERATION]: angularAccelerationSchema,
+  [VariableNames.ANGULAR_VELOCITY]: angularVelocitySchema,
+  [VariableNames.ORIENTATION]: orientationSchema,
+  [VariableNames.JERK]: jerkSchema,
+  [VariableNames.ACCELERATION]: accelerationSchema,
+  [VariableNames.VELOCITY]: velocitySchema,
+  [VariableNames.POSITION]: positionSchema
 }
 
 export default variableSchemata

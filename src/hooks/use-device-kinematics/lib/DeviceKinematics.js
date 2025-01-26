@@ -23,10 +23,10 @@ export default class DeviceKinematics {
   }
 
   constructor(iirfData) {
-    this.position = iirfData.position
-    this.acceleration = iirfData.acceleration
-    this.angularVelocity = iirfData.angularVelocity
-    this.orientation = iirfData.orientation
+    this.position = iirfData[VariableNames.POSITION]
+    this.acceleration = iirfData[VariableNames.ACCELERATION]
+    this.angularVelocity = iirfData[VariableNames.ANGULAR_VELOCITY]
+    this.orientation = iirfData[VariableNames.ORIENTATION]
     this.deltaT = iirfData.deltaT
     this.refreshRates = iirfData.refreshRates
   }
@@ -53,17 +53,25 @@ export default class DeviceKinematics {
     return combined.scale(1 / this.angularVelocity.magnitude() ** 2 || 1)
   }
 
-  get stateVector() {
+  get variables() {
     return [
-      ...this.position,
-      ...this.velocity,
-      ...this.acceleration,
-      ...this.jerk,
-      ...this.orientation,
-      ...this.angularVelocity,
-      ...this.angularAcceleration,
-      ...this.angularJerk
+      this.position,
+      this.velocity,
+      this.acceleration,
+      this.jerk,
+      this.orientation,
+      this.angularVelocity,
+      this.angularAcceleration,
+      this.angularJerk
     ]
+  }
+
+  get variableIndices() {
+    return Object.fromEntries(this.variables.map((variable, index) => [variable.name, index]))
+  }
+
+  get stateVector() {
+    return this.variables.flat()
   }
 
   get leverArmEffectJacobian() {
@@ -165,10 +173,10 @@ export default class DeviceKinematics {
 
   get observationMatrix() {
     return Matrix.block([
-      [this.getVariableObservationMatrixByIndex(0)], // Position
-      [this.getVariableObservationMatrixByIndex(2)], // Acceleration
-      [this.getVariableObservationMatrixByIndex(4)], // Orientation
-      [this.getVariableObservationMatrixByIndex(5)] // Angular Velocity
+      [this.getVariableObservationMatrixByIndex(this.variableIndices[VariableNames.POSITION])],
+      [this.getVariableObservationMatrixByIndex(this.variableIndices[VariableNames.ACCELERATION])],
+      [this.getVariableObservationMatrixByIndex(this.variableIndices[VariableNames.ORIENTATION])],
+      [this.getVariableObservationMatrixByIndex(this.variableIndices[VariableNames.ANGULAR_VELOCITY])]
     ])
   }
 
