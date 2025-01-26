@@ -40,7 +40,12 @@ export default class IIRFVariable extends Vector3 {
     this.#deltaT = deltaT
 
     this.#previous = previousVariable
-      ? new IIRFVariable(previousVariable, previousVariable.previous, previousVariable.schema, previousVariable.deltaT)
+      ? new IIRFVariable(
+          new Vector3(...previousVariable),
+          previousVariable.previous ? new Vector3(...previousVariable.previous) : null,
+          this.schema,
+          previousVariable.deltaT
+        )
       : null
   }
 

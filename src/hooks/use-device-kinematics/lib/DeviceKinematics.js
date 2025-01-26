@@ -1,10 +1,11 @@
 import { Matrix } from '../../../lib'
 
 import { VariableNames } from '../../../lib/constants'
+import { S } from '../../../lib/math'
 
 import { IIRFData } from '../../use-iirf-data'
 
-import { PartialDerivative } from './constants'
+import { Jacobian } from '../../../lib/physics'
 
 export default class DeviceKinematics {
   dimension = 3
@@ -47,10 +48,8 @@ export default class DeviceKinematics {
     return this.angularAcceleration.derivativeWrtT
   }
 
-  get offset() {
-    const crossProduct = this.angularVelocity.cross(this.angularVelocity.cross(this.acceleration))
-    const combined = this.angularAcceleration.cross(this.acceleration).add(crossProduct)
-    return combined.scale(1 / this.angularVelocity.magnitude() ** 2 || 1)
+  get measuredVariables() {
+    return [this.position, this.acceleration, this.orientation, this.angularVelocity]
   }
 
   get variables() {
@@ -70,73 +69,78 @@ export default class DeviceKinematics {
     return this.variables.flat()
   }
 
-  get leverArmEffectJacobian() {
-    return {
-      [PartialDerivative.WRT_ALPHA]: new Matrix([
-        [0, -this.offset.z, this.offset.y],
-        [this.offset.z, 0, -this.offset.x],
-        [-this.offset.y, this.offset.x, 0]
-      ]),
-      [PartialDerivative.WRT_OMEGA]: new Matrix([
-        [
-          0,
-          -2 * this.angularVelocity.z * this.offset.z,
-          2 * this.angularVelocity.y * this.offset.y + this.angularVelocity.y * this.offset.z - this.angularVelocity.z * this.offset.x
-        ],
-        [
-          2 * this.angularVelocity.z * this.offset.x - this.angularVelocity.x * this.offset.z,
-          0,
-          -2 * this.angularVelocity.x * this.offset.x
-        ],
-        [
-          -2 * this.angularVelocity.y * this.offset.x - this.angularVelocity.y * this.offset.z + this.angularVelocity.z * this.offset.x,
-          2 * this.angularVelocity.x * this.offset.y,
-          0
-        ]
-      ])
-    }
+  get offset() {
+    const crossProduct = this.angularVelocity.cross(this.angularVelocity.cross(this.acceleration))
+    const combined = this.angularAcceleration.cross(this.acceleration).add(crossProduct)
+    return combined.scale(1 / this.angularVelocity.magnitude() ** 2 || 1)
   }
 
-  get coriolisEffectJacobian() {
-    return {
-      [PartialDerivative.WRT_V]: new Matrix([
-        [0, -2 * this.angularVelocity.z, 2 * this.angularVelocity.y],
-        [2 * this.angularVelocity.z, 0, -2 * this.angularVelocity.x],
-        [-2 * this.angularVelocity.y, 2 * this.angularVelocity.x, 0]
-      ]),
-      [PartialDerivative.WRT_OMEGA]: new Matrix([
-        [-2 * this.velocity.z, 2 * this.velocity.y, 0],
-        [2 * this.velocity.z, -2 * this.velocity.x, 0],
-        [0, 2 * this.velocity.x, -2 * this.velocity.y]
-      ])
-    }
+  get motionAPINoise() {
+    return 1 / this.refreshRates?.motion
+  }
+
+  get geolocationAPINoise() {
+    return 1 / this.refreshRates?.geolocation
+  }
+
+  get orientationAPINoise() {
+    return 1 / this.refreshRates?.orientation
+  }
+
+  get processNoiseMatrix() {
+    return Matrix.diagonal(S, this.variables.length * this.dimension)
+  }
+
+  get motionAPINoiseMatrix() {
+    return Matrix.diagonal(this.motionAPINoise, this.dimension)
+  }
+
+  get geolocationAPINoiseMatrix() {
+    return Matrix.diagonal(this.geolocationAPINoise, this.dimension)
+  }
+
+  get orientationAPINoiseMatrix() {
+    return Matrix.diagonal(this.orientationAPINoise, this.dimension)
+  }
+
+  get zeroMatrix() {
+    return Matrix.zero(this.dimension)
+  }
+
+  get observationNoiseMatrix() {
+    return Matrix.block([
+      [this.geolocationAPINoiseMatrix, this.zeroMatrix, this.zeroMatrix, this.zeroMatrix],
+      [this.zeroMatrix, this.motionAPINoiseMatrix, this.zeroMatrix, this.zeroMatrix],
+      [this.zeroMatrix, this.zeroMatrix, this.orientationAPINoiseMatrix, this.zeroMatrix],
+      [this.zeroMatrix, this.zeroMatrix, this.zeroMatrix, this.motionAPINoiseMatrix]
+    ])
   }
 
   get kinematicsMatrix() {
     return Matrix.blockDiagonal(
       [
-        // Generalized position state Equation vector
+        // Generalized position state equation
         DeviceKinematics.mapCoefficientsToStateEquationVector({
           [VariableNames.POSITION]: 1,
           [VariableNames.VELOCITY]: this.deltaT,
           [VariableNames.ACCELERATION]: Math.pow(this.deltaT, 2) / 2,
           [VariableNames.JERK]: Math.pow(this.deltaT, 3) / 6
         }),
-        // Generalized velocity state Equation vector
+        // Generalized velocity state equation
         DeviceKinematics.mapCoefficientsToStateEquationVector({
           [VariableNames.POSITION]: 0,
           [VariableNames.VELOCITY]: 1,
           [VariableNames.ACCELERATION]: this.deltaT,
           [VariableNames.JERK]: Math.pow(this.deltaT, 2) / 2
         }),
-        // Generalized acceleration state Equation vector
+        // Generalized acceleration state equation
         DeviceKinematics.mapCoefficientsToStateEquationVector({
           [VariableNames.POSITION]: 0,
           [VariableNames.VELOCITY]: 0,
           [VariableNames.ACCELERATION]: 1,
           [VariableNames.JERK]: this.deltaT
         }),
-        // Generalized jerk state Equation vector
+        // Generalized jerk state equation
         DeviceKinematics.mapCoefficientsToStateEquationVector({
           [VariableNames.POSITION]: 0,
           [VariableNames.VELOCITY]: 0,
@@ -149,14 +153,16 @@ export default class DeviceKinematics {
   }
 
   get leverArmEffectMatrix() {
-    const paddedJacobianWrtAlpha = this.leverArmEffectJacobian.wrtAlpha.pad({ top: 0, left: 9 })
-    const paddedJacobianWrtOmega = this.leverArmEffectJacobian.wrtOmega.pad({ top: 0, left: 9 })
+    const leverArmEffectJacobian = Jacobian.leverArmEffect(this.offset, this.angularVelocity)
+    const paddedJacobianWrtAlpha = leverArmEffectJacobian.wrtAlpha.pad({ top: 0, left: 9 })
+    const paddedJacobianWrtOmega = leverArmEffectJacobian.wrtOmega.pad({ top: 0, left: 9 })
     return paddedJacobianWrtAlpha.add(paddedJacobianWrtOmega)
   }
 
   get coriolisEffectMatrix() {
-    const paddedJacobianWrtV = this.coriolisEffectJacobian.wrtV.pad({ top: 0, left: 9 })
-    const paddedJacobianWrtOmega = this.coriolisEffectJacobian.wrtOmega.pad({ top: 0, left: 9 })
+    const coriolisEffectJacobian = Jacobian.coriolisEffect(this.angularVelocity, this.velocity)
+    const paddedJacobianWrtV = coriolisEffectJacobian.wrtV.pad({ top: 0, left: 9 })
+    const paddedJacobianWrtOmega = coriolisEffectJacobian.wrtOmega.pad({ top: 0, left: 9 })
     return paddedJacobianWrtV.add(paddedJacobianWrtOmega)
   }
 
