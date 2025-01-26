@@ -6,7 +6,9 @@ import { toRadians } from '../../../lib/math'
 
 import IIRFData from '../lib/IIRFData'
 
-export default function useIIRFilter(refreshRate, isListening, rawSensorData) {
+const refreshRate = 100
+
+export default function useIIRFilter(isListening, rawSensorData) {
   const [isClockRunning, setIsClockRunning] = useState(false)
   const [iirfData, setIIRFData] = useState(IIRFData.initial)
   const clockDelay = useMemo(() => 1000 / refreshRate, [refreshRate])
