@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 import { Canvas } from '@react-three/fiber'
 
 import Container from '../Container'
@@ -10,21 +12,37 @@ import { useRadialMousePosition, useMouseVelocity } from './hooks'
 
 import styles from './style.module.css'
 
-const hue = Math.random() * 360
+function Text({ text }) {
+  return (
+    <div className={styles.text}>
+      <div className={styles.inner}>
+        {text.map(({ text: _text, color }, index) =>
+          _text ? (
+            <span key={index} style={{ color: color }}>
+              {_text}&nbsp;
+            </span>
+          ) : null
+        )}
+      </div>
+    </div>
+  )
+}
 
 export default function App() {
-  const { theta } = useRadialMousePosition()
+  const [text, setText] = useState([' '])
+  //const { theta } = useRadialMousePosition()
 
-  const { velocity: mouseVelocity, trapTriggered, setTrapTriggered } = useMouseVelocity({ accelerationTrapThreshold: 0.1 })
-
+  console.log('foo')
   return (
     <div className={styles.App}>
       <Container>
         <Frame>
-          <Canvas camera={camera} className={styles.Canvas} style={{ filter: `hue-rotate(${hue}deg)` }}>
-            <Scene mouseVelocity={mouseVelocity} trapTriggered={trapTriggered} setTrapTriggered={setTrapTriggered} theta={0} />
+          <Canvas camera={camera} className={styles.Canvas}>
+            <Scene text={text} setText={setText} />
           </Canvas>
         </Frame>
+
+        <Text text={text} />
       </Container>
     </div>
   )

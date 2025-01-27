@@ -6,6 +6,9 @@ $backgroundColor: rgb(255, 255, 255, 1);
 .Frame {
   background-color: black;
 
+  //aspect-ratio: 1 / 1;
+  //width: 50%;
+  
   position: relative;
 }
 
@@ -66,16 +69,17 @@ $backgroundColor: rgb(255, 255, 255, 1);
   z-index: 1;
 }
 
+
 @media (orientation: landscape) {
   .Frame {
-    height: 62vh;
-    width: 62vh;
+    height: 50vh;
+    width: 50vh;
   }
 }
 
 @media (orientation: portrait) {
   .Frame {
-    height: 62vw;
-    width: 62vw;
+    height: 50vw;
+    width: 50vw;
   }
 }
