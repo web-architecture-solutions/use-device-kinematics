@@ -4,6 +4,8 @@ import Container from '../Container'
 import Frame from '../Frame'
 import Scene from '../Scene'
 
+import { OrbitControls } from '@react-three/drei'
+
 import { camera } from './constants'
 
 import { useRadialMousePosition, useMouseVelocity } from './hooks'
@@ -20,11 +22,10 @@ export default function App() {
   return (
     <div className={styles.App}>
       <Container>
-        <Frame>
-          <Canvas camera={camera} className={styles.Canvas} style={{ filter: `hue-rotate(${hue}deg)` }}>
-            <Scene mouseVelocity={mouseVelocity} trapTriggered={trapTriggered} setTrapTriggered={setTrapTriggered} theta={0} />
-          </Canvas>
-        </Frame>
+        <Canvas camera={camera} className={styles.Canvas} style={{ filter: `hue-rotate(${hue}deg)` }}>
+          <Scene mouseVelocity={mouseVelocity} trapTriggered={trapTriggered} setTrapTriggered={setTrapTriggered} theta={0} />
+          <OrbitControls />
+        </Canvas>
       </Container>
     </div>
   )

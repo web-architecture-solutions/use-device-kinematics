@@ -45,7 +45,7 @@ export default class GeometryBuffer {
   }
 
   randomStep(coord) {
-    const randomStep = 2 * (Math.random() - 0.5) * this.parameters.stepSize * this.parameters.mouseVelocity
+    const randomStep = 2 * (Math.random() - 0.5) * this.parameters.stepSize
     return coord + randomStep
   }
 
@@ -66,23 +66,23 @@ export default class GeometryBuffer {
   }
 
   updatePartialBuffer() {
-    this.geometry.setAttribute('position', new THREE.BufferAttribute(this.coords, 3))
-    this.geometry.setAttribute('color', new THREE.BufferAttribute(this.colors, 3))
-    this.geometry.setDrawRange(0, this.bufferIndex)
+    //this.geometry.setAttribute('position', new THREE.BufferAttribute(this.coords, 3))
+    //this.geometry.setAttribute('color', new THREE.BufferAttribute(this.colors, 3))
+    //this.geometry.setDrawRange(0, this.bufferIndex)
   }
 
   updateFullBuffer() {
     const reorderedPoints = this.reorderArray(this.coords)
     const reorderedColors = this.reorderArray(this.colors)
-    this.geometry.setAttribute('position', new THREE.BufferAttribute(reorderedPoints, 3))
-    this.geometry.setAttribute('color', new THREE.BufferAttribute(reorderedColors, 3))
-    this.geometry.setDrawRange(0, this.parameters.maxPoints - 1)
+    //this.geometry.setAttribute('position', new THREE.BufferAttribute(reorderedPoints, 3))
+    //this.geometry.setAttribute('color', new THREE.BufferAttribute(reorderedColors, 3))
+    //this.geometry.setDrawRange(0, this.parameters.maxPoints - 1)
   }
 
   update() {
     this.addNextPoint()
     this.isFull ? this.updateFullBuffer() : this.updatePartialBuffer()
-    this.geometry.attributes.position.needsUpdate = true
-    this.geometry.attributes.color.needsUpdate = true
+    //this.geometry.attributes.position.needsUpdate = true
+    //this.geometry.attributes.color.needsUpdate = true
   }
 }

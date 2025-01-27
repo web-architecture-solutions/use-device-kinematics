@@ -18,13 +18,14 @@ const { delay, randomizeDelay, duration, intensity, randomizeDuration, pixelizat
 export default function Scene({ mouseVelocity, trapTriggered, setTrapTriggered }) {
   return (
     <>
-      <Rotate callback={rotationCallback}>
-        <UnitCube />
+      {/*<Rotate callback={rotationCallback}>*/}
+      <UnitCube />
 
-        <RandomWalk parameters={{ mouseVelocity, ...randomWalkParameters }} />
-      </Rotate>
+      <RandomWalk parameters={{ mouseVelocity, ...randomWalkParameters }} />
+      {/*</Rotate>*/}
 
       <EffectComposer>
+        {/*
         <GlitchComposer
           isGlitched={trapTriggered}
           delay={delay}
@@ -42,6 +43,7 @@ export default function Scene({ mouseVelocity, trapTriggered, setTrapTriggered }
             intensity={intensity}
           />
         </GlitchComposer>
+        */}
 
         <Noise blendFunction={BlendFunction.SOFT_LIGHT} />
 
