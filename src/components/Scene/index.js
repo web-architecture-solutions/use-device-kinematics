@@ -12,16 +12,31 @@ import ChromaticAberrationGlitch from '../ChromaticAberrationGlitch'
 
 import { rotationCallback, randomWalkParameters, glitchParameters } from './constants'
 
+import { useRef } from 'react'
+
+import { useFrame } from '@react-three/fiber'
+
+import { useGeometryBuffer } from '../RandomWalk/hooks'
+
 const { delay, randomizeDelay, duration, intensity, randomizeDuration, pixelizationGranularity, randomizePixelizationGranularity } =
   glitchParameters
 
 export default function Scene({ mouseVelocity, trapTriggered, setTrapTriggered }) {
+  const lineRef = useRef()
+  const geometryBuffer = useGeometryBuffer(lineRef, { mouseVelocity, ...randomWalkParameters })
+
+  useFrame(() => geometryBuffer.update())
+
   return (
     <>
       <Rotate callback={rotationCallback}>
         <UnitCube />
 
-        <RandomWalk parameters={{ mouseVelocity, ...randomWalkParameters }} />
+        <line ref={lineRef}>
+          <bufferGeometry />
+
+          <lineBasicMaterial vertexColors />
+        </line>
       </Rotate>
 
       <EffectComposer>
