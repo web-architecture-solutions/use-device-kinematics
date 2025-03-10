@@ -8,7 +8,7 @@ export default class GeometryBuffer {
     this.parameters = {
       // Quantum defaults (transparent to existing users)
       numQubits: 1, // Single qubit for Bloch sphere visualization
-      circuitDepth: 1000,
+      circuitDepth: 10000,
       entanglementProb: 0.0, // No entanglement for single-qubit Bloch sphere
       ...parameters
     }
@@ -28,13 +28,15 @@ export default class GeometryBuffer {
   initializeQuantumState() {
     const theta = Math.acos(2 * Math.random() - 1) // Uniform polar angle
     const phi = Math.random() * 2 * Math.PI // Uniform azimuthal angle
+    const signedTheta = Math.random() > 0.5 ? theta : -theta
+    const signedPhi = Math.random() > 0.5 ? phi : -phi
+
+    const i = Math.cos(signedTheta / 2) // Real part (|0⟩ amplitude)
+    const j = Math.sin(signedTheta / 2) * Math.cos(signedPhi) // Imaginary part (|1⟩ amplitude, real component)
+    const k = Math.sin(signedTheta / 2) * Math.sin(signedPhi) // Imaginary part (|1⟩ amplitude, imaginary component)
 
     return {
-      amplitudes: [
-        Math.cos(theta / 2), // Real part (|0⟩ amplitude)
-        Math.sin(theta / 2) * Math.cos(phi), // Imaginary part (|1⟩ amplitude, real component)
-        Math.sin(theta / 2) * Math.sin(phi) // Imaginary part (|1⟩ amplitude, imaginary component)
-      ]
+      amplitudes: [Math.random() > 0.5 ? i : -i, Math.random() > 0.5 ? j : -j, Math.random() > 0.5 ? k : -k]
     }
   }
 
@@ -155,15 +157,17 @@ export default class GeometryBuffer {
   addNextPoint() {
     if (this._currentCircuitDepth < this.parameters.circuitDepth) {
       const randomGate = Math.random()
-      if (randomGate < 0.33) {
+
+      if (randomGate < 0.5) {
         this.applyHadamard()
-      } else if (randomGate < 0.66) {
-        const randomPhase = Math.random() * Math.PI * 2
-        this.applyPhaseGate(randomPhase)
       } else {
-        const randomAngle = Math.random() * Math.PI * 2
-        this.applyPhaseGate(randomAngle)
+        this.applyPauliX()
       }
+
+      //this.applyRandomRotation()
+
+      //const randomPhase = Math.random() * Math.PI * 2
+      //this.applyPhaseGate(randomPhase)
 
       // Apply noise after gate application
       this.applyNoise()

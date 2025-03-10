@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 
 export const initialConstraint = 'spherical'
-export const initialMaxPoints = 10000
+export const initialMaxPoints = 50000
 export const initialStepSize = 0.1
 
 export const edges = [

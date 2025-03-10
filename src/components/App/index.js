@@ -10,7 +10,7 @@ import WienerProcess from '../WienerProcess'
 
 import { parameterReducer } from './reducers'
 
-import { useGUI } from './hooks'
+//import { useGUI } from './hooks'
 
 import { initialConstraint, initialMaxPoints, initialStepSize } from '../../constants'
 
