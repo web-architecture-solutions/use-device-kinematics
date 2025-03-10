@@ -23,7 +23,7 @@ const initialParameters = {
 export default function App() {
   const [parameters, dispatch] = useReducer(parameterReducer, initialParameters)
 
-  useGUI({ parameters, dispatch })
+  //useGUI({ parameters, dispatch })
 
   return (
     <Canvas camera={{ position: [3, 3, 3], fov: 60 }} style={{ background: 'black' }}>
