@@ -1,12 +1,7 @@
 // UnitPolyhedron.jsx
 import React from 'react'
 import EmbeddedLine from '../EmbeddedLine'
-import {
-  getTetrahedronEdgesPositions,
-  getOctahedronEdgesPositions,
-  getIcosahedronEdgesPositions,
-  getDodecahedronEdgesPositions
-} from '../../CustomPlatonicSolids'
+import { getTetrahedronEdgesPositions, getOctahedronEdgesPositions } from '../../CustomPlatonicSolids'
 
 export default function UnitPolyhedron({ type }) {
   let positions = []
@@ -17,12 +12,7 @@ export default function UnitPolyhedron({ type }) {
     case 'octahedral':
       positions = getOctahedronEdgesPositions()
       break
-    case 'icosahedral':
-      positions = getIcosahedronEdgesPositions()
-      break
-    case 'dodecahedral':
-      positions = getDodecahedronEdgesPositions()
-      break
+
     default:
       console.warn('Unknown polyhedral type:', type)
   }
