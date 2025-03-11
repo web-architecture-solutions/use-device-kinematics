@@ -27,7 +27,8 @@ export default function App() {
 
   return (
     <Canvas camera={{ position: [3, 3, 3], fov: 60 }} style={{ background: 'black' }}>
-      {parameters.constraint === 'cubical' ? <UnitCube /> : <UnitSphere />}
+      <UnitCube />
+      {/*parameters.constraint === 'cubical' ? <UnitCube /> : <UnitSphere />*/}
 
       <WienerProcess parameters={parameters} />
 

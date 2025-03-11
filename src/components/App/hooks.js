@@ -7,7 +7,9 @@ export function useGUI({ parameters, dispatch }) {
 
   const stepSizeController = gui.add(parameters, 'stepSize', 0.01, 1).name('Step Size')
   const maxPointsController = gui.add(parameters, 'maxPoints', 3, 50000, 1).name('Max Points')
-  const constraintController = gui.add(parameters, 'constraint', ['spherical', 'cubical']).name('Constraint Type')
+  const constraintController = gui
+    .add(parameters, 'constraint', ['spherical', 'cubical', 'tetrahedral', 'octahedral', 'icosahedral', 'dodecahedral', 'durer'])
+    .name('Constraint Type')
 
   useEffect(() => {
     stepSizeController.onChange((value) => dispatch({ type: 'UPDATE_STEP_SIZE', payload: value }))
