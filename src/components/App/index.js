@@ -18,6 +18,8 @@ const initialParameters = {
   stepSize: initialStepSize
 }
 
+const randomHue = Math.random() * 360
+
 export default function App() {
   const [parameters, dispatch] = useReducer(parameterReducer, initialParameters)
   useGUI({ parameters, dispatch })
@@ -31,9 +33,6 @@ export default function App() {
         return <UnitSphere />
       case 'tetrahedral':
       case 'octahedral':
-      case 'icosahedral':
-      case 'dodecahedral':
-      case 'durer':
         return <UnitPolyhedron type={parameters.constraint} />
       default:
         return null
@@ -41,7 +40,7 @@ export default function App() {
   }
 
   return (
-    <Canvas camera={{ position: [3, 3, 3], fov: 60 }} style={{ background: 'black' }}>
+    <Canvas camera={{ position: [3, 3, 3], fov: 60 }} style={{ background: 'black', filter: `hue-rotate(${randomHue}deg) saturate(2)` }}>
       {renderConstraint()}
       <WienerProcess parameters={parameters} />
       <OrbitControls />
