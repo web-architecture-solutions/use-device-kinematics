@@ -1,4 +1,4 @@
-import { EffectComposer, SSAO, Bloom, Noise } from '@react-three/postprocessing'
+import { EffectComposer, Bloom, Noise } from '@react-three/postprocessing'
 
 import { BlendFunction } from 'postprocessing'
 
@@ -10,18 +10,37 @@ import PixelationGlitch from '../PixelationGlitch'
 import CameraGlitch from '../CameraGlitch'
 import ChromaticAberrationGlitch from '../ChromaticAberrationGlitch'
 
-import { rotationCallback, randomWalkParameters, glitchParameters } from './constants'
+import UnitSphere from '../UnitSphere'
+import UnitPolyhedron from '../UnitPolyhedron'
+
+import { rotationCallback, randomWalkParameters as parameters, glitchParameters } from './constants'
 
 const { delay, randomizeDelay, duration, intensity, randomizeDuration, pixelizationGranularity, randomizePixelizationGranularity } =
   glitchParameters
 
 export default function Scene() {
+  const renderConstraint = () => {
+    switch (parameters.constraint) {
+      case 'cubical':
+        return <UnitCube />
+      case 'spherical':
+        return <UnitSphere />
+      case 'tetrahedral':
+      case 'octahedral':
+        return <UnitPolyhedron type={parameters.constraint} />
+      default:
+        return null
+    }
+  }
   return (
     <>
-      <Rotate callback={rotationCallback}>
-        <UnitCube />
+      <Rotate callback={({ x, y, z }) => ({ x: x + 0.005, y: y + 0.005, z: z - 0.005 })}>
+        <UnitSphere />
+      </Rotate>
 
-        <RandomWalk parameters={{ ...randomWalkParameters }} />
+      <Rotate callback={rotationCallback}>
+        {renderConstraint()}
+        <RandomWalk parameters={parameters} />
       </Rotate>
 
       <EffectComposer>

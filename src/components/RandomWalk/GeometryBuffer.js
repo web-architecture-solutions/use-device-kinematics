@@ -28,25 +28,12 @@ export default class GeometryBuffer {
     )
   }
 
-  get nextPoint() {
-    const newCoords = this.currentPoint.coords.map((coord) => {
-      const newCoord = this.randomStep(coord)
-      if (newCoord > 1) return 2 - newCoord
-      if (newCoord < -1) return -2 - newCoord
-      return newCoord
-    })
-    return new Point(...newCoords)
-  }
-
   initialize() {
     this.coords.set([0, 0, 0], 0)
     this.colors.set([0.5, 0.5, 0.5], 0)
+    Point.constraint = this.parameters.constraint
+    Point.stepSize = this.parameters.stepSize
     return this
-  }
-
-  randomStep(coord) {
-    const randomStep = 2 * (Math.random() - 0.5) * this.parameters.stepSize
-    return coord + randomStep
   }
 
   reorderArray(array) {
@@ -58,7 +45,7 @@ export default class GeometryBuffer {
   }
 
   addNextPoint() {
-    const nextPoint = this.nextPoint
+    const nextPoint = this.currentPoint.nextPoint
     this.coords.set(nextPoint.coords, this.bufferIndex * 3)
     this.colors.set(nextPoint.color, this.bufferIndex * 3)
     this.bufferIndex = (this.bufferIndex + 1) % this.parameters.maxPoints

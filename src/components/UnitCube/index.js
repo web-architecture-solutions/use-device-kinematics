@@ -1,19 +1,16 @@
-import Edge from '../Edge'
+import { vertices, edges } from './constants'
 
-import { edges, vertices, vertexColors } from './constants'
+import EmbeddedLine from '../EmbeddedLine'
 
 export default function UnitCube() {
   return (
     <group>
-      {edges.map(([start, end], index) => (
-        <Edge
-          key={index}
-          startVertex={vertices[start]}
-          endVertex={vertices[end]}
-          startColor={vertexColors[start]}
-          endColor={vertexColors[end]}
-        />
-      ))}
+      {edges.map(([start, end], index) => {
+        const startVertex = vertices[start]
+        const endVertex = vertices[end]
+        const positions = [...startVertex, ...endVertex]
+        return <EmbeddedLine key={index} positions={positions} />
+      })}
     </group>
   )
 }
