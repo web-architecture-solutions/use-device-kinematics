@@ -34,13 +34,10 @@ export default function Scene() {
   }
   return (
     <>
-      <Rotate callback={({ x, y, z }) => ({ x: x + 0.005, y: y + 0.005, z: z - 0.005 })}>
-        <UnitSphere />
-      </Rotate>
-
       <Rotate callback={rotationCallback}>
         {renderConstraint()}
         <RandomWalk parameters={parameters} />
+        <UnitSphere />
       </Rotate>
 
       <EffectComposer>
