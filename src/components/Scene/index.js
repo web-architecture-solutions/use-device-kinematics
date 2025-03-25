@@ -37,6 +37,13 @@ export default function Scene() {
       <Rotate callback={rotationCallback}>
         {renderConstraint()}
         <RandomWalk parameters={parameters} />
+        <RandomWalk parameters={parameters} />
+        <RandomWalk parameters={parameters} />
+        <RandomWalk parameters={parameters} />
+        <RandomWalk parameters={parameters} />
+        <RandomWalk parameters={parameters} />
+        <RandomWalk parameters={parameters} />
+        <RandomWalk parameters={parameters} />
         <UnitSphere />
       </Rotate>
 
