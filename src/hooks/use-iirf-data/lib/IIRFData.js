@@ -65,7 +65,7 @@ export default class IIRFData {
     )
   }
 
-  get toString() {
+  toString() {
     return JSON.stringify(this.json, null, 2)
   }
 }

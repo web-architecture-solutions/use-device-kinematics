@@ -115,7 +115,7 @@ export default class IIRFVariable extends Vector3 {
     }
   }
 
-  get toString() {
+  toString() {
     return JSON.stringify(this.json, null, 2)
   }
 

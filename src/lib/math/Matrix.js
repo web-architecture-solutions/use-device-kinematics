@@ -56,7 +56,7 @@ export default class Matrix extends Array {
   }
 
   static block(m, rowMapper = null) {
-    return m.flatMap((row) => (rowMapper ? row.map(rowMapper) : row))
+    return new Matrix(m.flatMap((row) => (rowMapper ? row.map(rowMapper) : row)))
   }
 
   static blockDiagonal(m, dimension) {

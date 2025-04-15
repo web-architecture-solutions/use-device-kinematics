@@ -1,6 +1,7 @@
 import { Matrix } from '../../../lib'
 
 import { VariableNames } from '../../../lib/constants'
+
 import { S } from '../../../lib/math'
 
 import { IIRFData } from '../../use-iirf-data'
@@ -167,7 +168,7 @@ export default class DeviceKinematics {
   }
 
   get stateTransitionMatrix() {
-    return Matrix.block([
+    return new Matrix([
       [this.kinematicsMatrix, this.leverArmEffectMatrix],
       [this.coriolisEffectMatrix, this.kinematicsMatrix]
     ])
@@ -182,7 +183,14 @@ export default class DeviceKinematics {
     ])
   }
 
-  get toString() {
+  getVariableObservationMatrix(variable) {
+    const index = this.variables.indexOf(variable)
+    const left = index * this.dimension
+    const right = (8 - index - 1) * this.dimension
+    return Matrix.identity(this.dimension).pad({ left, right })
+  }
+
+  toString() {    
     return JSON.stringify(
       {
         stateVector: this.stateVector,
@@ -192,12 +200,5 @@ export default class DeviceKinematics {
       null,
       2
     )
-  }
-
-  getVariableObservationMatrix(variable) {
-    const index = this.variables.indexOf(variable)
-    const left = index * this.dimension
-    const right = (8 - index - 1) * this.dimension
-    return Matrix.identity(this.dimension).pad({ left, right })
   }
 }

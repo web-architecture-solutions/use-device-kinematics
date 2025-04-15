@@ -41,7 +41,8 @@ export default function useDeviceAPI({
 
   const stabilizedListener = _useEvent ? useEvent(listener) : listener
 
-  const startListening = useCallback(async () => {
+  const startListening = useCallback(async (event) => {
+    event.preventDefault()
     if (isFeaturePresent && !permissionGranted && !isListening && typeof requestPermission === 'function') {
       try {
         const permission = await requestPermission()

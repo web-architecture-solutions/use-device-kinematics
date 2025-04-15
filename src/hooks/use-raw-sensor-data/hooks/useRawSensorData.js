@@ -29,8 +29,8 @@ export default function useRawSensorData(config = {}) {
       () => motion.isListening || orientation.isListening || geolocation.isListening,
       [motion.isListening, orientation.isListening, geolocation.isListening]
     ),
-    startListening: useCallback(async () => {
-      await Promise.all([motion.startListening(), orientation.startListening(), geolocation.startListening()])
+    startListening: useCallback(async (event) => {
+      await Promise.all([motion.startListening(event), orientation.startListening(event), geolocation.startListening(event)])
     }, [motion.startListening, orientation.startListening, geolocation.startListening])
   }
 }
