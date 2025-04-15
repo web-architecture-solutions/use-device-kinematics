@@ -49,7 +49,7 @@ function VectorTable({ variables, vector }) {
       <tbody>
         <tr>
           {vector.map((variable, index) => (
-            <td key={index}>{`${variable}`}</td>
+            <td key={index}>{typeof variable === 'number' ? variable.toFixed(2) : variable.toString()}</td>
           ))}
         </tr>
       </tbody>
@@ -66,7 +66,7 @@ function MatrixTable({ variables, matrix }) {
         {matrix.map((row, rowIndex) => (
           <tr key={rowIndex}>
             {row.map((variable, colIndex) => (
-              <td key={colIndex}>{`${variable}`}</td>
+              <td key={colIndex}>{typeof variable === 'number' ? variable.toFixed(2) : variable.toString()}</td>
             ))}
           </tr>
         ))}
