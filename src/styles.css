@@ -64,6 +64,8 @@ table {
 
   margin: 0 0 1em;
 
+  table-layout: fixed;
+
   text-align: left;
 }
 
