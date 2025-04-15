@@ -41,6 +41,10 @@ function DataTableHeader({ variables }) {
   )
 }
 
+function DataCell({ variable }) {
+  return <td>{typeof variable === 'number' ? variable.toFixed(2) : `${variable}`}</td>
+}
+
 function VectorTable({ variables, vector }) {
   return (
     <table>
@@ -49,7 +53,7 @@ function VectorTable({ variables, vector }) {
       <tbody>
         <tr>
           {vector.map((variable, index) => (
-            <td key={index}>{typeof variable === 'number' ? variable.toFixed(2) : variable.toString()}</td>
+            <DataCell variable={variable} key={index} />
           ))}
         </tr>
       </tbody>
@@ -66,7 +70,7 @@ function MatrixTable({ variables, matrix }) {
         {matrix.map((row, rowIndex) => (
           <tr key={rowIndex}>
             {row.map((variable, colIndex) => (
-              <td key={colIndex}>{typeof variable === 'number' ? variable.toFixed(2) : variable.toString()}</td>
+              <DataCell variable={variable} key={colIndex} />
             ))}
           </tr>
         ))}
@@ -147,11 +151,11 @@ export default function App() {
           <h2>Errors</h2>
 
           <dl>
-            {Object.entries(errors).map(([code, message]) => (
-              <>
+            {Object.entries(errors).map(([code, message], index) => (
+              <span key={index}>
                 <dt>{code}:</dt>
                 <dd>{message}</dd>
-              </>
+              </span>
             ))}
           </dl>
         </section>
