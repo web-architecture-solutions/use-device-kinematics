@@ -4,7 +4,7 @@ import DataTableCell from '../DataTableCell'
 export default function MatrixTable({ variables, matrix }) {
   return (
     <table style={{ width: `${matrix[0].length * 6}em` }}>
-      <DataTableHeader variables={variables} />
+      {variables ? <DataTableHeader variables={variables} /> : null}
 
       <tbody>
         {matrix.map((row, rowIndex) => (
