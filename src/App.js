@@ -41,17 +41,19 @@ function DataTableHeader({ variables }) {
   )
 }
 
+function stringifyNumeric(variable) {
+  return `${variable >= 0 ? '+' : '-'}${Math.abs(variable).toFixed(2)}`
+}
+
 function DataCell({ variable }) {
-  return (
-    <td>
-      {typeof variable === 'number' && !isNaN(variable) ? `${variable >= 0 ? '+' : '-'}${Math.abs(variable).toFixed(2)}` : `${variable}`}
-    </td>
-  )
+  const isNumeric = typeof variable === 'number' && !isNaN(variable)
+  const value = isNumeric ? stringifyNumeric(variable) : `${variable}`
+  return <td>{value}</td>
 }
 
 function VectorTable({ variables, vector }) {
   return (
-    <table style={{ width: `${vector.length * 5}em` }}>
+    <table style={{ width: `${vector.length * 6}em` }}>
       <DataTableHeader variables={variables} />
 
       <tbody>
@@ -66,9 +68,8 @@ function VectorTable({ variables, vector }) {
 }
 
 function MatrixTable({ variables, matrix }) {
-  console.log(matrix.cols)
   return (
-    <table style={{ width: `${matrix[0].length * 5}em` }}>
+    <table style={{ width: `${matrix[0].length * 6}em` }}>
       <DataTableHeader variables={variables} />
 
       <tbody>

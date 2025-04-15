@@ -76,6 +76,8 @@ thead {
 
 th,
 td {
+  overflow: hidden;
+
   padding: 0.5em;
 }
 
