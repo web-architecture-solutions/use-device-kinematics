@@ -56,7 +56,24 @@ export default class Matrix extends Array {
   }
 
   static block(m, rowMapper = null) {
-    return new Matrix(m.flatMap((row) => (rowMapper ? row.map(rowMapper) : row)))
+    const blocks = m.map((blockRow) => blockRow.map((block) => (rowMapper ? rowMapper(block) : block)))
+    if (blocks.length === 0) return new Matrix([[]])
+    const flattenedRows = []
+    for (let blockRow of blocks) {
+      if (blockRow.length === 0) continue
+      const subRows = blockRow[0].length
+      for (let i = 0; i < subRows; i++) {
+        let newRow = []
+        for (let block of blockRow) {
+          if (!Array.isArray(block) || block.length < subRows) {
+            throw new Error('Each block must be a 2D array with consistent row sizes')
+          }
+          newRow = newRow.concat(block[i])
+        }
+        flattenedRows.push(newRow)
+      }
+    }
+    return new Matrix(flattenedRows)
   }
 
   static blockDiagonal(m, dimension) {

@@ -94,7 +94,7 @@ export default class IIRFVariable extends Vector3 {
         const delta = S * componentValue - S * this.previous[index]
         return delta / (S * this.deltaT)
       }
-      return new IIRFVariable(this.map(calculateComponentDerivativeWrtT), this.previous.derivativeWrtT, this.schema, this.deltaT)
+      return new IIRFVariable(this.map(calculateComponentDerivativeWrtT), this.previous.derivativeWrtT, this.#derivativeSchema, this.deltaT)
     }
     return IIRFVariable.initial
   }

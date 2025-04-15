@@ -19,25 +19,3 @@ export function calculateGeodeticDisplacement(currentPosition, previousPosition)
 
   return [eastwardDisplacement, northwardDisplacement, verticalDisplacement]
 }
-
-/*
-export function calculateHaversineDistance(previousPosition, currentPosition) {
-  const { x: previousLongitude, y: previousLatitude } = previousPosition
-  const { x: currentLongitude, y: currentLatitude } = currentPosition
-
-  const previousLatitudeRadians = toRadians(previousLatitude)
-  const currentLatitudeRadians = toRadians(currentLatitude)
-  const latitudeDifferenceRadians = toRadians(currentLatitude - previousLatitude)
-  const longitudeDifferenceRadians = toRadians(currentLongitude - previousLongitude)
-
-  const a =
-    Math.sin(latitudeDifferenceRadians / 2) * Math.sin(latitudeDifferenceRadians / 2) +
-    Math.cos(previousLatitudeRadians) *
-      Math.cos(currentLatitudeRadians) *
-      Math.sin(longitudeDifferenceRadians / 2) *
-      Math.sin(longitudeDifferenceRadians / 2)
-  const centralAngle = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-
-  return R_E * centralAngle
-}
-*/

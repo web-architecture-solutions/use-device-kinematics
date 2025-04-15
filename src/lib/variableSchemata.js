@@ -6,23 +6,6 @@ import { calculateGeodeticDisplacement } from './physics/formulae'
 
 import { VariableNames } from './constants'
 
-function calculatePositionDerivativeWrtT(position) {
-  if (position.previous) {
-    const geodeticDisplacement = calculateGeodeticDisplacement(position, position.previous)
-    const calculateComponentDerivativeWrtT = (_, index) => {
-      const delta = geodeticDisplacement[index]
-      return delta / (S * position.deltaT)
-    }
-    return new IIRFVariable(
-      position.map(calculateComponentDerivativeWrtT),
-      position.previous?.derivativeWrtT,
-      position.schema,
-      position.deltaT
-    )
-  }
-  return IIRFVariable.initial
-}
-
 const angularJerkSchema = {
   name: VariableNames.ANGULAR_JERK
 }
@@ -52,6 +35,23 @@ const accelerationSchema = {
 
 const velocitySchema = {
   name: VariableNames.VELOCITY
+}
+
+function calculatePositionDerivativeWrtT(position) {
+  if (position.previous) {
+    const geodeticDisplacement = calculateGeodeticDisplacement(position, position.previous)
+    const calculateComponentDerivativeWrtT = (_, index) => {
+      const delta = geodeticDisplacement[index]
+      return delta / (S * position.deltaT)
+    }
+    return new IIRFVariable(
+      position.map(calculateComponentDerivativeWrtT),
+      position.previous?.derivativeWrtT,
+      velocitySchema,
+      position.deltaT
+    )
+  }
+  return IIRFVariable.initial
 }
 
 const positionSchema = {

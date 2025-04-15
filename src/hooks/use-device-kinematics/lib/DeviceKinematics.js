@@ -1,3 +1,5 @@
+import { PartialDerivative } from '../../../lib/physics/constants'
+
 import { Matrix } from '../../../lib'
 
 import { VariableNames } from '../../../lib/constants'
@@ -155,20 +157,20 @@ export default class DeviceKinematics {
 
   get leverArmEffectMatrix() {
     const leverArmEffectJacobian = Jacobian.leverArmEffect(this.offset, this.angularVelocity)
-    const paddedJacobianWrtAlpha = leverArmEffectJacobian.wrtAlpha.pad({ top: 0, left: 9 })
-    const paddedJacobianWrtOmega = leverArmEffectJacobian.wrtOmega.pad({ top: 0, left: 9 })
+    const paddedJacobianWrtAlpha = leverArmEffectJacobian[PartialDerivative.WRT_ALPHA].pad({ top: 6, left: 6, bottom: 3, right: 3 })
+    const paddedJacobianWrtOmega = leverArmEffectJacobian[PartialDerivative.WRT_OMEGA].pad({ top: 6, left: 6, bottom: 3, right: 3 })
     return paddedJacobianWrtAlpha.add(paddedJacobianWrtOmega)
   }
 
   get coriolisEffectMatrix() {
     const coriolisEffectJacobian = Jacobian.coriolisEffect(this.angularVelocity, this.velocity)
-    const paddedJacobianWrtV = coriolisEffectJacobian.wrtV.pad({ top: 0, left: 9 })
-    const paddedJacobianWrtOmega = coriolisEffectJacobian.wrtOmega.pad({ top: 0, left: 9 })
-    return paddedJacobianWrtV.add(paddedJacobianWrtOmega)
+    const paddedJacobianWRTV = coriolisEffectJacobian[PartialDerivative.WRT_V].pad({ top: 6, left: 6, bottom: 3, right: 3 })
+    const paddedJacobianWRTOMEGA = coriolisEffectJacobian[PartialDerivative.WRT_OMEGA].pad({ top: 6, left: 6, bottom: 3, right: 3 })
+    return paddedJacobianWRTV.add(paddedJacobianWRTOMEGA)
   }
 
   get stateTransitionMatrix() {
-    return new Matrix([
+    return Matrix.block([
       [this.kinematicsMatrix, this.leverArmEffectMatrix],
       [this.coriolisEffectMatrix, this.kinematicsMatrix]
     ])
@@ -190,7 +192,7 @@ export default class DeviceKinematics {
     return Matrix.identity(this.dimension).pad({ left, right })
   }
 
-  toString() {    
+  toString() {
     return JSON.stringify(
       {
         stateVector: this.stateVector,
