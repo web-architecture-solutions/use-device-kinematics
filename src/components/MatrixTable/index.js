@@ -1,9 +1,9 @@
 import DataTableHeader from '../DataTableHeader'
 import DataTableCell from '../DataTableCell'
 
-export default function MatrixTable({ variables, matrix }) {
+export default function MatrixTable({ variables, matrix, emsPerCell }) {
   return (
-    <table style={{ width: `${matrix[0].length * 6}em` }}>
+    <table style={{ width: `${matrix[0].length * emsPerCell}em` }}>
       {variables ? <DataTableHeader variables={variables} /> : null}
 
       <tbody>

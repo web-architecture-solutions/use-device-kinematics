@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import useDeviceKinematics from '../../hooks/use-device-kinematics'
+import useKalmanFilter from '../../hooks/use-kalman-filter/useKalmanFilter'
 
 import Data from '../Data'
 import DeviceKinematics from '../DeviceKinematics'
@@ -14,11 +15,13 @@ const DataSource = {
 }
 
 export default function App() {
-  const [dataSource, setDataSource] = useState(DataSource.RAW_DATA)
+  const [dataSource, setDataSource] = useState(DataSource.DEVICE_KINEMATICS)
 
   const { deviceKinematics, iirfData, rawSensorData, refreshRates, errors, isListening, startListening } = useDeviceKinematics({
     enableHighAccuracy: true
   })
+
+  //const { state, update, reset } = useKalmanFilter(deviceKinematics)
 
   function handleOnDataSourceChange(event) {
     switch (event.target.value) {
@@ -48,7 +51,7 @@ export default function App() {
       <h1>Device Sensor Data</h1>
 
       <form>
-        <select onChange={handleOnDataSourceChange}>
+        <select onChange={handleOnDataSourceChange} defaultValue={DataSource.DEVICE_KINEMATICS.description}>
           <option value="RAW_DATA">Raw Sensor Data</option>
           <option value="REFRESH_RATES">Sensor Refresh Rates</option>
           <option value="IIRF_DATA">IIRF Data</option>

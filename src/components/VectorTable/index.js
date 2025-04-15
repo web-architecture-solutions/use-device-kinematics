@@ -1,9 +1,9 @@
 import DataTableHeader from '../DataTableHeader'
 import DataTableCell from '../DataTableCell'
 
-export default function VectorTable({ variables, vector }) {
+export default function VectorTable({ variables, vector, emsPerCell }) {
   return (
-    <table style={{ width: `${vector.length * 6}em` }}>
+    <table style={{ width: `${vector.length * emsPerCell}em` }}>
       <DataTableHeader variables={variables} />
 
       <tbody>
