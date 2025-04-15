@@ -47,7 +47,7 @@ function DataCell({ variable }) {
 
 function VectorTable({ variables, vector }) {
   return (
-    <table>
+    <table style={{ width: `${vector.length * 4}em` }}>
       <DataTableHeader variables={variables} />
 
       <tbody>
@@ -62,8 +62,9 @@ function VectorTable({ variables, vector }) {
 }
 
 function MatrixTable({ variables, matrix }) {
+  console.log(matrix.cols)
   return (
-    <table>
+    <table style={{ width: `${matrix[0].length * 4}em` }}>
       <DataTableHeader variables={variables} />
 
       <tbody>
