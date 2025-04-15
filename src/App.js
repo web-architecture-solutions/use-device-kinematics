@@ -44,7 +44,7 @@ function DataTableHeader({ variables }) {
 function DataCell({ variable }) {
   return (
     <td>
-      {typeof variable === 'number' && !variable.isNaN() ? `${variable >= 0 ? '+' : '-'}${Math.abs(variable).toFixed(2)}` : `${variable}`}
+      {typeof variable === 'number' && !isNaN(variable) ? `${variable >= 0 ? '+' : '-'}${Math.abs(variable).toFixed(2)}` : `${variable}`}
     </td>
   )
 }
