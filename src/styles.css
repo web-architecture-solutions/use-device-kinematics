@@ -62,11 +62,29 @@ button {
 table {
   border-collapse: collapse;
 
+  margin: 0 0 1em;
+
   text-align: left;
+}
+
+thead {
+  background: #595959;
+  color: white;
 }
 
 th,
 td {
-  border: solid 1px black;
   padding: 0.5em;
+}
+
+th {
+  border: solid 1px #ababab;
+}
+
+td {
+  border: solid 1px #949494;
+}
+
+dd {
+  margin: 0.5em 0 1em 1em;
 }

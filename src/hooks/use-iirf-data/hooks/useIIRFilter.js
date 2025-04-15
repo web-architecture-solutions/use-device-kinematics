@@ -13,14 +13,17 @@ const refreshRate = 250
 export default function useIIRFilter(isListening, rawSensorData, refreshRates) {
   const [isClockRunning, setIsClockRunning] = useState(false)
   const [iirfData, setIIRFData] = useState(IIRFData.initial)
+
   const deltaT = useMemo(() => 1 / refreshRate, [refreshRate])
   const timestamp = useClock(1000 / refreshRate, isClockRunning)
+
   useEffect(() => {
     if (!isListening && isClockRunning) setIsClockRunning(false)
     if (isListening && !isClockRunning) setIsClockRunning(true)
-    if (isListening) {
-      setIIRFData((previousIIRFData) => {
-        return new IIRFData(
+
+    if (isListening && rawSensorData) {
+      setIIRFData(
+        new IIRFData(
           {
             [VariableNames.POSITION]: {
               x: rawSensorData.longitude,
@@ -43,11 +46,11 @@ export default function useIIRFilter(isListening, rawSensorData, refreshRates) {
               z: toRadians(rawSensorData.rotationRate.alpha)
             }
           },
-          previousIIRFData,
+          iirfData,
           deltaT,
           refreshRates
         )
-      })
+      )
     }
   }, [isListening, timestamp])
   return iirfData

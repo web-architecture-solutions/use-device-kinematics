@@ -24,6 +24,57 @@ const VariableAbbreviations = {
 
 const coordinates = ['x', 'y', 'z']
 
+function DataTableHeader({ variables }) {
+  return (
+    <thead>
+      <tr>
+        {variables.map((variable) =>
+          coordinates.map((coordinate) => (
+            <th key={`${variable.name}_${coordinate}`}>
+              {VariableAbbreviations[variable.name]}
+              <sub>{coordinate}</sub>
+            </th>
+          ))
+        )}
+      </tr>
+    </thead>
+  )
+}
+
+function VectorTable({ variables, vector }) {
+  return (
+    <table>
+      <DataTableHeader variables={variables} />
+
+      <tbody>
+        <tr>
+          {vector.map((variable, index) => (
+            <td key={index}>{`${variable}`}</td>
+          ))}
+        </tr>
+      </tbody>
+    </table>
+  )
+}
+
+function MatrixTable({ variables, matrix }) {
+  return (
+    <table>
+      <DataTableHeader variables={variables} />
+
+      <tbody>
+        {matrix.map((row, rowIndex) => (
+          <tr key={rowIndex}>
+            {row.map((variable, colIndex) => (
+              <td key={colIndex}>{`${variable}`}</td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
+}
+
 function DeviceKinematics({ deviceKinematics }) {
   return (
     <section>
@@ -31,40 +82,15 @@ function DeviceKinematics({ deviceKinematics }) {
 
       <h3>State Vector</h3>
 
-      <table>
-        <thead>
-          <tr>
-            {deviceKinematics.variables.map((variable) =>
-              coordinates.map((coordinate) => (
-                <th>
-                  {VariableAbbreviations[variable.name]}
-                  <sub>{coordinate}</sub>
-                </th>
-              ))
-            )}
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr>
-            {deviceKinematics.stateVector.map((variable) => (
-              <td>{variable === null ? 'null' : variable}</td>
-            ))}
-          </tr>
-        </tbody>
-      </table>
+      <VectorTable variables={deviceKinematics.variables} vector={deviceKinematics.stateVector} />
 
       <h3>State Transition Matrix</h3>
 
-      <table>
-        <tbody>
-          {deviceKinematics.coriolisEffectMatrix.map((row) => (
-            <tr>
-              <td>{JSON.stringify(row)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <MatrixTable variables={deviceKinematics.variables} matrix={deviceKinematics.stateTransitionMatrix} />
+
+      <h3>Observation Matrix</h3>
+
+      <MatrixTable variables={deviceKinematics.variables} matrix={deviceKinematics.observationMatrix} />
     </section>
   )
 }
@@ -120,7 +146,14 @@ export default function App() {
         <section>
           <h2>Errors</h2>
 
-          <pre>{JSON.stringify(errors, null, 2)}</pre>
+          <dl>
+            {Object.entries(errors).map(([code, message]) => (
+              <>
+                <dt>{code}:</dt>
+                <dd>{message}</dd>
+              </>
+            ))}
+          </dl>
         </section>
       ) : null}
     </div>
