@@ -42,7 +42,7 @@ function calculatePositionDerivativeWrtT(position) {
     const geodeticDisplacement = calculateGeodeticDisplacement(position, position.previous)
     const calculateComponentDerivativeWrtT = (_, index) => {
       const delta = geodeticDisplacement[index]
-      return delta / (S * position.deltaT)
+      return S * position.deltaT === 0 ? 0 : delta / (S * position.deltaT)
     }
     return new IIRFVariable(
       position.map(calculateComponentDerivativeWrtT),

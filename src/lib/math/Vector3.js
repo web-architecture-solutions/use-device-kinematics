@@ -23,8 +23,12 @@ export default class Vector3 extends Array {
     return this[2]
   }
 
+  get isNull() {
+    return this.some((coordinate) => coordinate === null)
+  }
+
   cross(v) {
-    return new Vector3(this.y * v.z - this.z * v.y, this.z * v.x - this.x * v.z, this.x * v.y - this.y * v.x)
+    return v.isNull ? this : new Vector3(this.y * v.z - this.z * v.y, this.z * v.x - this.x * v.z, this.x * v.y - this.y * v.x)
   }
 
   scale(scalar) {
@@ -32,7 +36,7 @@ export default class Vector3 extends Array {
   }
 
   add(v) {
-    return new Vector3(this.x + v.x, this.y + v.y, this.z + v.z)
+    return v.isNull ? this : new Vector3(this.x + v.x, this.y + v.y, this.z + v.z)
   }
 
   subtract(v) {
@@ -53,7 +57,7 @@ export default class Vector3 extends Array {
 
   normalize() {
     const magnitude = this.magnitude()
-    return magnitude === 0 ? new Vector3(0, 0, 0) : this.scale(1 / mag)
+    return magnitude === 0 ? new Vector3(0, 0, 0) : this.scale(1 / magnitude)
   }
 
   toArray() {

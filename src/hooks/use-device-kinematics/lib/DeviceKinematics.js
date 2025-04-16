@@ -75,19 +75,19 @@ export default class DeviceKinematics {
   get offset() {
     const crossProduct = this.angularVelocity.cross(this.angularVelocity.cross(this.acceleration))
     const combined = this.angularAcceleration.cross(this.acceleration).add(crossProduct)
-    return combined.scale(1 / this.angularVelocity.magnitude() ** 2 || 1)
+    return this.angularVelocity.magnitude() === 0 ? combined : combined.scale(1 / this.angularVelocity.magnitude() ** 2)
   }
 
   get motionAPINoise() {
-    return 1 / this.refreshRates?.motion
+    return 1 / this.refreshRates.motion
   }
 
   get geolocationAPINoise() {
-    return 1 / this.refreshRates?.geolocation
+    return 1 / this.refreshRates.geolocation
   }
 
   get orientationAPINoise() {
-    return 1 / this.refreshRates?.orientation
+    return 1 / this.refreshRates.orientation
   }
 
   get processNoiseMatrix() {

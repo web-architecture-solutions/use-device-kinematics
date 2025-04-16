@@ -8,7 +8,7 @@ export default class IIRFVariable extends Vector3 {
   #derivativeSchema
   #derivativeName
 
-  static initialData = { x: null, y: null, z: null }
+  static initialData = { x: 0, y: 0, z: 0 }
 
   static get initial() {
     return new IIRFVariable(this.initialData, null, {}, null)
@@ -24,14 +24,14 @@ export default class IIRFVariable extends Vector3 {
     )
   }
 
-  static prepare = ({ x, y, z } = { x: null, y: null, z: null }) => new Vector3(x, y, z)
+  static prepare = ({ x, y, z } = { x: 0, y: 0, z: 0 }) => new Vector3(x, y, z)
 
   constructor(rawVariableData, previousVariable, schema, deltaT) {
     super()
 
-    this[0] = rawVariableData?.[0] ?? null
-    this[1] = rawVariableData?.[1] ?? null
-    this[2] = rawVariableData?.[2] ?? null
+    this[0] = rawVariableData?.[0] ?? 0
+    this[1] = rawVariableData?.[1] ?? 0
+    this[2] = rawVariableData?.[2] ?? 0
 
     this.#schema = schema
     this.#name = this.#schema.name
@@ -92,7 +92,7 @@ export default class IIRFVariable extends Vector3 {
     if (this.previous) {
       const calculateComponentDerivativeWrtT = (componentValue, index) => {
         const delta = S * componentValue - S * this.previous[index]
-        return delta / (S * this.deltaT)
+        return S * this.deltaT === 0 ? 0 : delta / (S * this.deltaT)
       }
       return new IIRFVariable(this.map(calculateComponentDerivativeWrtT), this.previous.derivativeWrtT, this.#derivativeSchema, this.deltaT)
     }
@@ -106,9 +106,9 @@ export default class IIRFVariable extends Vector3 {
       y: this.y,
       z: this.z,
       deltaT: this.deltaT,
-      previousX: this.previous?.x ?? null,
-      previousY: this.previous?.y ?? null,
-      previousZ: this.previous?.z ?? null,
+      previousX: this.previous?.x ?? 0,
+      previousY: this.previous?.y ?? 0,
+      previousZ: this.previous?.z ?? 0,
       previousDeltaT: this.previous?.deltaT ?? null,
       derivativeWrtT: this.derivativeWrtT,
       isEqualToPrevious: this.isEqual(this.previous)

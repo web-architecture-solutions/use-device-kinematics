@@ -16,8 +16,14 @@ export default class IIRFData {
     [VariableNames.ANGULAR_VELOCITY]: IIRFVariable.initialData
   }
 
+  static initialRefreshRates = {
+    geolocation: Infinity,
+    motion: Infinity,
+    orientation: Infinity
+  }
+
   static get initial() {
-    return new IIRFData(this.initialData, null, null)
+    return new IIRFData(this.initialData, null, null, this.initialRefreshRates)
   }
 
   static variableToDerivativeEntries(derivatives, [_, variable]) {

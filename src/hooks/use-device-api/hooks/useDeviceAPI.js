@@ -29,7 +29,7 @@ export default function useDeviceAPI({
 
       if (lastUpdateTimeRef.current !== null) {
         const deltaTime = now - lastUpdateTimeRef.current
-        const rate = 1000 / deltaTime
+        const rate = deltaTime === 0 ? 0 : 1000 / deltaTime
         setRefreshRate(rate)
       }
 
@@ -41,29 +41,32 @@ export default function useDeviceAPI({
 
   const stabilizedListener = _useEvent ? useEvent(listener) : listener
 
-  const startListening = useCallback(async (event) => {
-    event.preventDefault()
-    if (isFeaturePresent && !permissionGranted && !isListening && typeof requestPermission === 'function') {
-      try {
-        const permission = await requestPermission()
-        if (permission === 'granted') {
-          setPermissionGranted(true)
-        } else {
-          errors.add(listenerType, 'User denied permission to access the API.')
+  const startListening = useCallback(
+    async (event) => {
+      event.preventDefault()
+      if (isFeaturePresent && !permissionGranted && !isListening && typeof requestPermission === 'function') {
+        try {
+          const permission = await requestPermission()
+          if (permission === 'granted') {
+            setPermissionGranted(true)
+          } else {
+            errors.add(listenerType, 'User denied permission to access the API.')
+          }
+        } catch ({ message }) {
+          errors.add(listenerType, message)
         }
-      } catch ({ message }) {
-        errors.add(listenerType, message)
+      } else if (isFeaturePresent && !permissionGranted && !isListening && typeof requestPermission !== 'function') {
+        throw new Error('requestPermission must be a function')
+      } else if (isFeaturePresent && !permissionGranted && isListening) {
+        throw new Error('useDeviceAPI: Should not be listening before permission has been granted')
+      } else {
+        setPermissionGranted(false)
+        setData(initialData)
+        setIsListening(false)
       }
-    } else if (isFeaturePresent && !permissionGranted && !isListening && typeof requestPermission !== 'function') {
-      throw new Error('requestPermission must be a function')
-    } else if (isFeaturePresent && !permissionGranted && isListening) {
-      throw new Error('useDeviceAPI: Should not be listening before permission has been granted')
-    } else {
-      setPermissionGranted(false)
-      setData(initialData)
-      setIsListening(false)
-    }
-  }, [isFeaturePresent, permissionGranted, requestPermission, errors, listenerType])
+    },
+    [isFeaturePresent, permissionGranted, requestPermission, errors, listenerType]
+  )
 
   useEffect(() => {
     if (!isFeaturePresent) {
