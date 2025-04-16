@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import useDeviceKinematics from '../../hooks/use-device-kinematics'
-//import useKalmanFilter from '../../hooks/use-kalman-filter/useKalmanFilter'
+import useKalmanFilter from '../../hooks/use-kalman-filter/useKalmanFilter'
 
 import Data from '../Data'
 import DeviceKinematics from '../DeviceKinematics'
@@ -21,7 +21,7 @@ export default function App() {
     enableHighAccuracy: true
   })
 
-  //const { state, update, reset } = useKalmanFilter(deviceKinematics)
+  const { state } = useKalmanFilter(deviceKinematics)
 
   function handleOnDataSourceChange(event) {
     switch (event.target.value) {
@@ -52,14 +52,16 @@ export default function App() {
 
       <form>
         <select onChange={handleOnDataSourceChange} defaultValue={DataSource.DEVICE_KINEMATICS.description}>
-          <option value="RAW_DATA">Raw Sensor Data</option>
-          <option value="REFRESH_RATES">Sensor Refresh Rates</option>
-          <option value="IIRF_DATA">IIRF Data</option>
-          <option value="DEVICE_KINEMATICS">Device Kinematics</option>
+          <option value={DataSource.RAW_DATA.description}>Raw Sensor Data</option>
+          <option value={DataSource.REFRESH_RATES.description}>Sensor Refresh Rates</option>
+          <option value={DataSource.IIRF_DATA.description}>IIRF Data</option>
+          <option value={DataSource.DEVICE_KINEMATICS.description}>Device Kinematics</option>
         </select>
 
         <button onClick={startListening}>{isListening ? 'Stop' : 'Start'}</button>
       </form>
+
+      {isListening ? <pre>{JSON.stringify(state, null, 4)}</pre> : null}
 
       {isListening ? (
         dataSource === DataSource.DEVICE_KINEMATICS ? (
