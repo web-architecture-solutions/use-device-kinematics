@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import useDeviceKinematics from '../../hooks/use-device-kinematics'
-import useKalmanFilter from '../../hooks/use-kalman-filter/useKalmanFilter'
+//import useKalmanFilter from '../../hooks/use-kalman-filter/useKalmanFilter'
 
 import Data from '../Data'
 import DeviceKinematics from '../DeviceKinematics'
@@ -21,7 +21,7 @@ export default function App() {
     enableHighAccuracy: true
   })
 
-  const { state } = useKalmanFilter(deviceKinematics)
+  //const { state } = useKalmanFilter(deviceKinematics)
 
   function handleOnDataSourceChange(event) {
     switch (event.target.value) {
@@ -61,7 +61,7 @@ export default function App() {
         <button onClick={startListening}>{isListening ? 'Stop' : 'Start'}</button>
       </form>
 
-      {isListening ? <pre>{JSON.stringify(state, null, 4)}</pre> : null}
+      {/*isListening ? <pre>{JSON.stringify(state, null, 4)}</pre> : null*/}
 
       {isListening ? (
         dataSource === DataSource.DEVICE_KINEMATICS ? (
