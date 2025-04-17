@@ -1,38 +1,140 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
-import { KalmanFilter } from 'kalman-filter'
+
+// Minimal matrix operations for Kalman filter
+function matrixAdd(A, B) {
+  return A.map((row, i) => row.map((val, j) => val + B[i][j]))
+}
+
+function matrixSubtract(A, B) {
+  return A.map((row, i) => row.map((val, j) => val - B[i][j]))
+}
+
+function matrixMultiply(A, B) {
+  const rowsA = A.length
+  const colsA = A[0].length
+  const colsB = B[0].length
+  const result = Array.from({ length: rowsA }, () => Array(colsB).fill(0))
+  for (let i = 0; i < rowsA; i++) {
+    for (let k = 0; k < colsA; k++) {
+      for (let j = 0; j < colsB; j++) {
+        result[i][j] += A[i][k] * B[k][j]
+      }
+    }
+  }
+  return result
+}
+
+function matrixTranspose(A) {
+  return A[0].map((_, j) => A.map((row) => row[j]))
+}
+
+function identityMatrix(size) {
+  return Array.from({ length: size }, (_, i) => Array.from({ length: size }, (_, j) => (i === j ? 1 : 0)))
+}
+
+function matrixInverse(matrix) {
+  const n = matrix.length
+  // Augment with identity
+  const aug = matrix.map((row, i) => [...row, ...identityMatrix(n)[i]])
+
+  // Forward elimination
+  for (let i = 0; i < n; i++) {
+    // Pivot
+    let maxRow = i
+    for (let k = i + 1; k < n; k++) {
+      if (Math.abs(aug[k][i]) > Math.abs(aug[maxRow][i])) {
+        maxRow = k
+      }
+    }
+    ;[aug[i], aug[maxRow]] = [aug[maxRow], aug[i]]
+
+    const pivot = aug[i][i]
+    if (Math.abs(pivot) < 1e-12) {
+      throw new Error('Matrix is singular and cannot be inverted')
+    }
+    // Normalize pivot row
+    for (let j = 0; j < 2 * n; j++) aug[i][j] /= pivot
+    // Eliminate other rows
+    for (let k = 0; k < n; k++) {
+      if (k !== i) {
+        const factor = aug[k][i]
+        for (let j = 0; j < 2 * n; j++) aug[k][j] -= factor * aug[i][j]
+      }
+    }
+  }
+
+  // Extract inverse
+  return aug.map((row) => row.slice(n))
+}
+
+export class KalmanFilter {
+  /**
+   * @param {{ dynamic: { init: {mean: number[][], covariance: number[][]}, transition: number[][], covariance: number[][] },
+   *            observation: { stateProjection: number[][], covariance: number[][] } }} config
+   */
+  constructor({ dynamic, observation }) {
+    this.F = dynamic.transition
+    this.Q = dynamic.covariance
+    this.H = observation.stateProjection
+    this.R = observation.covariance
+    this.xInit = dynamic.init.mean
+    this.PInit = dynamic.init.covariance
+  }
+
+  /**
+   * Runs one Kalman filter predict-update cycle.
+   * @param {{ previousCorrected: { mean: number[][], covariance: number[][] } | null, observation: number[][] }} params
+   * @returns {{ mean: number[][], covariance: number[][] }} corrected state
+   */
+  filter({ previousCorrected, observation: z }) {
+    let xPrior, PPrior
+
+    if (!previousCorrected) {
+      xPrior = this.xInit
+      PPrior = this.PInit
+    } else {
+      const xPrev = previousCorrected.mean
+      const PPrev = previousCorrected.covariance
+      // Predict
+      xPrior = matrixMultiply(this.F, xPrev)
+      PPrior = matrixAdd(matrixMultiply(this.F, matrixMultiply(PPrev, matrixTranspose(this.F))), this.Q)
+    }
+
+    // Measurement update
+    const Ht = matrixTranspose(this.H)
+    const S = matrixAdd(matrixMultiply(this.H, matrixMultiply(PPrior, Ht)), this.R)
+    const K = matrixMultiply(matrixMultiply(PPrior, Ht), matrixInverse(S))
+    const y = matrixSubtract(z, matrixMultiply(this.H, xPrior))
+    const xPost = matrixAdd(xPrior, matrixMultiply(K, y))
+    const size = PPrior.length
+    const I = identityMatrix(size)
+    const PPost = matrixMultiply(matrixSubtract(I, matrixMultiply(K, this.H)), PPrior)
+
+    return { mean: xPost, covariance: PPost }
+  }
+}
+
+// Helper to convert 1D array into column vector
+function toColumnMatrix(arr) {
+  return arr.map((value) => [value])
+}
 
 /**
- * Helper to convert a 1D array into a column vector (matrix),
- * e.g. [a, b, c] => [[a], [b], [c]]
- */
-const toColumnMatrix = (arr) => arr.map((value) => [value])
-
-/**
- * useKalmanFilter tracks incoming DeviceKinematics updates
- * and runs an online Kalman filter cycle.
- *
- * IMPORTANT: The Kalman filter instance is configured with
- *  - a state dimension of 24 (from deviceKinematics.stateVector), and
- *  - an observation model expecting a measurement vector of 12.
- *
- * To satisfy these, we pass in the flattened measuredVariables (position, acceleration,
- * orientation, angularVelocity) which is 4 * 3 = 12 numbers.
+ * Custom React hook for Kalman filtering device kinematics.
+ * @param {{ stateVector: number[], processNoiseMatrix: number[][], stateTransitionMatrix: number[][],
+ *            observationMatrix: number[][], observationNoiseMatrix: number[][], measuredVariables: number[][] }} deviceKinematics
  */
 export default function useKalmanFilter(deviceKinematics) {
   const filterRef = useRef(null)
-  // We start with previousCorrected set to null (the library's signal to use dynamic.init)
   const previousCorrectedRef = useRef(null)
-  // Holds the filtered state returned by the Kalman filter (a valid "State" instance)
   const [filteredState, setFilteredState] = useState(null)
-  // An array to track each observation (as a column vector)
   const [observations, setObservations] = useState([])
 
-  // Initialize the Kalman filter when the DeviceKinematics configuration changes.
+  // Initialize or reset filter when kinematic config changes
   useEffect(() => {
     filterRef.current = new KalmanFilter({
       dynamic: {
         init: {
-          // Use the full state as initial mean (24 x 1 column vector)
           mean: toColumnMatrix(deviceKinematics.stateVector),
           covariance: deviceKinematics.processNoiseMatrix
         },
@@ -44,39 +146,31 @@ export default function useKalmanFilter(deviceKinematics) {
         covariance: deviceKinematics.observationNoiseMatrix
       }
     })
-    // Reset internal state so that the first observation will properly initialize the filter.
     previousCorrectedRef.current = null
-    setObservations([])
     setFilteredState(null)
+    setObservations([])
   }, [deviceKinematics])
 
-  // Process each new update from deviceKinematics as a new observation.
+  // Process each incoming measurement
   useEffect(() => {
-    // Instead of the full stateVector (24 numbers), extract measured variables (12 numbers):
-    // measuredVariables is assumed to be an array of 4 items (position, acceleration, orientation,
-    // angularVelocity), each an array of length 3.
-    const measuredObservation = deviceKinematics.measuredVariables.flat()
-    const newObservation = toColumnMatrix(measuredObservation) // becomes 12 x 1 matrix
-    setObservations((prev) => [...prev, newObservation])
+    const measured = deviceKinematics.measuredVariables.flat()
+    const z = toColumnMatrix(measured)
+    setObservations((prev) => [...prev, z])
 
-    // Use the online Kalman filter API.
-    // On the first call, previousCorrected is null so that the filter uses dynamic.init.
     const corrected = filterRef.current.filter({
       previousCorrected: previousCorrectedRef.current,
-      observation: newObservation
+      observation: z
     })
 
-    // Save the corrected state for the next update.
     previousCorrectedRef.current = corrected
     setFilteredState(corrected)
   }, [deviceKinematics])
 
-  // Optional: Provide a reset function to clear the filter state.
   const reset = useCallback(() => {
     previousCorrectedRef.current = null
     setFilteredState(null)
     setObservations([])
-  }, [deviceKinematics])
+  }, [])
 
   return { state: filteredState, observations, reset }
 }
