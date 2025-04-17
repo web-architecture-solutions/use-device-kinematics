@@ -70,7 +70,7 @@ function matrixInverse(matrix) {
 export class KalmanFilter {
   /**
    * @param {{ dynamic: { init: {mean: number[][], covariance: number[][]}, transition: number[][], covariance: number[][] },
-   *            observation: { stateProjection: number[][], covariance: number[][] } }} config
+   * observation: { stateProjection: number[][], covariance: number[][] } }} config
    */
   constructor({ dynamic, observation }) {
     this.F = dynamic.transition
@@ -119,10 +119,28 @@ function toColumnMatrix(arr) {
   return arr.map((value) => [value])
 }
 
+// Helper to create a block diagonal matrix
+function createBlockDiagonalMatrix(blocks) {
+  const numBlocks = blocks.length
+  const blockSize = blocks[0].length
+  const resultSize = numBlocks * blockSize
+  const result = Array.from({ length: resultSize }, () => Array(resultSize).fill(0))
+
+  for (let i = 0; i < numBlocks; i++) {
+    for (let row = 0; row < blockSize; row++) {
+      for (let col = 0; col < blockSize; col++) {
+        result[i * blockSize + row][i * blockSize + col] = blocks[i][row][col]
+      }
+    }
+  }
+
+  return result
+}
+
 /**
- * Custom React hook for Kalman filtering device kinematics.
- * @param {{ stateVector: number[], processNoiseMatrix: number[][], stateTransitionMatrix: number[][],
- *            observationMatrix: number[][], observationNoiseMatrix: number[][], measuredVariables: number[][] }} deviceKinematics
+ * Custom React hook for Kalman filtering device kinematics assuming constant jerk and constant angular jerk.
+ * @param {{ stateVector: number[], processNoiseMatrix: number[][], timeStep: number,
+ * observationMatrix: number[][], observationNoiseMatrix: number[][], measuredVariables: number[][] }} deviceKinematics
  */
 export default function useKalmanFilter(deviceKinematics) {
   const filterRef = useRef(null)
@@ -132,18 +150,46 @@ export default function useKalmanFilter(deviceKinematics) {
 
   // Initialize or reset filter when kinematic config changes
   useEffect(() => {
+    const { stateVector, processNoiseMatrix, timeStep, observationMatrix, observationNoiseMatrix } = deviceKinematics
+
+    if (!timeStep) {
+      console.warn('Time step (timeStep) is not provided in deviceKinematics. Assuming a default value of 1.')
+    }
+    const dt = timeStep || 1
+
+    const nLinear = 3 // x, y, z
+    const nAngular = 3 // roll, pitch, yaw (assuming Euler angles)
+    const stateSizePerAxis = 4 // position, velocity, acceleration, jerk
+
+    const linearTransitionBlock = [
+      [1, dt, 0.5 * dt * dt, (1 / 6) * dt * dt * dt],
+      [0, 1, dt, 0.5 * dt * dt],
+      [0, 0, 1, dt],
+      [0, 0, 0, 1]
+    ]
+
+    const angularTransitionBlock = [
+      [1, dt, 0.5 * dt * dt, (1 / 6) * dt * dt * dt],
+      [0, 1, dt, 0.5 * dt * dt],
+      [0, 0, 1, dt],
+      [0, 0, 0, 1]
+    ]
+
+    const transitionMatrixBlocks = Array(nLinear + nAngular).fill(linearTransitionBlock)
+    const stateTransitionMatrix = createBlockDiagonalMatrix(transitionMatrixBlocks)
+
     filterRef.current = new KalmanFilter({
       dynamic: {
         init: {
-          mean: toColumnMatrix(deviceKinematics.stateVector),
-          covariance: deviceKinematics.processNoiseMatrix
+          mean: toColumnMatrix(stateVector),
+          covariance: processNoiseMatrix
         },
-        transition: deviceKinematics.stateTransitionMatrix,
-        covariance: deviceKinematics.processNoiseMatrix
+        transition: stateTransitionMatrix,
+        covariance: processNoiseMatrix
       },
       observation: {
-        stateProjection: deviceKinematics.observationMatrix,
-        covariance: deviceKinematics.observationNoiseMatrix
+        stateProjection: observationMatrix,
+        covariance: observationNoiseMatrix
       }
     })
     previousCorrectedRef.current = null
